@@ -8,12 +8,12 @@ public class Test {
         ClockWorker worker = ClockWorkerContext.getWorker();
 
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1; i++) {
+
             TestJob work = new TestJob(i);
-            WorkSchedule schedule = new WorkSchedule(work);
+            WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStartDelay(1000).setEndDateTime("2019-01-15T10:48:30+09:00");
 
-            worker.addWorkSchedule(schedule.setStartDelay(1000));
-
+            schedule.start();
 
         }
 
@@ -40,19 +40,20 @@ public class Test {
             this.seq = seq;
         }
 
-        public long execute() throws InterruptedException {
+        public long execute(EventInfo event) throws InterruptedException {
 
             count ++;
 
             log(seq + "th job execute. count="+count);
 
 
-            if (count % 3 == 0) {
-                return 2 * Clock.SECOND;
-            } else if (count >3) {
-                return Clock.FINISH;
-            } else {
+
+            if (count <= 3) {
                 return Clock.SECOND;
+            } else if (count >3 && count<100) {
+                return 2*Clock.SECOND;
+            } else {
+                return Clock.FINISH;
             }
 
 

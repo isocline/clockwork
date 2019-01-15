@@ -23,9 +23,11 @@ package isocline.clockwork;
 public interface Work  {
 
 
+
+
     /**
      * @return
      * @throws InterruptedException
      */
-    long execute() throws InterruptedException;
+    long execute(EventInfo event) throws InterruptedException;
 }

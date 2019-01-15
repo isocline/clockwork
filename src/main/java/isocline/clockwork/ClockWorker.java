@@ -90,7 +90,23 @@ public class ClockWorker extends ThreadGroup {
     }
 
 
-    public boolean addWorkSchedule(WorkSchedule workSchedule) {
+
+    public WorkSchedule createSchedule(Work work) {
+        return new WorkSchedule(this,work);
+    }
+
+    public WorkSchedule createSchedule(Class workClass) throws InstantiationException, IllegalAccessException {
+        return new WorkSchedule(this, (Work) workClass.newInstance());
+    }
+
+
+    public WorkSchedule createSchedule(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        return new WorkSchedule(this,(Work) Class.forName(className).newInstance());
+    }
+
+
+
+    boolean addWorkSchedule(WorkSchedule workSchedule) {
         boolean result = this.workQueue.add(workSchedule);
         if (result) {
             this.runningWorkCount.incrementAndGet();
@@ -357,9 +373,12 @@ public class ClockWorker extends ThreadGroup {
 
                             if (workSchedule.isExecute()) {
 
-                                long delaytime = slc.execute();
+                                EventInfo eventInfo = new EventInfo();
+                                eventInfo.setWorkSechedule(workSchedule);
+
+                                long delaytime = slc.execute(eventInfo);
                                 while (delaytime == 0) {
-                                    delaytime = slc.execute();
+                                    delaytime = slc.execute(eventInfo);
                                 }
                                 this.clockWorker.runningWorkCount.decrementAndGet();
                                 if (delaytime >= 0) {
@@ -368,7 +387,7 @@ public class ClockWorker extends ThreadGroup {
                                 }
 
                                 // Thread.sleep(1);
-                            } else {
+                            } else if(!workSchedule.isEnd()) {
                                 timeoutCount++;
                                 stoplessCount = 0;
 
