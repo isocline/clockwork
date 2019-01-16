@@ -17,9 +17,14 @@ package isocline.clockwork;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
+import java.util.UUID;
 
 public class WorkSchedule {
 
+
+    private String workUuid;
 
     private long waitTime = 0;
 
@@ -44,8 +49,14 @@ public class WorkSchedule {
     WorkSchedule(ClockWorker clockWorker, Work work) {
         this.clockWorker = clockWorker;
         this.work = work;
+
+        this.workUuid = UUID.randomUUID().toString();
     }
 
+
+    public String getId() {
+        return this.workUuid;
+    }
 
     //
     private void checkLocking() throws RuntimeException {
@@ -63,16 +74,17 @@ public class WorkSchedule {
 
         if (this.waitTime == 0) {
             isExecute = true;
-        } else if (this.checkTime <= System.currentTimeMillis()) {
+        } else if (this.checkTime > 0  && this.checkTime <= System.currentTimeMillis()) {
+            isExecute = true;
+        } else if (this.eventList.size() > 0) {
             isExecute = true;
         }
 
-        if(isExecute) {
-            if(isEnd()) {
+        if (isExecute) {
+            if (isEnd()) {
                 isExecute = false;
             }
         }
-
 
 
         return isExecute;
@@ -85,7 +97,7 @@ public class WorkSchedule {
 
 
     boolean isEnd() {
-        if(this.workEndTime > 0) {
+        if (this.workEndTime > 0) {
             if (System.currentTimeMillis() >= this.workEndTime) {
                 return true;
             }
@@ -122,16 +134,37 @@ public class WorkSchedule {
 
 
     public WorkSchedule setStartDelay(long waitTime) {
+
         checkLocking();
         this.waitTime = waitTime;
 
-        long chkTime = System.currentTimeMillis() + waitTime;
-        if (this.checkTime < chkTime) {
-            this.checkTime = chkTime;
+        if (waitTime < 0) {
+            this.checkTime = waitTime;
+        } else {
+            long chkTime = System.currentTimeMillis() + waitTime;
+            if (this.checkTime < chkTime) {
+                this.checkTime = chkTime;
+            }
         }
+
 
         return this;
     }
+
+    private static final long UNDEFINED_INTERVAL = -1;
+    private long intervalTime = UNDEFINED_INTERVAL;
+
+    public long getIntervalTime() {
+        return this.intervalTime;
+    }
+
+    public WorkSchedule setRepeatInterval(long intervalTime) {
+
+        this.intervalTime = intervalTime;
+        return setStartDelay(intervalTime);
+
+    }
+
 
     private Date getDate(String isoDateTime) throws java.text.ParseException {
 
@@ -215,6 +248,8 @@ public class WorkSchedule {
     public WorkSchedule bindEvent(String eventName) {
         checkLocking();
 
+        this.clockWorker.bindEvent(eventName, this);
+
         return this;
     }
 
@@ -227,4 +262,74 @@ public class WorkSchedule {
         this.clockWorker.addWorkSchedule(this);
         return this;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        WorkSchedule schedule = (WorkSchedule) o;
+
+        return workUuid.equals(schedule.workUuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return workUuid.hashCode();
+    }
+
+    private LinkedList<EventInfo> eventList = new LinkedList<EventInfo>();
+
+    void raiseEvent(EventInfo event) {
+        eventList.add(event);
+    }
+
+    EventInfo checkEvent() {
+        try {
+            return eventList.removeFirst();
+        } catch (NoSuchElementException nse) {
+            return null;
+        }
+    }
+
+    private double contextId;
+
+
+    Context enterQueue() {
+
+
+        this.contextId = Math.random();
+        Context ctx = new Context(contextId, this);
+
+
+        return ctx;
+    }
+
+
+    /**
+     * Context for Queue
+     */
+    static class Context {
+
+        private double contextId;
+
+        private WorkSchedule workSchedule;
+
+
+        Context(double contextId, WorkSchedule workSchedule) {
+            this.contextId = contextId;
+            this.workSchedule = workSchedule;
+        }
+
+        WorkSchedule getWorkSchedule() {
+
+            if (this.contextId == this.workSchedule.contextId) {
+                return workSchedule;
+            }
+
+            return null;
+
+        }
+    }
+
 }

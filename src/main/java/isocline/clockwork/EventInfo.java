@@ -1,6 +1,8 @@
 package isocline.clockwork;
 
-public class EventInfo {
+import java.util.HashMap;
+
+public class EventInfo extends HashMap {
 
 
     private WorkSchedule schedule;

@@ -33,11 +33,18 @@ public class Clock {
     public final static long AGAIN_RIGHT_WAY = 0;
 
 
+    public final static long SLEEP = -1;
+
     /**
      * finish job
      *
      */
-    public final static long FINISH = -1;
+    public final static long FINISH = -99;
+
+
+
+
+    public final static long LOOP = 0;
 
 
     /**
