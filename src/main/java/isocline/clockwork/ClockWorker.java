@@ -23,9 +23,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+
 /**
  *
- *
+ * Base class for WorkSchedule management and thread management
  *
  */
 public class ClockWorker extends ThreadGroup {
@@ -35,6 +37,10 @@ public class ClockWorker extends ThreadGroup {
 
     private String name;
 
+    private boolean isWorking = false;
+
+    private int checkpointWorkQueueSize = 500;
+
 
     private Configuration configuration;
 
@@ -42,22 +48,23 @@ public class ClockWorker extends ThreadGroup {
 
     private AtomicInteger threadWorkerCount = new AtomicInteger(0);
 
-    AtomicInteger runningWorkCount = new AtomicInteger(0);
-
     private BlockingQueue<WorkSchedule.Context> workQueue;
-
 
     private WorkChecker workChecker;
 
-    private boolean isWorking = false;
+    private Map<String, WorkScheduleList> eventMap = new ConcurrentHashMap<String, WorkScheduleList>();
 
 
-    private int checkpointWorkQueueSize = 500;
+    AtomicInteger managedWorkCount = new AtomicInteger(0);
+
+
 
 
     /**
-     * @param name
-     * @param config
+     * Create a ClockWorker object which provice services for WorkSchedule
+     *
+     * @param name   ClockerWorker name
+     * @param config configuration for ClockWorker
      */
     public ClockWorker(String name, Configuration config) {
         super("ClockWorker");
@@ -74,7 +81,7 @@ public class ClockWorker extends ThreadGroup {
 
         init(true);
 
-        logger.info(this.name+ " initialized");
+        logger.info(this.name + " initialized");
     }
 
 
@@ -88,25 +95,167 @@ public class ClockWorker extends ThreadGroup {
         workChecker.start();
 
         do {
-
             addThreadWorker();
-
         } while (this.threadWorkerCount.get() < this.configuration.getInitThreadWorkerSize());
 
     }
 
 
+    /**
+     * Create a WorkSchedule instance.
+     *
+     * @param work Work implement class object
+     * @return new instance of WorkSchedule
+     */
     public WorkSchedule createSchedule(Work work) {
         return new WorkSchedule(this, work);
     }
 
+
+    /**
+     * Create a WorkSchedule instance by work class
+     *
+     * @param workClass class of implement for Work
+     * @return new instance of WorkSchedule
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
     public WorkSchedule createSchedule(Class workClass) throws InstantiationException, IllegalAccessException {
         return new WorkSchedule(this, (Work) workClass.newInstance());
     }
 
 
+    /**
+     * Create a WorkSchedule instance by work classname
+     *
+     * @param className classname of implement for Work
+     * @return new instance of WorkSchedule
+     * @throws ClassNotFoundException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
     public WorkSchedule createSchedule(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         return new WorkSchedule(this, (Work) Class.forName(className).newInstance());
+    }
+
+
+    /**
+     * Returns a count of managed Work implement instance.
+     *
+     * @return count of managed Work implement instance.
+     */
+    public int getManagedWorkCount() {
+        return this.managedWorkCount.get();
+    }
+
+
+    /**
+     * Returns a count of running Thread for processing Work object.
+     */
+    public int getThreadWorkerCount() {
+        return this.threadWorkerCount.get();
+    }
+
+    /**
+     * Returns a current queue size for processing Work object.
+     */
+    public int getWorkQueueSize() {
+        return this.workQueue.size();
+    }
+
+
+    /**
+     * Wait until completion of work.when the time is up, stop waiting
+     *
+     * @param timeout milli seconds for timeout
+     */
+    public void waitingJob(long timeout) {
+
+        try {
+            Thread.sleep(500);
+            for (int i = 0; i < timeout / 100; i++) {
+                if (this.getManagedWorkCount() > 0) {
+                    Thread.sleep(100);
+
+                } else {
+                    if (this.getManagedWorkCount() == 0
+                            && workQueue.size() == 0) {
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+
+        }
+
+        long tt1 = System.currentTimeMillis();
+
+        for (ThreadWorker t : this.threadWorkers) {
+            t.interrupt();
+        }
+
+        while (this.managedWorkCount.get() > 0) {
+            waiting(100);
+
+            long gap = System.currentTimeMillis() - tt1;
+            if (gap > timeout && timeout > 0) {
+                break;
+            }
+
+        }
+
+        long tt2 = System.currentTimeMillis();
+
+        long gap = (tt2 - tt1);
+        if (gap > 0) {
+            logger.warn(this.name + " wait time(milisecond) for async job : " + gap);
+        }
+    }
+
+
+    /**
+     * Shutdown all process for these services. but wait for process complete until maximum 10 seconds
+     */
+    public void shutdown() {
+
+
+        int count = 0;
+        isWorking = false;
+        while (this.getManagedWorkCount() > 0) {
+
+            waiting(10);
+            count++;
+
+            // 10초 까지 대기
+            if (count > 1000) {
+                break;
+            }
+        }
+
+
+        try {
+            super.destroy();
+        } catch (IllegalThreadStateException ite) {
+
+        } finally {
+            logger.info(this.name + " shutdown");
+        }
+    }
+
+
+    /**
+     * Shutdown all process for these services. but wait for process complete until timeout
+     *
+     * @param timeout
+     */
+    public void shutdown(long timeout) {
+
+        if (timeout > 0) {
+
+            waitingJob(timeout);
+        }
+
+        shutdown();
     }
 
 
@@ -128,21 +277,6 @@ public class ClockWorker extends ThreadGroup {
 
     }
 
-    public int getRunningWorkCount() {
-        return this.runningWorkCount.get();
-    }
-
-    public int getThreadWorkerCount() {
-        return this.threadWorkerCount.get();
-    }
-
-    /**
-     * @return
-     */
-    public int getWorkQueueSize() {
-        return this.workQueue.size();
-    }
-
 
     private void waiting(long t) {
         try {
@@ -152,92 +286,6 @@ public class ClockWorker extends ThreadGroup {
         }
     }
 
-
-    /**
-     * @param timeout
-     */
-    public void waitingJob(long timeout) {
-
-        try {
-            Thread.sleep(500);
-            for (int i = 0; i < timeout / 100; i++) {
-                if (this.getRunningWorkCount() > 0) {
-                    Thread.sleep(100);
-
-                } else {
-                    if (this.getRunningWorkCount() == 0
-                            && workQueue.size() == 0) {
-                        break;
-                    }
-                }
-            }
-        } catch (Exception e) {
-
-        }
-
-        long tt1 = System.currentTimeMillis();
-
-        for (ThreadWorker t : this.threadWorkers) {
-            t.interrupt();
-        }
-
-        while (this.runningWorkCount.get() > 0) {
-            waiting(100);
-
-            long gap = System.currentTimeMillis() - tt1;
-            if (gap > timeout && timeout > 0) {
-                break;
-            }
-
-        }
-
-        long tt2 = System.currentTimeMillis();
-
-        long gap = (tt2 - tt1);
-        if (gap > 0) {
-            logger.warn(this.name + " wait time(milisecond) for async job : "+ gap);
-        }
-
-
-    }
-
-
-    public void shutdown() {
-
-
-        int count = 0;
-        isWorking = false;
-        while (this.getRunningWorkCount() > 0) {
-
-            waiting(10);
-            count++;
-
-            // 10초 까지 대기
-            if (count > 1000) {
-                break;
-            }
-        }
-
-
-
-        try {
-            super.destroy();
-        } catch (IllegalThreadStateException ite) {
-
-        } finally {
-            logger.info(this.name+ " shutdown");
-        }
-
-    }
-
-
-    public void shutdownAfterWaiting(long timeout) {
-
-        waitingJob(timeout);
-
-        shutdown();
-
-    }
 
     private synchronized boolean addThreadWorker() {
 
@@ -299,7 +347,7 @@ public class ClockWorker extends ThreadGroup {
     }
 
 
-    private Map<String, WorkScheduleList> eventMap = new ConcurrentHashMap<String, WorkScheduleList>();
+
 
 
     private WorkScheduleList getWorkScheduleList(String eventName, boolean isCreate) {
@@ -346,7 +394,7 @@ public class ClockWorker extends ThreadGroup {
             for (WorkSchedule schedule : array) {
 
                 EventInfo eventInfo = event;
-                if(event==null) {
+                if (event == null) {
                     eventInfo = new EventInfo();
                 }
 
@@ -358,6 +406,13 @@ public class ClockWorker extends ThreadGroup {
 
     }
 
+
+
+    /****************************************
+     *
+     * Sub class for WorkSchedule information
+     *
+     */
     private static class WorkScheduleList extends HashSet<WorkSchedule> {
 
         private WorkSchedule[] array = null;
@@ -403,10 +458,9 @@ public class ClockWorker extends ThreadGroup {
         }
     }
 
-    /**
+    /****************************************
      *
-     *
-     *
+     * Thread for Worker
      */
     private static class ThreadWorker extends Thread {
 
@@ -481,12 +535,12 @@ public class ClockWorker extends ThreadGroup {
                     WorkSchedule.Context ctx = this.clockWorker.workQueue.poll(1,
                             TimeUnit.SECONDS);
 
-                    if(ctx==null) {
+                    if (ctx == null) {
                         continue;
                     }
 
                     workSchedule = ctx.getWorkSchedule();
-                    if(workSchedule==null) continue;
+                    if (workSchedule == null) continue;
 
                     this.lastWorkTime = System.currentTimeMillis();
 
@@ -501,13 +555,11 @@ public class ClockWorker extends ThreadGroup {
                         if (check(slc)) {
 
 
-
                             if (workSchedule.isExecute()) {
 
 
-
                                 EventInfo eventInfo = workSchedule.checkEvent();
-                                if(eventInfo==null) {
+                                if (eventInfo == null) {
                                     eventInfo = new EventInfo();
 
                                 }
@@ -521,12 +573,12 @@ public class ClockWorker extends ThreadGroup {
                                 if (delaytime >= Clock.LOOP) {
                                     workSchedule.setRepeatInterval(delaytime);
                                     this.clockWorker.addWorkSchedule(workSchedule);
-                                }else if (delaytime == Clock.SLEEP) {
+                                } else if (delaytime == Clock.SLEEP) {
 
                                     workSchedule.setRepeatInterval(-1);
 
                                     this.clockWorker.addWorkSchedule(workSchedule);
-                                }else {
+                                } else {
 
                                     workSchedule.finish();
                                 }
@@ -556,9 +608,9 @@ public class ClockWorker extends ThreadGroup {
                         stoplessCount = 0;
                     }
 
-                }catch (RuntimeException re) {
+                } catch (RuntimeException re) {
                     workSchedule.finish();
-                }catch (InterruptedException ite) {
+                } catch (InterruptedException ite) {
 
                 } catch (Throwable e) {
                     e.printStackTrace();
@@ -580,8 +632,9 @@ public class ClockWorker extends ThreadGroup {
     }
 
 
-    /**
+    /****************************************
      *
+     * Thread class for checking work status.
      */
     private static class WorkChecker extends Thread {
 
@@ -603,7 +656,6 @@ public class ClockWorker extends ThreadGroup {
             while (clockWorker.isWorking) {
 
                 try {
-
                     WorkSchedule wrapper = statusWrappers.poll(1, TimeUnit.SECONDS);
 
                     if (wrapper != null) {
@@ -626,9 +678,7 @@ public class ClockWorker extends ThreadGroup {
             }
 
             statusWrappers.clear();
-
         }
-
     }
 
 

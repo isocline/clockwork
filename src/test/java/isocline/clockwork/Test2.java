@@ -32,7 +32,7 @@ public class Test2 {
         for(int i=0;i<30;i++) {
 
             System.out.println(worker.getWorkQueueSize() +"  start");
-            System.out.println(worker.getRunningWorkCount() +"  chk");
+            System.out.println(worker.getManagedWorkCount() +"  chk");
 
             Thread.sleep(1000);
         }

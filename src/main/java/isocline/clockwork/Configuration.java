@@ -16,6 +16,7 @@
 package isocline.clockwork;
 
 /**
+ *
  * Configuration class for ClockWorker
  */
 public class Configuration {
@@ -25,8 +26,6 @@ public class Configuration {
     private int initThreadWorkerSize = 1;
 
     private int maxThreadWorkerSize = 10;
-
-
 
     private long executeTimeout = 30 * Clock.SECOND;
 
@@ -40,6 +39,9 @@ public class Configuration {
     public final static Configuration PERFORMANCE = create().setInitThreadWorkerSize(3).setMaxThreadWorkerSize(24).setThreadPriority(Thread.MAX_PRIORITY).lock();
 
 
+    /**
+     * Create new instance of Configuration
+     */
     public static Configuration create() {
         return new Configuration();
     }

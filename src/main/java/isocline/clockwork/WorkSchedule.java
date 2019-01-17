@@ -158,7 +158,7 @@ public class WorkSchedule {
         } else {
             long crntTime = System.currentTimeMillis();
             if(this.isSecondBaseMode) {
-                crntTime = (((long) crntTime / waitTime) * waitTime)-1;
+                crntTime = (((long) crntTime / waitTime) * waitTime);
             }
 
 
@@ -275,7 +275,7 @@ public class WorkSchedule {
         }
         this.clockWorker.addWorkSchedule(this);
 
-        this.clockWorker.runningWorkCount.incrementAndGet();
+        this.clockWorker.managedWorkCount.incrementAndGet();
 
         return this;
     }
@@ -284,7 +284,7 @@ public class WorkSchedule {
     public void finish() {
         if(this.isStart) {
             this.isStart = false;
-            this.clockWorker.runningWorkCount.decrementAndGet();
+            this.clockWorker.managedWorkCount.decrementAndGet();
         }
     }
 

@@ -26,12 +26,12 @@ public class Test {
         /*
         for(int i=0;i<30;i++) {
 
-            if(worker.getRunningWorkCount()==0) {
+            if(worker.getManagedWorkCount()==0) {
                 break;
             }
 
             System.out.println("WORKER SIZE = "+ worker.getWorkQueueSize() +"  start");
-            System.out.println("WORK COUNT = "+worker.getRunningWorkCount() +"  chk");
+            System.out.println("WORK COUNT = "+worker.getManagedWorkCount() +"  chk");
 
             if(i==15) {
                 EventInfo event = new EventInfo();
@@ -45,7 +45,7 @@ public class Test {
         */
 
 
-        worker.shutdownAfterWaiting(10000);
+        worker.shutdown(10000);
     }
 
 
