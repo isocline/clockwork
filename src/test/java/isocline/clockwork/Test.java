@@ -1,5 +1,9 @@
 package isocline.clockwork;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Test {
 
     public static void main(String[] args) throws Exception {
@@ -11,29 +15,37 @@ public class Test {
         for (int i = 0; i < 1; i++) {
 
             TestJob work = new TestJob(i);
-            WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStartDelay(1000);
+            //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStartDelay(1000);
+            //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStartDelay(Clock.at("2019-01-17T13:32:30+09:00"));
+            WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setSecondBaseMode(true);
 
             schedule.start();
 
         }
 
+        /*
         for(int i=0;i<30;i++) {
 
-            System.out.println(worker.getWorkQueueSize() +"  start");
-            System.out.println(worker.getRunningWorkCount() +"  chk");
+            if(worker.getRunningWorkCount()==0) {
+                break;
+            }
 
-            if(i==3) {
+            System.out.println("WORKER SIZE = "+ worker.getWorkQueueSize() +"  start");
+            System.out.println("WORK COUNT = "+worker.getRunningWorkCount() +"  chk");
+
+            if(i==15) {
                 EventInfo event = new EventInfo();
                 event.put("x","X value setup");
                 worker.raiseEvent("fire", event );
                 System.err.println("xxxxxxx");
             }
 
-            Thread.sleep(1000);
+            Thread.sleep(3000);
         }
+        */
 
 
-        worker.shutdown();
+        worker.shutdownAfterWaiting(10000);
     }
 
 
@@ -74,7 +86,14 @@ public class Test {
         }
 
         private void log(String msg) {
-            System.out.println(new java.util.Date() + " " + msg);
+
+            final String input = "20120823151034.567";
+            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+            Date d = new Date();
+
+
+            System.out.println(df.format(d) + " " + msg);
 
         }
     }

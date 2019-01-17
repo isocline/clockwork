@@ -15,13 +15,18 @@
  */
 package isocline.clockwork;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+
+/**
+ *
+ */
 public class WorkSchedule {
+
+    private static final long UNDEFINED_INTERVAL = -1;
 
 
     private String workUuid;
@@ -35,6 +40,12 @@ public class WorkSchedule {
     private boolean isLock = false;
 
     private boolean isStart = false;
+
+    private long intervalTime = UNDEFINED_INTERVAL;
+
+    private double contextCheckId;
+
+    private boolean isSecondBaseMode = false;
 
 
     private Work work;
@@ -68,6 +79,10 @@ public class WorkSchedule {
 
 
     boolean isExecute() {
+
+        if(!isStart) {
+            throw new RuntimeException("service end");
+        }
 
         boolean isExecute = false;
 
@@ -141,7 +156,14 @@ public class WorkSchedule {
         if (waitTime < 0) {
             this.checkTime = waitTime;
         } else {
-            long chkTime = System.currentTimeMillis() + waitTime;
+            long crntTime = System.currentTimeMillis();
+            if(this.isSecondBaseMode) {
+                crntTime = (((long) crntTime / waitTime) * waitTime)-1;
+            }
+
+
+
+            long chkTime = crntTime + waitTime;
             if (this.checkTime < chkTime) {
                 this.checkTime = chkTime;
             }
@@ -151,8 +173,6 @@ public class WorkSchedule {
         return this;
     }
 
-    private static final long UNDEFINED_INTERVAL = -1;
-    private long intervalTime = UNDEFINED_INTERVAL;
 
     public long getIntervalTime() {
         return this.intervalTime;
@@ -166,23 +186,7 @@ public class WorkSchedule {
     }
 
 
-    private Date getDate(String isoDateTime) throws java.text.ParseException {
 
-        String isoDateTimeTxt = isoDateTime.replaceAll("\\+0([0-9]){1}\\:00", "+0$100");
-
-        System.err.println(isoDateTimeTxt);
-
-        SimpleDateFormat form = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-        Date date;
-        try {
-            date = form.parse(isoDateTimeTxt);
-        } catch (java.text.ParseException pe) {
-            form = new SimpleDateFormat("yyyyMMdd'T'HHmmssZ");
-            date = form.parse(isoDateTimeTxt);
-        }
-        return date;
-
-    }
 
     /**
      * ISO 8601 Data elements and interchange formats (https://en.wikipedia.org/wiki/ISO_8601)
@@ -191,7 +195,7 @@ public class WorkSchedule {
      */
     public WorkSchedule setStartDateTime(String isoDateTime) throws java.text.ParseException {
 
-        return setStartDateTime(getDate(isoDateTime));
+        return setStartDateTime(Clock.getDate(isoDateTime));
     }
 
 
@@ -209,7 +213,7 @@ public class WorkSchedule {
      */
     public WorkSchedule setEndDateTime(String isoDateTime) throws java.text.ParseException {
 
-        return setEndDateTime(getDate(isoDateTime));
+        return setEndDateTime(Clock.getDate(isoDateTime));
     }
 
     public WorkSchedule setEndDateTime(Date endDateTime) {
@@ -254,13 +258,34 @@ public class WorkSchedule {
     }
 
 
+    public WorkSchedule setSecondBaseMode(boolean isSecondBaseMode) {
+        checkLocking();
+        this.isSecondBaseMode = isSecondBaseMode;
+        return this;
+    }
+
+
     public WorkSchedule start() {
         if (isStart) {
             throw new RuntimeException("Already start!");
         }
         this.isStart = true;
+        if(this.isSecondBaseMode) {
+            this.setStartDelay(Clock.SECOND);
+        }
         this.clockWorker.addWorkSchedule(this);
+
+        this.clockWorker.runningWorkCount.incrementAndGet();
+
         return this;
+    }
+
+
+    public void finish() {
+        if(this.isStart) {
+            this.isStart = false;
+            this.clockWorker.runningWorkCount.decrementAndGet();
+        }
     }
 
     @Override
@@ -292,14 +317,14 @@ public class WorkSchedule {
         }
     }
 
-    private double contextId;
+
 
 
     Context enterQueue() {
 
 
-        this.contextId = Math.random();
-        Context ctx = new Context(contextId, this);
+        this.contextCheckId = Math.random();
+        Context ctx = new Context(contextCheckId, this);
 
 
         return ctx;
@@ -323,7 +348,7 @@ public class WorkSchedule {
 
         WorkSchedule getWorkSchedule() {
 
-            if (this.contextId == this.workSchedule.contextId) {
+            if (this.contextId == this.workSchedule.contextCheckId) {
                 return workSchedule;
             }
 

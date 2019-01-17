@@ -15,13 +15,10 @@
  */
 package isocline.clockwork;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- *
- *
  * @author webplugger
  */
 public class Clock {
@@ -37,11 +34,8 @@ public class Clock {
 
     /**
      * finish job
-     *
      */
     public final static long FINISH = -99;
-
-
 
 
     public final static long LOOP = 0;
@@ -49,59 +43,81 @@ public class Clock {
 
     /**
      * second
-     *
-     *
      */
     public final static long SECOND = 1000;
 
 
     /**
      * minute
-     *
      */
     public final static long MINUTE = SECOND * 60;
 
     /**
      * hour
-     *
      */
     public final static long HOUR = MINUTE * 60;
 
 
     /**
-     *  day
-     *
-     *
+     * day
      */
     public final static long DAY = HOUR * 24;
 
+
+    /**
+     * @param isoDateTime
+     * @return
+     */
+    public static long at(String isoDateTime) throws java.text.ParseException {
+
+
+        Date date = getDate(isoDateTime);
+
+        long gap = date.getTime() - System.currentTimeMillis()-1;
+
+        if (gap < 1) {
+            return FINISH;
+        }
+
+        return gap;
+
+
+    }
 
 
     /**
      *
      *
-     * @param yyyyMMdd_hhmmss
      * @return
      */
-    public static long at(String yyyyMMdd_hhmmss) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd hhmmss");
+    public static long nextSecond() {
+        long s = System.currentTimeMillis();
+        long next = (((long) s / 1000) * 1000) + 1000;
 
-        try {
-            Date date = sdf.parse(yyyyMMdd_hhmmss);
+        long g= next-s;
 
-            long gap = date.getTime() - System.currentTimeMillis();
-
-            if (gap < 1) {
-                return FINISH;
-            }
-
-            return gap;
-
-        } catch (ParseException pe) {
-            return FINISH;
-        }
-
-
+        return g;
     }
 
+
+    /**
+     * @param isoDateTime
+     * @return
+     * @throws java.text.ParseException
+     */
+    public static Date getDate(String isoDateTime) throws java.text.ParseException {
+
+        String isoDateTimeTxt = isoDateTime.replaceAll("\\+0([0-9]){1}\\:00", "+0$100");
+
+        SimpleDateFormat form = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        Date date;
+        try {
+            date = form.parse(isoDateTimeTxt);
+        } catch (java.text.ParseException pe) {
+            form = new SimpleDateFormat("yyyyMMdd'T'HHmmssZ");
+            date = form.parse(isoDateTimeTxt);
+        }
+        return date;
+
+    }
 }

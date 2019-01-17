@@ -15,20 +15,22 @@
  */
 package isocline.clockwork;
 
+import org.apache.log4j.Logger;
+
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-
 /**
  *
  *
  *
  */
 public class ClockWorker extends ThreadGroup {
+
+    protected static Logger logger = Logger.getLogger(ClockWorker.class.getName());
 
 
     private String name;
@@ -40,7 +42,7 @@ public class ClockWorker extends ThreadGroup {
 
     private AtomicInteger threadWorkerCount = new AtomicInteger(0);
 
-    private AtomicInteger runningWorkCount = new AtomicInteger(0);
+    AtomicInteger runningWorkCount = new AtomicInteger(0);
 
     private BlockingQueue<WorkSchedule.Context> workQueue;
 
@@ -71,6 +73,8 @@ public class ClockWorker extends ThreadGroup {
         this.workQueue = new LinkedBlockingQueue<WorkSchedule.Context>(this.configuration.getMaxWorkQueueSize());
 
         init(true);
+
+        logger.info(this.name+ " initialized");
     }
 
 
@@ -109,7 +113,7 @@ public class ClockWorker extends ThreadGroup {
     boolean addWorkSchedule(WorkSchedule workSchedule) {
         boolean result = this.workQueue.offer(workSchedule.enterQueue());
         if (result) {
-            this.runningWorkCount.incrementAndGet();
+
 
             int sz = this.workQueue.size();
             if (sz > checkpointWorkQueueSize) {
@@ -191,8 +195,7 @@ public class ClockWorker extends ThreadGroup {
 
         long gap = (tt2 - tt1);
         if (gap > 0) {
-            System.out.println(this.name + " wait time(milisecond) for async job : "
-                    + gap);
+            logger.warn(this.name + " wait time(milisecond) for async job : "+ gap);
         }
 
 
@@ -200,10 +203,12 @@ public class ClockWorker extends ThreadGroup {
 
 
     public void shutdown() {
-        isWorking = false;
+
 
         int count = 0;
-        while (this.threadWorkerCount.get() > 0) {
+        isWorking = false;
+        while (this.getRunningWorkCount() > 0) {
+
             waiting(10);
             count++;
 
@@ -213,10 +218,14 @@ public class ClockWorker extends ThreadGroup {
             }
         }
 
+
+
         try {
             super.destroy();
         } catch (IllegalThreadStateException ite) {
 
+        } finally {
+            logger.info(this.name+ " shutdown");
         }
 
     }
@@ -331,11 +340,11 @@ public class ClockWorker extends ThreadGroup {
     public void raiseEvent(String eventName, EventInfo event) {
 
         WorkScheduleList workScheduleList = getWorkScheduleList(eventName, false);
-        System.err.println("------ "+workScheduleList);
+
         if (workScheduleList != null) {
             WorkSchedule[] array = workScheduleList.getWorkScheduleArray();
             for (WorkSchedule schedule : array) {
-                System.err.println( schedule.getId()+" fire !!!!! ");
+
                 EventInfo eventInfo = event;
                 if(event==null) {
                     eventInfo = new EventInfo();
@@ -467,6 +476,7 @@ public class ClockWorker extends ThreadGroup {
 
             while (isWorking()) {
 
+                WorkSchedule workSchedule = null;
                 try {
                     WorkSchedule.Context ctx = this.clockWorker.workQueue.poll(1,
                             TimeUnit.SECONDS);
@@ -475,7 +485,7 @@ public class ClockWorker extends ThreadGroup {
                         continue;
                     }
 
-                    WorkSchedule workSchedule = ctx.getWorkSchedule();
+                    workSchedule = ctx.getWorkSchedule();
                     if(workSchedule==null) continue;
 
                     this.lastWorkTime = System.currentTimeMillis();
@@ -507,7 +517,7 @@ public class ClockWorker extends ThreadGroup {
                                 while (delaytime == Clock.LOOP) {
                                     delaytime = slc.execute(eventInfo);
                                 }
-                                this.clockWorker.runningWorkCount.decrementAndGet();
+
                                 if (delaytime >= Clock.LOOP) {
                                     workSchedule.setRepeatInterval(delaytime);
                                     this.clockWorker.addWorkSchedule(workSchedule);
@@ -516,6 +526,9 @@ public class ClockWorker extends ThreadGroup {
                                     workSchedule.setRepeatInterval(-1);
 
                                     this.clockWorker.addWorkSchedule(workSchedule);
+                                }else {
+
+                                    workSchedule.finish();
                                 }
 
                                 // Thread.sleep(1);
@@ -523,7 +536,7 @@ public class ClockWorker extends ThreadGroup {
                                 timeoutCount++;
                                 stoplessCount = 0;
 
-                                this.clockWorker.runningWorkCount.decrementAndGet();
+
                                 // Thread.sleep(50);
                                 // this.parent.addWorkSchedule(workSchedule);
                                 this.clockWorker.workChecker
@@ -543,8 +556,10 @@ public class ClockWorker extends ThreadGroup {
                         stoplessCount = 0;
                     }
 
-                } catch (InterruptedException ite) {
-                    this.clockWorker.runningWorkCount.decrementAndGet();
+                }catch (RuntimeException re) {
+                    workSchedule.finish();
+                }catch (InterruptedException ite) {
+
                 } catch (Throwable e) {
                     e.printStackTrace();
 
