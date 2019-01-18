@@ -1,8 +1,6 @@
 package isocline.clockwork;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import org.apache.log4j.Logger;
 
 public class Test {
 
@@ -18,6 +16,7 @@ public class Test {
             //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStartDelay(1000);
             //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStartDelay(Clock.at("2019-01-17T13:32:30+09:00"));
             WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setSecondBaseMode(true);
+            //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire");
 
             schedule.start();
 
@@ -50,6 +49,8 @@ public class Test {
 
 
     public static class TestJob implements Work {
+
+        protected static Logger logger = Logger.getLogger(TestJob.class.getName());
 
 
         private int seq;
@@ -87,13 +88,7 @@ public class Test {
 
         private void log(String msg) {
 
-            final String input = "20120823151034.567";
-            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
-            Date d = new Date();
-
-
-            System.out.println(df.format(d) + " " + msg);
+            logger.debug(msg);
 
         }
     }

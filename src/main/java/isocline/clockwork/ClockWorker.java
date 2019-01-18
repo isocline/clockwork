@@ -226,8 +226,8 @@ public class ClockWorker extends ThreadGroup {
             waiting(10);
             count++;
 
-            // 10초 까지 대기
-            if (count > 1000) {
+            // total 1 second
+            if (count > 100) {
                 break;
             }
         }
