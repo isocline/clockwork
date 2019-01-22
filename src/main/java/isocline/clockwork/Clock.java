@@ -30,15 +30,6 @@ public class Clock {
     public final static long AGAIN_RIGHT_WAY = 0;
 
 
-    public final static long SLEEP = -1;
-
-    /**
-     * finish job
-     */
-    public final static long FINISH = -99;
-
-
-    public final static long LOOP = 0;
 
 
     /**
@@ -76,7 +67,7 @@ public class Clock {
         long gap = date.getTime() - System.currentTimeMillis()-1;
 
         if (gap < 1) {
-            return FINISH;
+            return Work.FINISH;
         }
 
         return gap;

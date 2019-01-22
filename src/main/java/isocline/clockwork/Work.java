@@ -26,6 +26,16 @@ public interface Work  {
 
 
 
+    long SLEEP = -1;
+
+    /**
+     * finish job
+     */
+    long FINISH = -99;
+
+
+    long LOOP = 0;
+
 
     /**
      * @return

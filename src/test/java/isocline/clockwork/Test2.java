@@ -31,7 +31,7 @@ public class Test2 {
 
         for(int i=0;i<30;i++) {
 
-            System.out.println(worker.getWorkQueueSize() +"  start");
+            System.out.println(worker.getWorkQueueSize() +"  activate");
             System.out.println(worker.getManagedWorkCount() +"  chk");
 
             Thread.sleep(1000);
@@ -62,7 +62,7 @@ public class Test2 {
             if (count % 3 == 0) {
                 return 2 * Clock.SECOND;
             } else if (count >3) {
-                return Clock.FINISH;
+                return FINISH;
             } else {
                 return Clock.SECOND;
             }

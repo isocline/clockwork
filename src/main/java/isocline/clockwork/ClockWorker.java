@@ -385,6 +385,13 @@ public class ClockWorker extends ThreadGroup {
         workScheduleMap.remove(workSchedule);
     }
 
+    public void raiseEvent(EventInfo event) {
+        String eventName = event.getEventName();
+        if(eventName!=null && eventName.length()>0) {
+            raiseEvent(eventName, event);
+        }
+    }
+
     public void raiseEvent(String eventName, EventInfo event) {
 
         WorkScheduleList workScheduleList = getWorkScheduleList(eventName, false);
@@ -566,14 +573,14 @@ public class ClockWorker extends ThreadGroup {
                                 eventInfo.setWorkSechedule(workSchedule);
 
                                 long delaytime = slc.execute(eventInfo);
-                                while (delaytime == Clock.LOOP) {
+                                while (delaytime == Work.LOOP) {
                                     delaytime = slc.execute(eventInfo);
                                 }
 
-                                if (delaytime >= Clock.LOOP) {
+                                if (delaytime >= Work.LOOP) {
                                     workSchedule.setRepeatInterval(delaytime);
                                     this.clockWorker.addWorkSchedule(workSchedule);
-                                } else if (delaytime == Clock.SLEEP) {
+                                } else if (delaytime == Work.SLEEP) {
 
                                     workSchedule.setRepeatInterval(-1);
 

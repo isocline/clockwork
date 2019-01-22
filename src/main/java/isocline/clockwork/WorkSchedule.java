@@ -56,6 +56,8 @@ public class WorkSchedule {
 
     private ClockWorker clockWorker = null;
 
+    private LinkedList<EventInfo> eventList = new LinkedList<EventInfo>();
+
 
     WorkSchedule(ClockWorker clockWorker, Work work) {
         this.clockWorker = clockWorker;
@@ -265,9 +267,9 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule start() {
+    public WorkSchedule activate() {
         if (isStart) {
-            throw new RuntimeException("Already start!");
+            throw new RuntimeException("Already activate!");
         }
         this.isStart = true;
         if(this.isSecondBaseMode) {
@@ -303,7 +305,10 @@ public class WorkSchedule {
         return workUuid.hashCode();
     }
 
-    private LinkedList<EventInfo> eventList = new LinkedList<EventInfo>();
+
+    public ClockWorker getClockWorker() {
+        return clockWorker;
+    }
 
     void raiseEvent(EventInfo event) {
         eventList.add(event);

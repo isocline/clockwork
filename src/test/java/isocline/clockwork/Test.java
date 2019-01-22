@@ -18,7 +18,7 @@ public class Test {
             WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setSecondBaseMode(true);
             //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire");
 
-            schedule.start();
+            schedule.activate();
 
         }
 
@@ -29,7 +29,7 @@ public class Test {
                 break;
             }
 
-            System.out.println("WORKER SIZE = "+ worker.getWorkQueueSize() +"  start");
+            System.out.println("WORKER SIZE = "+ worker.getWorkQueueSize() +"  activate");
             System.out.println("WORK COUNT = "+worker.getManagedWorkCount() +"  chk");
 
             if(i==15) {
@@ -68,7 +68,7 @@ public class Test {
             log(seq + "th job execute. count="+count + " "+eventMsg);
 
             if(eventMsg!=null) {
-                return Clock.FINISH;
+                return FINISH;
             }
 
 
@@ -78,9 +78,9 @@ public class Test {
             } else if (count >3 && count<6) {
                 return 2*Clock.SECOND;
             } else if(count >= 6) {
-                return Clock.SLEEP;
+                return SLEEP;
             }else {
-                return Clock.FINISH;
+                return FINISH;
             }
 
 

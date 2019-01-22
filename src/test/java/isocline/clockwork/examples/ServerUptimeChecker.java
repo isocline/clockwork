@@ -8,12 +8,21 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+
+/**
+ * This program is an automatic server health check program.
+ * Checked web server is busy then this program checks more slowly.
+ * and web server has a good response time  then the program checks more often.
+ *
+ */
 public class ServerUptimeChecker  implements Work {
 
     private static Logger logger = Logger.getLogger(ServerUptimeChecker.class.getName());
 
 
     private URL url;
+
+    private int failCount = 0;
 
     public ServerUptimeChecker(String strUrl) throws MalformedURLException {
 
@@ -46,6 +55,11 @@ public class ServerUptimeChecker  implements Work {
 
         }catch (IOException ioe) {
 
+            failCount++;
+
+            if(failCount>10) {
+                return FINISH;
+            }
             return 30*Clock.SECOND;
 
         }
@@ -61,7 +75,7 @@ public class ServerUptimeChecker  implements Work {
 
            ServerUptimeChecker checker = new ServerUptimeChecker( url);
            WorkSchedule schedule = worker.createSchedule(checker).bindEvent("connectTypeChange");
-           schedule.start();
+           schedule.activate();
        }
 
 
