@@ -33,6 +33,7 @@ public class ServerUptimeChecker  implements Work {
 
 
         try {
+            logger.debug(" check");
             long t1 = System.currentTimeMillis();
 
             HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
@@ -74,7 +75,7 @@ public class ServerUptimeChecker  implements Work {
        for(String url:urls) {
 
            ServerUptimeChecker checker = new ServerUptimeChecker( url);
-           WorkSchedule schedule = worker.createSchedule(checker).bindEvent("connectTypeChange");
+           WorkSchedule schedule = worker.createSchedule(checker).bindEvent("connectTypeChange").setJitter(200).setSecondBaseMode(true);
            schedule.activate();
        }
 

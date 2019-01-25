@@ -43,6 +43,8 @@ public class WorkSchedule {
 
     private long intervalTime = UNDEFINED_INTERVAL;
 
+    private long jitter = 0;
+
     private double contextCheckId;
 
     private boolean isSecondBaseMode = false;
@@ -160,7 +162,7 @@ public class WorkSchedule {
         } else {
             long crntTime = System.currentTimeMillis();
             if(this.isSecondBaseMode) {
-                crntTime = (((long) crntTime / waitTime) * waitTime);
+                crntTime = (((long) crntTime / waitTime) * waitTime)+this.jitter;
             }
 
 
@@ -263,6 +265,12 @@ public class WorkSchedule {
     public WorkSchedule setSecondBaseMode(boolean isSecondBaseMode) {
         checkLocking();
         this.isSecondBaseMode = isSecondBaseMode;
+        return this;
+    }
+
+    public WorkSchedule setJitter(long jitter) {
+        checkLocking();
+        this.jitter = jitter;
         return this;
     }
 
