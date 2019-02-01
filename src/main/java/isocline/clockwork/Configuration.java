@@ -36,7 +36,7 @@ public class Configuration {
 
     public final static Configuration DEFAULT = create().lock();
 
-    public final static Configuration PERFORMANCE = create().setInitThreadWorkerSize(3).setMaxThreadWorkerSize(24).setThreadPriority(Thread.MAX_PRIORITY).lock();
+    public final static Configuration PERFORMANCE = create().setInitThreadWorkerSize(10).setMaxThreadWorkerSize(24).setThreadPriority(Thread.MAX_PRIORITY).lock();
 
 
     /**

@@ -108,7 +108,17 @@ public class ClockWorker extends ThreadGroup {
      * @return new instance of WorkSchedule
      */
     public WorkSchedule createSchedule(Work work) {
-        return new WorkSchedule(this, work);
+        return createSchedule(null, work);
+    }
+
+
+    public WorkSchedule createSchedule(ScheduleConfig config, Work work) {
+        WorkSchedule workSchedule = new WorkSchedule(this, work);
+        if(config!=null) {
+            workSchedule.setScheduleConfig(config);
+        }
+
+        return workSchedule;
     }
 
 
@@ -121,7 +131,13 @@ public class ClockWorker extends ThreadGroup {
      * @throws IllegalAccessException
      */
     public WorkSchedule createSchedule(Class workClass) throws InstantiationException, IllegalAccessException {
-        return new WorkSchedule(this, (Work) workClass.newInstance());
+        return createSchedule( (Work) workClass.newInstance());
+    }
+
+
+
+    public WorkSchedule createSchedule(ScheduleConfig config,Class workClass) throws InstantiationException, IllegalAccessException {
+        return createSchedule(config, (Work) workClass.newInstance());
     }
 
 
@@ -367,22 +383,28 @@ public class ClockWorker extends ThreadGroup {
     }
 
 
-    void bindEvent(String eventName, WorkSchedule workSchedule) {
+    void bindEvent(WorkSchedule workSchedule,String... eventNames) {
 
-        WorkScheduleList workScheduleMap = getWorkScheduleList(eventName, true);
+        for(String eventName:eventNames) {
+            WorkScheduleList workScheduleMap = getWorkScheduleList(eventName, true);
 
-        workScheduleMap.add(workSchedule);
+            workScheduleMap.add(workSchedule);
+        }
+
+
     }
 
 
-    void unindEvent(String eventName, WorkSchedule workSchedule) {
+    void unindEvent(WorkSchedule workSchedule, String... eventNames) {
 
-        WorkScheduleList workScheduleMap = getWorkScheduleList(eventName, false);
-        if (workScheduleMap == null) {
-            return;
+        for(String eventName:eventNames) {
+            WorkScheduleList workScheduleMap = getWorkScheduleList(eventName, false);
+            if (workScheduleMap == null) {
+                return;
+            }
+
+            workScheduleMap.remove(workSchedule);
         }
-
-        workScheduleMap.remove(workSchedule);
     }
 
     public void raiseEvent(EventInfo event) {
@@ -539,8 +561,8 @@ public class ClockWorker extends ThreadGroup {
 
                 WorkSchedule workSchedule = null;
                 try {
-                    WorkSchedule.Context ctx = this.clockWorker.workQueue.poll(1,
-                            TimeUnit.SECONDS);
+                    WorkSchedule.Context ctx = this.clockWorker.workQueue.poll(100,
+                            TimeUnit.MILLISECONDS);
 
                     if (ctx == null) {
                         continue;
@@ -567,10 +589,20 @@ public class ClockWorker extends ThreadGroup {
 
                                 EventInfo eventInfo = workSchedule.checkEvent();
                                 if (eventInfo == null) {
-                                    eventInfo = new EventInfo();
+                                    eventInfo = workSchedule.getDefaultEventInfo();
 
+                                }else {
+                                    eventInfo.setWorkSechedule(workSchedule);
                                 }
-                                eventInfo.setWorkSechedule(workSchedule);
+
+                                /**
+                                 *
+                                 *
+                                 */
+
+                                workSchedule.adjustWaiting();
+
+
 
                                 long delaytime = slc.execute(eventInfo);
                                 while (delaytime == Work.LOOP) {
@@ -663,11 +695,12 @@ public class ClockWorker extends ThreadGroup {
             while (clockWorker.isWorking) {
 
                 try {
-                    WorkSchedule wrapper = statusWrappers.poll(1, TimeUnit.SECONDS);
+                    WorkSchedule wrapper = statusWrappers.poll(100, TimeUnit.MILLISECONDS);
 
                     if (wrapper != null) {
 
-                        if (wrapper.getCheckTime() <= System.currentTimeMillis()) {
+                        if (wrapper.getNextExecuteTime() <= (System.currentTimeMillis()+99)) {
+                            //System.err.println("zzz");
                             clockWorker.addWorkSchedule(wrapper);
                         } else {
                             statusWrappers.add(wrapper);

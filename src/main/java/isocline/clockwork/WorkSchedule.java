@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -33,7 +34,7 @@ public class WorkSchedule {
 
     private long waitTime = 0;
 
-    private long checkTime = 0;
+    private long nextExecuteTime = 0;
 
     private long workEndTime = 0;
 
@@ -81,37 +82,71 @@ public class WorkSchedule {
 
     }
 
+    void adjustWaiting()  throws InterruptedException{
+        if(needWaiting) {
+            double e = 573D/1000D;
+            long nanoTime = this.nextExecuteTime*1000000;
+            long gap = nanoTime - System.nanoTime();
+            long gap2 = (long) (gap*e);
+            TimeUnit.NANOSECONDS.sleep(gap2);
 
-    boolean isExecute() {
+            for(int i=0;i<10000000;i++) {
+                if(nanoTime<=System.nanoTime()) {
+                    System.out.println("                           "+gap+" "+gap2+ " "+i);
+                    return;
+                }
+            }
+
+        }
+
+    }
+
+
+    private boolean needWaiting = false;
+
+    boolean isExecute(){
+        needWaiting = false;
 
         if(!isStart) {
             throw new RuntimeException("service end");
+        }
+        if (isEnd()) {
+            return false;
         }
 
         boolean isExecute = false;
 
 
-        if (this.waitTime == 0) {
-            isExecute = true;
-        } else if (this.checkTime > 0  && this.checkTime <= System.currentTimeMillis()) {
+        if (this.waitTime == 0 ) {
             isExecute = true;
         } else if (this.eventList.size() > 0) {
             isExecute = true;
+        } else if (this.nextExecuteTime > 0 ) {
+            long t1 = this.nextExecuteTime  - System.currentTimeMillis();
+            if(t1<=0) {
+                return true;
+            }else  if(t1<1) {
+
+
+                if(this.isSecondBaseMode) {
+                    needWaiting = true;
+
+                }
+
+                return true;
+
+            }
+
         }
 
-        if (isExecute) {
-            if (isEnd()) {
-                isExecute = false;
-            }
-        }
 
 
         return isExecute;
     }
 
 
-    long getCheckTime() {
-        return this.checkTime;
+    long getNextExecuteTime() {
+        return this.nextExecuteTime;
     }
 
 
@@ -158,18 +193,19 @@ public class WorkSchedule {
         this.waitTime = waitTime;
 
         if (waitTime < 0) {
-            this.checkTime = waitTime;
+            this.nextExecuteTime = waitTime;
         } else {
             long crntTime = System.currentTimeMillis();
             if(this.isSecondBaseMode) {
-                crntTime = (((long) crntTime / waitTime) * waitTime)+this.jitter;
+                crntTime = (crntTime - (crntTime%1000)) + this.jitter;
+                //crntTime = ((long) crntTime / 1000) *1000+this.jitter;
             }
 
 
 
             long chkTime = crntTime + waitTime;
-            if (this.checkTime < chkTime) {
-                this.checkTime = chkTime;
+            if (this.nextExecuteTime < chkTime) {
+                this.nextExecuteTime = chkTime;
             }
         }
 
@@ -205,7 +241,7 @@ public class WorkSchedule {
 
     public WorkSchedule setStartDateTime(Date startDateTime) {
 
-        this.checkTime = startDateTime.getTime();
+        this.nextExecuteTime = startDateTime.getTime();
         return this;
     }
 
@@ -226,6 +262,11 @@ public class WorkSchedule {
         return this;
     }
 
+    public WorkSchedule setFinishTime(long milliSeconds) {
+        this.workEndTime = System.currentTimeMillis()+milliSeconds;
+        return this;
+    }
+
 
     public WorkSchedule setWorkSession(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         checkLocking();
@@ -234,7 +275,7 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule setWorkSession(WorkSession workSession) throws ClassNotFoundException {
+    public WorkSchedule setWorkSession(WorkSession workSession)  {
         checkLocking();
 
         this.workSession = workSession;
@@ -253,10 +294,10 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule bindEvent(String eventName) {
+    public WorkSchedule bindEvent(String... eventNames) {
         checkLocking();
 
-        this.clockWorker.bindEvent(eventName, this);
+        this.clockWorker.bindEvent( this, eventNames);
 
         return this;
     }
@@ -274,10 +315,17 @@ public class WorkSchedule {
         return this;
     }
 
-
     public WorkSchedule activate() {
+        return activate(false);
+    }
+
+    public WorkSchedule activate(boolean checkActivated) {
         if (isStart) {
-            throw new RuntimeException("Already activate!");
+            if(checkActivated) {
+                throw new RuntimeException("Already activate!");
+            }else {
+                return this;
+            }
         }
         this.isStart = true;
         if(this.isSecondBaseMode) {
@@ -286,6 +334,12 @@ public class WorkSchedule {
         this.clockWorker.addWorkSchedule(this);
 
         this.clockWorker.managedWorkCount.incrementAndGet();
+
+        return this;
+    }
+
+    public WorkSchedule setScheduleConfig(ScheduleConfig config) {
+        config.settup(this);
 
         return this;
     }
@@ -318,16 +372,33 @@ public class WorkSchedule {
         return clockWorker;
     }
 
+    private boolean isEmpty=true;
+
     void raiseEvent(EventInfo event) {
+        isEmpty=false;
         eventList.add(event);
     }
 
     EventInfo checkEvent() {
+        if(isEmpty) return null;
         try {
             return eventList.removeFirst();
         } catch (NoSuchElementException nse) {
+            isEmpty = true;
             return null;
         }
+    }
+
+    private EventInfo defaultEvent = null;
+
+    EventInfo getDefaultEventInfo() {
+        if(defaultEvent==null) {
+            defaultEvent = new EventInfo();
+            defaultEvent.setWorkSechedule(this);
+        }
+
+        return defaultEvent;
+
     }
 
 
