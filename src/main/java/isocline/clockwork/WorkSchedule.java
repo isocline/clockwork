@@ -36,6 +36,8 @@ public class WorkSchedule {
 
     private long nextExecuteTime = 0;
 
+    private long nextExecuteNanoTime = 0;
+
     private long workEndTime = 0;
 
     private boolean isLock = false;
@@ -85,14 +87,13 @@ public class WorkSchedule {
     void adjustWaiting()  throws InterruptedException{
         if(needWaiting) {
             double e = 573D/1000D;
-            long nanoTime = this.nextExecuteTime*1000000;
-            long gap = nanoTime - System.nanoTime();
+            long gap = nextExecuteNanoTime- System.nanoTime();
             long gap2 = (long) (gap*e);
             TimeUnit.NANOSECONDS.sleep(gap2);
 
             for(int i=0;i<10000000;i++) {
-                if(nanoTime<=System.nanoTime()) {
-                    System.out.println("                           "+gap+" "+gap2+ " "+i);
+                if(nextExecuteNanoTime<=System.nanoTime()) {
+                    //System.out.println(">>                           "+gap+" "+gap2+ " "+i+ " "+this.nextExecuteTime + " "+this.jitter + " "+System.currentTimeMillis());
                     return;
                 }
             }
@@ -104,44 +105,50 @@ public class WorkSchedule {
 
     private boolean needWaiting = false;
 
-    boolean isExecute(){
+    private static long chkTimeUnit = 3*1000000;
+
+    long checkRemainNanoTime(){
         needWaiting = false;
 
         if(!isStart) {
             throw new RuntimeException("service end");
         }
         if (isEnd()) {
-            return false;
+            return Long.MAX_VALUE;
         }
 
-        boolean isExecute = false;
+
 
 
         if (this.waitTime == 0 ) {
-            isExecute = true;
+            if(this.isSecondBaseMode) {
+                needWaiting = true;
+            }
+            long tt = System.nanoTime();
+            long gt = this.nextExecuteNanoTime - tt;
+            return 0;
         } else if (this.eventList.size() > 0) {
-            isExecute = true;
+            return 0;
         } else if (this.nextExecuteTime > 0 ) {
-            long t1 = this.nextExecuteTime  - System.currentTimeMillis();
+
+            long t1 = this.nextExecuteNanoTime  - System.nanoTime();
             if(t1<=0) {
-                return true;
-            }else  if(t1<1) {
-
-
-                if(this.isSecondBaseMode) {
-                    needWaiting = true;
-
-                }
-
-                return true;
+                //System.out.println("XY=="+this.jitter +" "+t1+ " "+this.nextExecuteNanoTime + " "+System.nanoTime());
+                return t1;
+            }else  if(this.isSecondBaseMode && t1<chkTimeUnit) {
+                needWaiting = true;
+                //System.out.println("XX=="+this.jitter +" "+t1);
+                return t1;
 
             }
+
+            return t1;
 
         }
 
 
 
-        return isExecute;
+        return Clock.HOUR;
     }
 
 
@@ -186,27 +193,56 @@ public class WorkSchedule {
         return this.work;
     }
 
+    private boolean isFirstDelaySet = false;
 
     public WorkSchedule setStartDelay(long waitTime) {
+        isFirstDelaySet=true;
 
         checkLocking();
         this.waitTime = waitTime;
 
         if (waitTime < 0) {
-            this.nextExecuteTime = waitTime;
+            this.nextExecuteTime = UNDEFINED_INTERVAL;
+            this.nextExecuteNanoTime = UNDEFINED_INTERVAL;
+
         } else {
             long crntTime = System.currentTimeMillis();
+            long adjCrntTime = crntTime;
             if(this.isSecondBaseMode) {
-                crntTime = (crntTime - (crntTime%1000)) + this.jitter;
+                for(int i=0;i<5;i++) {
+                    long adjTime = (crntTime - (crntTime%1000)) + this.jitter + i*1000;
+                    long nextTime = adjTime + waitTime;
+
+                    if((crntTime+this.jitter)<nextTime) {
+                        //if(i!=0)
+                        {
+                            //System.out.println("XXX "+i + " "+crntTime+ " "+nextTime + " -- "+this.jitter);
+                        }
+                        //System.err.println("XXX "+i);
+                        adjCrntTime = adjTime;
+                        //System.out.println("XXX "+i + " "+crntTime+ " "+nextTime + " -- "+adjCrntTime+ " "+this.jitter);
+                        break;
+                    }
+                }
+
+
                 //crntTime = ((long) crntTime / 1000) *1000+this.jitter;
             }
 
 
 
-            long chkTime = crntTime + waitTime;
+
+            long chkTime = adjCrntTime + waitTime;
             if (this.nextExecuteTime < chkTime) {
                 this.nextExecuteTime = chkTime;
+                this.nextExecuteNanoTime = this.nextExecuteTime * 1000000;
+                //System.out.println("----- -- "+this.nextExecuteTime +  "  "+crntTime + "  - "+this.jitter);
+
+            }else {
+                System.err.println("----- 2 "+this.nextExecuteTime);
             }
+
+
         }
 
 
@@ -241,7 +277,7 @@ public class WorkSchedule {
 
     public WorkSchedule setStartDateTime(Date startDateTime) {
 
-        this.nextExecuteTime = startDateTime.getTime();
+        this.setStartDelay(startDateTime.getTime());
         return this;
     }
 
@@ -315,6 +351,12 @@ public class WorkSchedule {
         return this;
     }
 
+    public WorkSchedule setSleepMode() {
+        checkLocking();
+        this.setStartDelay(Work.SLEEP);
+        return this;
+    }
+
     public WorkSchedule activate() {
         return activate(false);
     }
@@ -328,9 +370,11 @@ public class WorkSchedule {
             }
         }
         this.isStart = true;
-        if(this.isSecondBaseMode) {
-            this.setStartDelay(Clock.SECOND);
+
+        if(!isFirstDelaySet) {
+            this.setStartDelay(0);
         }
+
         this.clockWorker.addWorkSchedule(this);
 
         this.clockWorker.managedWorkCount.incrementAndGet();

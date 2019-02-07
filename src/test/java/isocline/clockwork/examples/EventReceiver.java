@@ -35,7 +35,7 @@ public class EventReceiver implements Work {
 
 
         EventReceiver checker = new EventReceiver();
-        WorkSchedule schedule = worker.createSchedule(checker).setFinishTime(30 * Clock.SECOND).bindEvent("test");
+        WorkSchedule schedule = worker.createSchedule(checker).setFinishTime(30 * Clock.SECOND).bindEvent("test").setSleepMode();
         schedule.activate();
 
 

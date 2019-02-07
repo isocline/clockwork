@@ -81,14 +81,17 @@ public class ClockWorker extends ThreadGroup {
 
         init(true);
 
+
         logger.info(this.name + " initialized");
     }
+
 
 
     /**
      * @param isWorking
      */
     private void init(boolean isWorking) {
+
         this.isWorking = isWorking;
 
         workChecker = new WorkChecker(this);
@@ -229,6 +232,24 @@ public class ClockWorker extends ThreadGroup {
     }
 
 
+
+
+    public void waitAndShutdown() {
+
+
+
+        while (this.getManagedWorkCount() > 0) {
+
+            waiting(100);
+
+        }
+
+
+        shutdown();
+
+    }
+
+
     /**
      * Shutdown all process for these services. but wait for process complete until maximum 10 seconds
      */
@@ -239,11 +260,11 @@ public class ClockWorker extends ThreadGroup {
         isWorking = false;
         while (this.getManagedWorkCount() > 0) {
 
-            waiting(10);
+            waiting(100);
             count++;
 
             // total 1 second
-            if (count > 100) {
+            if (count > 10) {
                 break;
             }
         }
@@ -557,6 +578,8 @@ public class ClockWorker extends ThreadGroup {
 
             isThreadRunning = true;
 
+
+            long chkeckNanoTime =  3*1000000;
             while (isWorking()) {
 
                 WorkSchedule workSchedule = null;
@@ -570,6 +593,7 @@ public class ClockWorker extends ThreadGroup {
 
                     workSchedule = ctx.getWorkSchedule();
                     if (workSchedule == null) continue;
+                    //debug(workSchedule.getWorkObject() + " SS");
 
                     this.lastWorkTime = System.currentTimeMillis();
 
@@ -583,8 +607,9 @@ public class ClockWorker extends ThreadGroup {
 
                         if (check(slc)) {
 
+                            long remainNanoTime = workSchedule.checkRemainNanoTime();
 
-                            if (workSchedule.isExecute()) {
+                            if (remainNanoTime<chkeckNanoTime) {
 
 
                                 EventInfo eventInfo = workSchedule.checkEvent();
@@ -600,7 +625,9 @@ public class ClockWorker extends ThreadGroup {
                                  *
                                  */
 
+                                //logger.debug(workSchedule.getWorkObject() +"w");
                                 workSchedule.adjustWaiting();
+                                //logger.debug(workSchedule.getWorkObject() +"E");
 
 
 
@@ -609,9 +636,17 @@ public class ClockWorker extends ThreadGroup {
                                     delaytime = slc.execute(eventInfo);
                                 }
 
-                                if (delaytime >= Work.LOOP) {
+                                if(delaytime>0) {
+
                                     workSchedule.setRepeatInterval(delaytime);
-                                    this.clockWorker.addWorkSchedule(workSchedule);
+
+                                    if (delaytime > this.clockWorker.configuration.getCountdownMiliSecondTimeToExecute()) {
+                                        this.clockWorker.workChecker
+                                                .addWorkStatusWrapper(workSchedule);
+                                        //System.err.println("z1");
+                                    }else {
+                                        this.clockWorker.addWorkSchedule(workSchedule);
+                                    }
                                 } else if (delaytime == Work.SLEEP) {
 
                                     workSchedule.setRepeatInterval(-1);
@@ -628,10 +663,23 @@ public class ClockWorker extends ThreadGroup {
                                 stoplessCount = 0;
 
 
-                                // Thread.sleep(50);
+                                if (chkeckNanoTime/1000000 > this.clockWorker.configuration.getCountdownMiliSecondTimeToExecute()) {
+                                    this.clockWorker.workChecker
+                                            .addWorkStatusWrapper(workSchedule);
+
+                                    //System.err.println("ADD "+workSchedule.getWorkObject()  );
+
+
+                                }else {
+                                    this.clockWorker
+                                            .addWorkSchedule(workSchedule);
+                                    //System.err.println("ADD2 "+workSchedule.getWorkObject()  );
+
+                                }
+
+                                Thread.sleep(0,10000);
                                 // this.parent.addWorkSchedule(workSchedule);
-                                this.clockWorker.workChecker
-                                        .addWorkStatusWrapper(workSchedule);
+
                             }
                         } else {
                             this.clockWorker.workQueue.put(workSchedule.enterQueue());
@@ -683,6 +731,26 @@ public class ClockWorker extends ThreadGroup {
 
         WorkChecker(ClockWorker clockWorker) {
             this.clockWorker = clockWorker;
+
+            checkPerm();
+
+        }
+
+        private long adjTimeout = 0;
+
+        private void checkPerm() {
+            try {
+                long t1 = System.currentTimeMillis();
+                for (int i = 0; i < 1000; i++) {
+                    Thread.sleep(1);
+                }
+                long t2 = System.currentTimeMillis();
+                long adjTimeout = (t2-t1 -1000)*2 ;
+
+                System.err.println("GAP======= "+adjTimeout);
+            }catch (Exception e) {
+
+            }
         }
 
         void addWorkStatusWrapper(WorkSchedule sb) {
@@ -699,10 +767,11 @@ public class ClockWorker extends ThreadGroup {
 
                     if (wrapper != null) {
 
-                        if (wrapper.getNextExecuteTime() <= (System.currentTimeMillis()+99)) {
-                            //System.err.println("zzz");
+                        if (wrapper.getNextExecuteTime() <= (System.currentTimeMillis()+this.clockWorker.configuration.getCountdownMiliSecondTimeToExecute())) {
+                            System.err.println("WAIT "+wrapper.getWorkObject() );
                             clockWorker.addWorkSchedule(wrapper);
                         } else {
+                            System.err.println("SET "+wrapper.getWorkObject());
                             statusWrappers.add(wrapper);
                             Thread.sleep(10);
                         }

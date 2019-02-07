@@ -29,8 +29,17 @@ public class MultiPlexer implements Work {
         return Clock.SECOND;
     }
 
+    @Override
+    public String toString() {
+        return "MultiPlexer{" +
+                "seq=" + seq +
+                ", id='" + id + '\'' +
+                '}';
+    }
+
     public static void main(String[] args) throws Exception {
         ClockWorker worker = ClockWorkerContext.getWorker();
+
 
 
         for(int i=0;i<10;i++ ) {
@@ -39,10 +48,17 @@ public class MultiPlexer implements Work {
         }
 
 
+
+
+
+
         for(int i=0;i<5;i++ ) {
             WorkSchedule schedule = worker.createSchedule(new MultiPlexer("B",i)).setSecondBaseMode(true).setJitter(i*100+50);
             schedule.activate();
         }
+
+
+
 
 
 

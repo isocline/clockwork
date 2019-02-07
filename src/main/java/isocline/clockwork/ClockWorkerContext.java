@@ -36,7 +36,7 @@ public class ClockWorkerContext implements
 
 
         if (worker == null) {
-            worker = new ClockWorker("default", Configuration.DEFAULT);
+            worker = new ClockWorker("default", Configuration.NOMAL);
         }
 
         return worker;

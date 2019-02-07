@@ -1,10 +1,12 @@
 package isocline.clockwork;
 
-import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 
-public class EventInfo extends HashMap {
+public class EventInfo {
 
 
+    private Map attributeMap = new Hashtable();
 
     private String eventName;
 
@@ -29,6 +31,25 @@ public class EventInfo extends HashMap {
     public WorkSchedule getWorkSchedule() {
 
         return this.schedule;
+    }
+
+
+    public void setAttribute(String key, Object value) {
+        this.attributeMap.put(key, value);
+
+    }
+
+    public Object getAttribute(String key) {
+        return this.attributeMap.get(key);
+    }
+
+    public Object removeAttribute(String key) {
+        return this.attributeMap.remove(key);
+    }
+
+    public void copyTo(EventInfo event) {
+        event.schedule = this.schedule;
+        event.attributeMap = this.attributeMap;
     }
 
 

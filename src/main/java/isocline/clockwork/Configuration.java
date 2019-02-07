@@ -23,20 +23,27 @@ public class Configuration {
 
     private int threadPriority = Thread.NORM_PRIORITY;
 
-    private int initThreadWorkerSize = 1;
+    private int initThreadWorkerSize = 3;
 
-    private int maxThreadWorkerSize = 10;
+    private int maxThreadWorkerSize = 12;
+
+
+
+    private int maxWorkQueueSize = 512 * 512 * 512;
 
     private long executeTimeout = 30 * Clock.SECOND;
 
-    private int maxWorkQueueSize = 512 * 512 * 512;
+    private long countdownMiliSecondTimeToExecute = 3 * Clock.SECOND;
 
     private boolean isPropertyLocking = false;
 
 
-    public final static Configuration DEFAULT = create().lock();
+    public final static Configuration NOMAL = create().setInitThreadWorkerSize(3).setMaxThreadWorkerSize(12).setThreadPriority(Thread.NORM_PRIORITY).lock();
 
-    public final static Configuration PERFORMANCE = create().setInitThreadWorkerSize(10).setMaxThreadWorkerSize(24).setThreadPriority(Thread.MAX_PRIORITY).lock();
+    public final static Configuration ECHO = create().setInitThreadWorkerSize(1).setMaxThreadWorkerSize(3).setThreadPriority(Thread.MIN_PRIORITY).lock();
+
+    public final static Configuration PERFORMANCE = create().setInitThreadWorkerSize(12).setMaxThreadWorkerSize(36).setThreadPriority(Thread.MAX_PRIORITY).lock();
+
 
 
     /**
@@ -114,4 +121,16 @@ public class Configuration {
         this.maxWorkQueueSize = maxWorkQueueSize;
         return this;
     }
+
+    public long getCountdownMiliSecondTimeToExecute() {
+        return countdownMiliSecondTimeToExecute;
+    }
+
+    public Configuration setCountdownMiliSecondTimeToExecute(long countdownTime) {
+        this.check();
+        this.countdownMiliSecondTimeToExecute=countdownTime;
+        return this;
+    }
+
+
 }

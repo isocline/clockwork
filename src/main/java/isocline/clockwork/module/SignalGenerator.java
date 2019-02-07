@@ -18,7 +18,13 @@ public class SignalGenerator implements Work {
     @Override
     public long execute(EventInfo event) throws InterruptedException {
 
-        event.getWorkSchedule().getClockWorker().raiseEvent(eventName, event);
+        System.out.println("FIRE");
+
+        EventInfo newEvent = new EventInfo(eventName);
+        event.copyTo(newEvent);
+
+
+        event.getWorkSchedule().getClockWorker().raiseEvent(eventName, newEvent);
 
         return timeGap;
     }
