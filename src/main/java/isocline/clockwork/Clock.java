@@ -76,18 +76,21 @@ public class Clock {
     }
 
 
+
     /**
      *
      *
      * @return
      */
-    public static long nextSecond() {
+    public static long nextSecond(long maximumWait) {
         long s = System.currentTimeMillis();
-        long next = (((long) s / 1000) * 1000) + 1000;
+        long s1 = s%1000;
 
-        long g= next-s;
-
-        return g;
+        if(s1>maximumWait) {
+            return (s-s1) + 2000;
+        }else {
+            return (s - s1) + 1000;
+        }
     }
 
 

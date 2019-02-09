@@ -27,7 +27,7 @@ public class ServerCheck extends LiveObject {
 
         System.out.println("zzz");
 
-        ClockWorkerContext.getWorker().waitAndShutdown();
+        ClockWorkerContext.getWorker().awaitShutdown();
 
     }
 

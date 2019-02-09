@@ -52,6 +52,8 @@ public class WorkSchedule {
 
     private boolean isSecondBaseMode = false;
 
+    private boolean isBetweenStartTimeMode = false;
+
 
     private Work work;
 
@@ -195,6 +197,22 @@ public class WorkSchedule {
 
     private boolean isFirstDelaySet = false;
 
+
+    public WorkSchedule setStartTime(long nextExecuteTime) {
+
+        if(waitTime==0) {
+            waitTime = 1;
+        }
+
+
+
+        this.nextExecuteTime  = nextExecuteTime;
+        this.nextExecuteNanoTime = this.nextExecuteTime * 1000000;
+
+
+        return this;
+    }
+
     public WorkSchedule setStartDelay(long waitTime) {
         isFirstDelaySet=true;
 
@@ -206,6 +224,32 @@ public class WorkSchedule {
             this.nextExecuteNanoTime = UNDEFINED_INTERVAL;
 
         } else {
+
+            if(this.isBetweenStartTimeMode && this.nextExecuteNanoTime>0) {
+
+
+
+
+                    long tmp = System.currentTimeMillis()-nextExecuteTime;
+
+
+                    if(tmp>0) {
+                        long x = (long) Math.ceil(  (double) tmp/ (double) waitTime );
+                        //System.out.println( x+" > "+this.nextExecuteTime);
+                        setStartTime( this.nextExecuteTime + waitTime*(x) );
+                        //System.out.println( x+" > "+this.nextExecuteTime);
+
+
+
+                        return this;
+                    }else if(tmp==0) {
+                        setStartTime( this.nextExecuteTime + waitTime );
+                        return this;
+                    }
+
+
+            }
+
             long crntTime = System.currentTimeMillis();
             long adjCrntTime = crntTime;
             if(this.isSecondBaseMode) {
@@ -234,8 +278,9 @@ public class WorkSchedule {
 
             long chkTime = adjCrntTime + waitTime;
             if (this.nextExecuteTime < chkTime) {
-                this.nextExecuteTime = chkTime;
-                this.nextExecuteNanoTime = this.nextExecuteTime * 1000000;
+                //System.out.println( " >> "+this.nextExecuteTime);
+                setStartTime(chkTime);
+
                 //System.out.println("----- -- "+this.nextExecuteTime +  "  "+crntTime + "  - "+this.jitter);
 
             }else {
@@ -277,7 +322,7 @@ public class WorkSchedule {
 
     public WorkSchedule setStartDateTime(Date startDateTime) {
 
-        this.setStartDelay(startDateTime.getTime());
+        this.setStartTime(startDateTime.getTime());
         return this;
     }
 
@@ -342,6 +387,13 @@ public class WorkSchedule {
     public WorkSchedule setSecondBaseMode(boolean isSecondBaseMode) {
         checkLocking();
         this.isSecondBaseMode = isSecondBaseMode;
+        this.isBetweenStartTimeMode = isSecondBaseMode;
+        return this;
+    }
+
+    public WorkSchedule setBetweenStartTimeMode(boolean isBetweenStartTimeMode) {
+        checkLocking();
+        this.isBetweenStartTimeMode = isBetweenStartTimeMode;
         return this;
     }
 
@@ -371,9 +423,18 @@ public class WorkSchedule {
         }
         this.isStart = true;
 
+        /*
         if(!isFirstDelaySet) {
-            this.setStartDelay(0);
+            long s1 = System.currentTimeMillis();
+            long s2 = s1%1000;
+            if(s2>900) {
+                long nextExecuteTime = (s1-s2)
+                this.setStartDateTime()
+            }
+
+            this.setStartDelay(1000);
         }
+        */
 
         this.clockWorker.addWorkSchedule(this);
 

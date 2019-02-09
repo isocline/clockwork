@@ -234,7 +234,7 @@ public class ClockWorker extends ThreadGroup {
 
 
 
-    public void waitAndShutdown() {
+    public void awaitShutdown() {
 
 
 

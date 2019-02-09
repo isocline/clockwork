@@ -26,7 +26,22 @@ public class MultiPlexer implements Work {
     public long execute(EventInfo event) throws InterruptedException {
         //System.out.println("== "+System.currentTimeMillis());
         logger.debug(id+" "+seq +" send");
-        return Clock.SECOND;
+
+        for(int i=0;i<10000;i++) {
+            logger.info("execute(EventInfo event) throws InterruptedException");
+        }
+        /*
+        int s = 0;
+        for(int i=0;i<10000;i++) {
+            if(i%20==0) {
+                Thread.sleep(0, 10);
+            }
+            s=s+  (int) (100*Math.random());
+        }
+        //logger.debug(id+" >> "+seq +" END "+s);
+
+*/
+        return 1000;
     }
 
     @Override
@@ -38,24 +53,27 @@ public class MultiPlexer implements Work {
     }
 
     public static void main(String[] args) throws Exception {
-        ClockWorker worker = ClockWorkerContext.getWorker();
+        ClockWorker worker = new ClockWorker("perform", Configuration.PERFORMANCE);
 
+        long startTime = Clock.nextSecond(900);
 
+        System.out.println(startTime);
 
         for(int i=0;i<10;i++ ) {
-            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("A",i)).setSecondBaseMode(true).setJitter(i*100);
+            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("A",i)).setSecondBaseMode(true).setStartTime(startTime+i*10);
             schedule.activate();
         }
 
 
 
 
-
+/*
 
         for(int i=0;i<5;i++ ) {
             WorkSchedule schedule = worker.createSchedule(new MultiPlexer("B",i)).setSecondBaseMode(true).setJitter(i*100+50);
             schedule.activate();
         }
+        */
 
 
 
