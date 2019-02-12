@@ -605,7 +605,6 @@ public class ClockWorker extends ThreadGroup {
                     //System.err.print("X");
 
                     if (ctx == null) {
-
                         continue;
                     }else if(count==5000) {
                         Thread.sleep(0,1);
@@ -635,7 +634,7 @@ public class ClockWorker extends ThreadGroup {
 
                             long remainNanoTime = workSchedule.checkRemainNanoTime();
 
-                            if (remainNanoTime < workSchedule.getPreemptiveTime()) {
+                            if (remainNanoTime < workSchedule.getPreemptiveNanoTime()) {
 
 
                                 EventInfo eventInfo = workSchedule.checkEvent();
@@ -666,7 +665,7 @@ public class ClockWorker extends ThreadGroup {
 
                                     workSchedule.setRepeatInterval(delaytime);
 
-                                    if (delaytime > this.clockWorker.configuration.getCountdownMiliSecondTimeToExecute()) {
+                                    if (delaytime > this.clockWorker.configuration.getExecuteCountdownMilliTime()) {
                                         this.clockWorker.workChecker
                                                 .addWorkStatusWrapper(workSchedule);
                                         //System.err.println("z1");
@@ -690,25 +689,19 @@ public class ClockWorker extends ThreadGroup {
                                 stoplessCount = 0;
 
 
-                                if (workSchedule.getPreemptiveTime()/1000000 > this.clockWorker.configuration.getCountdownMiliSecondTimeToExecute()) {
+                                if (remainNanoTime > this.clockWorker.configuration.getExecuteCountdownNanoTime()) {
                                     this.clockWorker.workChecker
                                             .addWorkStatusWrapper(workSchedule);
-
-                                    //System.err.println("ADD "+workSchedule.getWorkObject()  );
-
 
                                 }else {
                                     this.clockWorker
                                             .addWorkSchedule(workSchedule);
-                                    //System.err.println("ADD2 "+workSchedule.getWorkObject()  );
+
 
                                 }
-                                //Thread.sleep(1);
-
-                                //Thread.sleep(1);
-                                // this.parent.addWorkSchedule(workSchedule);
 
                             }
+
                         } else {
                             this.clockWorker.workQueue.put(workSchedule.enterQueue());
                         }
@@ -775,7 +768,7 @@ public class ClockWorker extends ThreadGroup {
                 long t2 = System.currentTimeMillis();
                 long adjTimeout = (t2-t1 -1000)*2 ;
 
-                System.err.println("GAP======= "+adjTimeout);
+
             }catch (Exception e) {
 
             }
@@ -788,7 +781,7 @@ public class ClockWorker extends ThreadGroup {
         @Override
         public void run() {
 
-            long countdown = this.clockWorker.configuration.getCountdownMiliSecondTimeToExecute();
+            long countdown = this.clockWorker.configuration.getExecuteCountdownMilliTime();
             while (clockWorker.isWorking) {
 
                 try {

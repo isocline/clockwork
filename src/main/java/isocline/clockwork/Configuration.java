@@ -33,7 +33,10 @@ public class Configuration {
 
     private long executeTimeout = 30 * Clock.SECOND;
 
-    private long countdownMiliSecondTimeToExecute = 200;
+    private long executeCountdownMilliTime = 200;
+
+    private long executeCountdownNanoTime = executeCountdownMilliTime * 1000000;
+
 
     private boolean isPropertyLocking = false;
 
@@ -122,13 +125,18 @@ public class Configuration {
         return this;
     }
 
-    public long getCountdownMiliSecondTimeToExecute() {
-        return countdownMiliSecondTimeToExecute;
+    public long getExecuteCountdownMilliTime() {
+        return executeCountdownMilliTime;
     }
 
-    public Configuration setCountdownMiliSecondTimeToExecute(long countdownTime) {
+    public long getExecuteCountdownNanoTime() {
+        return executeCountdownNanoTime;
+    }
+
+    public Configuration setExecuteCountdownMilliTime(long countdownTime) {
         this.check();
-        this.countdownMiliSecondTimeToExecute=countdownTime;
+        this.executeCountdownMilliTime =countdownTime;
+        this.executeCountdownNanoTime = countdownTime*1000000;
         return this;
     }
 

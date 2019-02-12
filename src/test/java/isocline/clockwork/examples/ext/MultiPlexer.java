@@ -69,18 +69,12 @@ public class MultiPlexer implements Work {
         }
 
 
-        Thread.sleep(60*1000);
 
-
-
-
-/*
-
-        for(int i=0;i<5;i++ ) {
-            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("B",i)).setStrictMode(true).setJitter(i*100+50);
+        for(int i=0;i<10;i++ ) {
+            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("B",i)).setStrictMode(true).setStartTime(startTime+i*100+50);
             schedule.activate();
         }
-        */
+
 
 
 

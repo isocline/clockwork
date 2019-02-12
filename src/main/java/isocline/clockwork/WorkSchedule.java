@@ -53,6 +53,10 @@ public class WorkSchedule {
 
     private boolean isBetweenStartTimeMode = true;
 
+    private boolean needWaiting = false;
+
+    private static long preemptiveCheckNanoTime = 1800000;
+
 
     private Work work;
 
@@ -106,14 +110,12 @@ public class WorkSchedule {
     }
 
 
-    private boolean needWaiting = false;
-
-    private static long chkTimeUnit = 1800000;
 
 
-    long getPreemptiveTime() {
+
+    long getPreemptiveNanoTime() {
         if(this.isStrictMode) {
-            return chkTimeUnit;
+            return preemptiveCheckNanoTime;
         }else {
             return 0;
         }
@@ -137,8 +139,7 @@ public class WorkSchedule {
             if(this.isStrictMode) {
                 needWaiting = true;
             }
-            long tt = System.nanoTime();
-            long gt = this.nextExecuteNanoTime - tt;
+
             return 0;
         } else if (this.eventList.size() > 0) {
             return 0;
@@ -146,13 +147,10 @@ public class WorkSchedule {
 
             long t1 = this.nextExecuteNanoTime  - System.nanoTime();
             if(t1<=0) {
-                //System.out.println("XY=="+this.jitter +" "+t1+ " "+this.nextExecuteNanoTime + " "+System.nanoTime());
                 return t1;
-            }else  if(this.isStrictMode && t1<this.getPreemptiveTime()) {
+            }else  if(this.isStrictMode && t1<this.getPreemptiveNanoTime()) {
                 needWaiting = true;
-                //System.out.println("XX=="+this.jitter +" "+t1);
                 return t1;
-
             }
 
             return t1;
@@ -246,11 +244,8 @@ public class WorkSchedule {
 
                     if(tmp>0) {
                         long x = (long) Math.ceil(  (double) tmp/ (double) waitTime );
-                        //System.out.println( x+" > "+this.nextExecuteTime);
+
                         setStartTime( this.nextExecuteTime + waitTime*(x) );
-                        //System.out.println( x+" > "+this.nextExecuteTime);
-
-
 
                         return this;
                     }else if(tmp==0) {
@@ -269,19 +264,10 @@ public class WorkSchedule {
                     long nextTime = adjTime + waitTime;
 
                     if((crntTime+this.jitter)<nextTime) {
-                        //if(i!=0)
-                        {
-                            //System.out.println("XXX "+i + " "+crntTime+ " "+nextTime + " -- "+this.jitter);
-                        }
-                        //System.err.println("XXX "+i);
                         adjCrntTime = adjTime;
-                        //System.out.println("XXX "+i + " "+crntTime+ " "+nextTime + " -- "+adjCrntTime+ " "+this.jitter);
                         break;
                     }
                 }
-
-
-                //crntTime = ((long) crntTime / 1000) *1000+this.jitter;
             }
 
 
@@ -289,10 +275,7 @@ public class WorkSchedule {
 
             long chkTime = adjCrntTime + waitTime;
             if (this.nextExecuteTime < chkTime) {
-                //System.out.println( " >> "+this.nextExecuteTime);
                 setStartTime(chkTime);
-
-                //System.out.println("----- -- "+this.nextExecuteTime +  "  "+crntTime + "  - "+this.jitter);
 
             }else {
                 System.err.println("----- 2 "+this.nextExecuteTime);
