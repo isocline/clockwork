@@ -19,7 +19,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -50,9 +49,9 @@ public class WorkSchedule {
 
     private double contextCheckId;
 
-    private boolean isSecondBaseMode = false;
+    private boolean isStrictMode = false;
 
-    private boolean isBetweenStartTimeMode = false;
+    private boolean isBetweenStartTimeMode = true;
 
 
     private Work work;
@@ -86,12 +85,14 @@ public class WorkSchedule {
 
     }
 
-    void adjustWaiting()  throws InterruptedException{
-        if(needWaiting) {
-            double e = 573D/1000D;
+    synchronized void adjustWaiting()  throws InterruptedException{
+        if(this.isStrictMode && needWaiting) {
+            double e = 51D/1000D;
             long gap = nextExecuteNanoTime- System.nanoTime();
             long gap2 = (long) (gap*e);
-            TimeUnit.NANOSECONDS.sleep(gap2);
+            //TimeUnit.NANOSECONDS.sleep(gap2);
+
+            this.wait(0,1);
 
             for(int i=0;i<10000000;i++) {
                 if(nextExecuteNanoTime<=System.nanoTime()) {
@@ -107,7 +108,17 @@ public class WorkSchedule {
 
     private boolean needWaiting = false;
 
-    private static long chkTimeUnit = 3*1000000;
+    private static long chkTimeUnit = 1800000;
+
+
+    long getPreemptiveTime() {
+        if(this.isStrictMode) {
+            return chkTimeUnit;
+        }else {
+            return 0;
+        }
+
+    }
 
     long checkRemainNanoTime(){
         needWaiting = false;
@@ -123,7 +134,7 @@ public class WorkSchedule {
 
 
         if (this.waitTime == 0 ) {
-            if(this.isSecondBaseMode) {
+            if(this.isStrictMode) {
                 needWaiting = true;
             }
             long tt = System.nanoTime();
@@ -137,7 +148,7 @@ public class WorkSchedule {
             if(t1<=0) {
                 //System.out.println("XY=="+this.jitter +" "+t1+ " "+this.nextExecuteNanoTime + " "+System.nanoTime());
                 return t1;
-            }else  if(this.isSecondBaseMode && t1<chkTimeUnit) {
+            }else  if(this.isStrictMode && t1<this.getPreemptiveTime()) {
                 needWaiting = true;
                 //System.out.println("XX=="+this.jitter +" "+t1);
                 return t1;
@@ -252,7 +263,7 @@ public class WorkSchedule {
 
             long crntTime = System.currentTimeMillis();
             long adjCrntTime = crntTime;
-            if(this.isSecondBaseMode) {
+            if(this.isStrictMode) {
                 for(int i=0;i<5;i++) {
                     long adjTime = (crntTime - (crntTime%1000)) + this.jitter + i*1000;
                     long nextTime = adjTime + waitTime;
@@ -384,10 +395,9 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule setSecondBaseMode(boolean isSecondBaseMode) {
+    public WorkSchedule setStrictMode(boolean isStrictMode) {
         checkLocking();
-        this.isSecondBaseMode = isSecondBaseMode;
-        this.isBetweenStartTimeMode = isSecondBaseMode;
+        this.isStrictMode = isStrictMode;
         return this;
     }
 
@@ -444,7 +454,7 @@ public class WorkSchedule {
     }
 
     public WorkSchedule setScheduleConfig(ScheduleConfig config) {
-        config.settup(this);
+        config.setup(this);
 
         return this;
     }

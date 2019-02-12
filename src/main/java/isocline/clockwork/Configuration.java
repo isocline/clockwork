@@ -33,7 +33,7 @@ public class Configuration {
 
     private long executeTimeout = 30 * Clock.SECOND;
 
-    private long countdownMiliSecondTimeToExecute = 3 * Clock.SECOND;
+    private long countdownMiliSecondTimeToExecute = 200;
 
     private boolean isPropertyLocking = false;
 

@@ -18,13 +18,13 @@ public class ScheduleConfig {
 
     private WorkSession workSession;
 
-    private boolean isSecondBaseMode;
+    private boolean isStrictMode;
 
-    private boolean isSecondBaseModeUsed = false;
+    private boolean isStrictModeUsed = false;
 
     private long jitter = Long.MIN_VALUE;
 
-    private boolean activeeMode = true;
+    private boolean activeMode = true;
 
 
     public ScheduleConfig setStartDelay(long waitTime) {
@@ -112,9 +112,9 @@ public class ScheduleConfig {
     }
 
 
-    public ScheduleConfig setSecondBaseMode(boolean isSecondBaseMode) {
-        isSecondBaseModeUsed = true;
-        this.isSecondBaseMode = isSecondBaseMode;
+    public ScheduleConfig setStrictMode(boolean isStrictMode) {
+        isStrictModeUsed = true;
+        this.isStrictMode = isStrictMode;
         return this;
 
     }
@@ -125,12 +125,12 @@ public class ScheduleConfig {
         return this;
     }
 
-    public void setActiveeMode(boolean activeeMode) {
-        this.activeeMode = activeeMode;
+    public void setActiveMode(boolean activeMode) {
+        this.activeMode = activeMode;
     }
 
 
-    void settup(WorkSchedule workSchedule) {
+    void setup(WorkSchedule workSchedule) {
 
         if(waitTime != Long.MIN_VALUE) {
             workSchedule.setStartDelay(waitTime);
@@ -160,14 +160,14 @@ public class ScheduleConfig {
             workSchedule.setWorkSession(workSession);
         }
 
-        if(isSecondBaseModeUsed) {
-            workSchedule.setSecondBaseMode(isSecondBaseMode);
+        if(isStrictModeUsed) {
+            workSchedule.setStrictMode(isStrictMode);
         }
 
         if(jitter!=Long.MIN_VALUE) {
             workSchedule.setJitter(jitter);
         }
-        if(activeeMode) {
+        if(activeMode) {
             workSchedule.activate();
         }
 

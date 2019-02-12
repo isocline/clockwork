@@ -65,7 +65,7 @@ public class ServerHeartbeat implements Work {
         ClockWorker worker = ClockWorkerContext.getWorker();
 
 
-        WorkSchedule schedule = worker.createSchedule(ServerHeartbeat.class).setSecondBaseMode(true);
+        WorkSchedule schedule = worker.createSchedule(ServerHeartbeat.class).setStrictMode(true);
         schedule.activate();
 
 

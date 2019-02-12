@@ -67,7 +67,7 @@ public class WaterLevelIndicator implements Work {
         ClockWorker worker = ClockWorkerContext.getWorker();
 
 
-        WorkSchedule schedule = worker.createSchedule(WaterLevelIndicator.class).setSecondBaseMode(true);
+        WorkSchedule schedule = worker.createSchedule(WaterLevelIndicator.class).setStrictMode(true);
         schedule.activate();
 
 

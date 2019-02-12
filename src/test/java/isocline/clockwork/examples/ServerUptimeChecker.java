@@ -75,7 +75,7 @@ public class ServerUptimeChecker  implements Work {
        for(String url:urls) {
 
            ServerUptimeChecker checker = new ServerUptimeChecker( url);
-           WorkSchedule schedule = worker.createSchedule(checker).bindEvent("connectTypeChange").setJitter(200).setSecondBaseMode(true);
+           WorkSchedule schedule = worker.createSchedule(checker).bindEvent("connectTypeChange").setJitter(200).setStrictMode(true);
            schedule.activate();
        }
 

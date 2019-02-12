@@ -17,7 +17,7 @@ public class MultiStepSchedule   {
         ClockWorker worker = ClockWorkerContext.getWorker();
 
 
-        WorkSchedule schedule = worker.createSchedule(Step1Schedule.class).setSecondBaseMode(true);
+        WorkSchedule schedule = worker.createSchedule(Step1Schedule.class).setStrictMode(true);
         schedule.activate();
 
         schedule = worker.createSchedule(Step2Schedule.class).bindEvent("next");

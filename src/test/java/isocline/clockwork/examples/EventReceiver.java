@@ -42,7 +42,7 @@ public class EventReceiver implements Work {
         SignalGenerator gen = new SignalGenerator();
         gen.setEventName("test");
 
-        worker.createSchedule(gen).setFinishTime(30 * Clock.SECOND).setSecondBaseMode(true).activate();
+        worker.createSchedule(gen).setFinishTime(30 * Clock.SECOND).setStrictMode(true).activate();
 
 
         worker.shutdown(20 * Clock.SECOND);

@@ -27,9 +27,11 @@ public class MultiPlexer implements Work {
         //System.out.println("== "+System.currentTimeMillis());
         logger.debug(id+" "+seq +" send");
 
-        for(int i=0;i<10000;i++) {
+        /*
+        for(int i=0;i<10;i++) {
             logger.info("execute(EventInfo event) throws InterruptedException");
         }
+        */
         /*
         int s = 0;
         for(int i=0;i<10000;i++) {
@@ -59,10 +61,15 @@ public class MultiPlexer implements Work {
 
         System.out.println(startTime);
 
-        for(int i=0;i<10;i++ ) {
-            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("A",i)).setSecondBaseMode(true).setStartTime(startTime+i*10);
+
+
+        for(int i=0;i< 10;i++ ) {
+            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("A",i)).setStrictMode(true ).setStartTime(startTime+i*100);
             schedule.activate();
         }
+
+
+        Thread.sleep(60*1000);
 
 
 
@@ -70,7 +77,7 @@ public class MultiPlexer implements Work {
 /*
 
         for(int i=0;i<5;i++ ) {
-            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("B",i)).setSecondBaseMode(true).setJitter(i*100+50);
+            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("B",i)).setStrictMode(true).setJitter(i*100+50);
             schedule.activate();
         }
         */
@@ -80,7 +87,7 @@ public class MultiPlexer implements Work {
 
 
 
-        worker.shutdown(20 * Clock.SECOND);
+        worker.shutdown(60 * Clock.SECOND);
     }
 
 }

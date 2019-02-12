@@ -17,7 +17,7 @@ public class Test {
             TestJob work = new TestJob(i);
             //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStartDelay(1000);
             //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStartDelay(Clock.at("2019-01-17T13:32:30+09:00"));
-            WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setSecondBaseMode(true);
+            WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStrictMode(true);
             //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire");
 
             schedule.activate();
