@@ -35,7 +35,7 @@ public class WorkSchedule {
 
     private long nextExecuteTime = 0;
 
-    private long nextExecuteNanoTime = 0;
+
 
     private long workEndTime = 0;
 
@@ -47,15 +47,15 @@ public class WorkSchedule {
 
     private long jitter = 0;
 
-    private double contextCheckId;
+    private long contextCheckId;
 
-    private boolean isStrictMode = false;
+    private boolean isStrictMode = true;
 
     private boolean isBetweenStartTimeMode = true;
 
     private boolean needWaiting = false;
 
-    private static long preemptiveCheckNanoTime = 1800000;
+    private static long preemptiveCheckMilliTime = 2;
 
 
     private Work work;
@@ -67,6 +67,10 @@ public class WorkSchedule {
     private ClockWorker clockWorker = null;
 
     private LinkedList<EventInfo> eventList = new LinkedList<EventInfo>();
+
+
+
+
 
 
     WorkSchedule(ClockWorker clockWorker, Work work) {
@@ -89,20 +93,32 @@ public class WorkSchedule {
 
     }
 
+
+
     synchronized void adjustWaiting()  throws InterruptedException{
         if(this.isStrictMode && needWaiting) {
-            double e = 51D/1000D;
-            long gap = nextExecuteNanoTime- System.nanoTime();
-            long gap2 = (long) (gap*e);
-            //TimeUnit.NANOSECONDS.sleep(gap2);
 
-            this.wait(0,1);
+
+            long gap = this.nextExecuteTime - System.currentTimeMillis();
+
+
+            //this.wait(0,1);
+            if(gap>1) {
+                Thread.sleep((gap-1),1000);
+            }
 
             for(int i=0;i<10000000;i++) {
-                if(nextExecuteNanoTime<=System.nanoTime()) {
+                /*
+                if(nextExecuteNanoTime<=nanoTime()) {
                     //System.out.println(">>                           "+gap+" "+gap2+ " "+i+ " "+this.nextExecuteTime + " "+this.jitter + " "+System.currentTimeMillis());
                     return;
                 }
+                */
+                if(nextExecuteTime<=System.currentTimeMillis()) {
+                    //System.out.println(" . "+i);
+                    return;
+                }
+
             }
 
         }
@@ -113,16 +129,16 @@ public class WorkSchedule {
 
 
 
-    long getPreemptiveNanoTime() {
+    long getPreemptiveMilliTime() {
         if(this.isStrictMode) {
-            return preemptiveCheckNanoTime;
+            return preemptiveCheckMilliTime;
         }else {
             return 0;
         }
 
     }
 
-    long checkRemainNanoTime(){
+    long checkRemainMilliTime(){
         needWaiting = false;
 
         if(!isStart) {
@@ -145,10 +161,14 @@ public class WorkSchedule {
             return 0;
         } else if (this.nextExecuteTime > 0 ) {
 
-            long t1 = this.nextExecuteNanoTime  - System.nanoTime();
+            long t1 = this.nextExecuteTime  - System.currentTimeMillis();
+
+            //System.out.print("("+t1+") "+System.currentTimeMillis());
+            //System.err.print("("+nextExecuteNanoTime+")_ ");
+            //System.err.print("("+System.nanoTime()+"). ");
             if(t1<=0) {
                 return t1;
-            }else  if(this.isStrictMode && t1<this.getPreemptiveNanoTime()) {
+            }else  if(this.isStrictMode && t1<this.getPreemptiveMilliTime()) {
                 needWaiting = true;
                 return t1;
             }
@@ -216,7 +236,7 @@ public class WorkSchedule {
 
 
         this.nextExecuteTime  = nextExecuteTime;
-        this.nextExecuteNanoTime = this.nextExecuteTime * 1000000;
+
 
 
         return this;
@@ -230,11 +250,11 @@ public class WorkSchedule {
 
         if (waitTime < 0) {
             this.nextExecuteTime = UNDEFINED_INTERVAL;
-            this.nextExecuteNanoTime = UNDEFINED_INTERVAL;
+
 
         } else {
 
-            if(this.isBetweenStartTimeMode && this.nextExecuteNanoTime>0) {
+            if(this.isBetweenStartTimeMode && this.nextExecuteTime>0) {
 
 
 
@@ -428,7 +448,6 @@ public class WorkSchedule {
             this.setStartDelay(1000);
         }
         */
-
         this.clockWorker.addWorkSchedule(this);
 
         this.clockWorker.managedWorkCount.incrementAndGet();
@@ -499,14 +518,17 @@ public class WorkSchedule {
 
     }
 
+    private static long contextSeq=0;
 
 
 
-    Context enterQueue() {
+
+    Context enterQueue(boolean isFromEvent) {
 
 
-        this.contextCheckId = Math.random();
-        Context ctx = new Context(contextCheckId, this);
+        contextSeq++;
+        this.contextCheckId = contextSeq;
+        Context ctx = new Context(contextCheckId, this,isFromEvent);
 
 
         return ctx;
@@ -518,14 +540,25 @@ public class WorkSchedule {
      */
     static class Context {
 
-        private double contextId;
+        private long contextId;
 
         private WorkSchedule workSchedule;
 
+        private boolean isFromEvent = false;
 
-        Context(double contextId, WorkSchedule workSchedule) {
+
+        Context(long contextId, WorkSchedule workSchedule, boolean isFromEvent) {
             this.contextId = contextId;
             this.workSchedule = workSchedule;
+            this.isFromEvent = isFromEvent;
+        }
+
+        boolean isExecuteImmediately() {
+            if(isFromEvent) {
+                this.isFromEvent = false;
+                return true;
+            }
+            return false;
         }
 
         WorkSchedule getWorkSchedule() {

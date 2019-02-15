@@ -297,7 +297,8 @@ public class ClockWorker extends ThreadGroup {
 
 
     boolean addWorkSchedule(WorkSchedule workSchedule) {
-        boolean result = this.workQueue.offer(workSchedule.enterQueue());
+
+        boolean result = this.workQueue.offer(workSchedule.enterQueue(false));
         if (result) {
 
 
@@ -439,17 +440,20 @@ public class ClockWorker extends ThreadGroup {
 
         WorkScheduleList workScheduleList = getWorkScheduleList(eventName, false);
 
-        if (workScheduleList != null) {
+        EventInfo eventInfo = event;
+        if (event == null) {
+            eventInfo = new EventInfo();
+        }
+
+        //if (workScheduleList != null)
+        {
             WorkSchedule[] array = workScheduleList.getWorkScheduleArray();
             for (WorkSchedule schedule : array) {
 
-                EventInfo eventInfo = event;
-                if (event == null) {
-                    eventInfo = new EventInfo();
-                }
+
 
                 schedule.raiseEvent(eventInfo);
-                this.workQueue.offer(schedule.enterQueue());
+                this.workQueue.offer(schedule.enterQueue(true));
 
             }
         }
@@ -602,7 +606,7 @@ public class ClockWorker extends ThreadGroup {
                     WorkSchedule.Context ctx = this.clockWorker.workQueue.poll(maxWaitTime,
                             TimeUnit.MILLISECONDS);
 
-                    //System.err.print("X");
+
 
                     if (ctx == null) {
                         continue;
@@ -632,9 +636,10 @@ public class ClockWorker extends ThreadGroup {
 
                         if (check(slc)) {
 
-                            long remainNanoTime = workSchedule.checkRemainNanoTime();
+                            long remainMilliTime = workSchedule.checkRemainMilliTime();
+                            //System.err.print("["+remainNanoTime+"] ");
 
-                            if (remainNanoTime < workSchedule.getPreemptiveNanoTime()) {
+                            if (ctx.isExecuteImmediately() || remainMilliTime < workSchedule.getPreemptiveMilliTime()) {
 
 
                                 EventInfo eventInfo = workSchedule.checkEvent();
@@ -650,10 +655,7 @@ public class ClockWorker extends ThreadGroup {
                                  *
                                  */
 
-                                //logger.debug(workSchedule.getWorkObject() +"w");
                                 workSchedule.adjustWaiting();
-                                //logger.debug(workSchedule.getWorkObject() +"E");
-
 
 
                                 long delaytime = slc.execute(eventInfo);
@@ -689,7 +691,8 @@ public class ClockWorker extends ThreadGroup {
                                 stoplessCount = 0;
 
 
-                                if (remainNanoTime > this.clockWorker.configuration.getExecuteCountdownNanoTime()) {
+                                if (remainMilliTime > this.clockWorker.configuration.getExecuteCountdownMilliTime()) {
+                                    //System.err.print("|"+remainNanoTime+"| ");
                                     this.clockWorker.workChecker
                                             .addWorkStatusWrapper(workSchedule);
 
@@ -703,7 +706,7 @@ public class ClockWorker extends ThreadGroup {
                             }
 
                         } else {
-                            this.clockWorker.workQueue.put(workSchedule.enterQueue());
+                            this.clockWorker.workQueue.put(workSchedule.enterQueue(false));
                         }
 
                     }

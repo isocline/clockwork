@@ -17,21 +17,29 @@ public class MultiPlexer implements Work {
 
     private String id;
 
+
+
     MultiPlexer(String id,int seq) {
         this.id = id;
         this.seq=seq;
+
+
     }
 
     @Override
     public long execute(EventInfo event) throws InterruptedException {
         //System.out.println("== "+System.currentTimeMillis());
-        logger.debug(id+" "+seq +" send");
+
+        logger.debug(id+" "+seq +" send ");
+
+
 
         /*
         for(int i=0;i<10;i++) {
             logger.info("execute(EventInfo event) throws InterruptedException");
         }
         */
+
         /*
         int s = 0;
         for(int i=0;i<10000;i++) {
@@ -40,10 +48,11 @@ public class MultiPlexer implements Work {
             }
             s=s+  (int) (100*Math.random());
         }
+        */
         //logger.debug(id+" >> "+seq +" END "+s);
 
-*/
-        return 1000;
+
+        return 500;
     }
 
     @Override
@@ -60,20 +69,24 @@ public class MultiPlexer implements Work {
         long startTime = Clock.nextSecond(900);
 
         System.out.println(startTime);
+        System.out.println(System.currentTimeMillis());
 
 
 
-        for(int i=0;i< 10;i++ ) {
-            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("A",i)).setStrictMode(true ).setStartTime(startTime+i*100);
+        for(int i=0;i< 20;i++ ) {
+            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("A",i)).setStartTime(startTime+i*5);
             schedule.activate();
         }
 
 
+
+        /*
 
         for(int i=0;i<10;i++ ) {
             WorkSchedule schedule = worker.createSchedule(new MultiPlexer("B",i)).setStrictMode(true).setStartTime(startTime+i*100+50);
             schedule.activate();
         }
+        */
 
 
 
@@ -81,7 +94,7 @@ public class MultiPlexer implements Work {
 
 
 
-        worker.shutdown(60 * Clock.SECOND);
+        worker.shutdown(600 * Clock.SECOND);
     }
 
 }

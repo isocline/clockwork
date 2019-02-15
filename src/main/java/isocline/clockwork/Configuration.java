@@ -33,9 +33,9 @@ public class Configuration {
 
     private long executeTimeout = 30 * Clock.SECOND;
 
-    private long executeCountdownMilliTime = 200;
+    private long executeCountdownMilliTime = 50;
 
-    private long executeCountdownNanoTime = executeCountdownMilliTime * 1000000;
+
 
 
     private boolean isPropertyLocking = false;
@@ -45,7 +45,7 @@ public class Configuration {
 
     public final static Configuration ECHO = create().setInitThreadWorkerSize(1).setMaxThreadWorkerSize(3).setThreadPriority(Thread.MIN_PRIORITY).lock();
 
-    public final static Configuration PERFORMANCE = create().setInitThreadWorkerSize(12).setMaxThreadWorkerSize(36).setThreadPriority(Thread.MAX_PRIORITY).lock();
+    public final static Configuration PERFORMANCE = create().setInitThreadWorkerSize(24).setMaxThreadWorkerSize(36).setThreadPriority(Thread.MAX_PRIORITY).lock();
 
 
 
@@ -129,16 +129,15 @@ public class Configuration {
         return executeCountdownMilliTime;
     }
 
-    public long getExecuteCountdownNanoTime() {
-        return executeCountdownNanoTime;
-    }
 
     public Configuration setExecuteCountdownMilliTime(long countdownTime) {
         this.check();
         this.executeCountdownMilliTime =countdownTime;
-        this.executeCountdownNanoTime = countdownTime*1000000;
+
         return this;
     }
+
+
 
 
 }
