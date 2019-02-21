@@ -52,7 +52,7 @@ public class MultiPlexer implements Work {
         //logger.debug(id+" >> "+seq +" END "+s);
 
 
-        return 500;
+        return 100;
     }
 
     @Override
@@ -73,8 +73,8 @@ public class MultiPlexer implements Work {
 
 
 
-        for(int i=0;i< 20;i++ ) {
-            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("A",i)).setStartTime(startTime+i*5);
+        for(int i=0;i< 10;i++ ) {
+            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("A",i)).setStartTime(startTime+i*10);
             schedule.activate();
         }
 

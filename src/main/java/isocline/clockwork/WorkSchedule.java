@@ -15,9 +15,11 @@
  */
 package isocline.clockwork;
 
+import isocline.clockwork.event.EventRepository;
+import isocline.clockwork.event.EventSet;
+
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 
@@ -69,6 +71,8 @@ public class WorkSchedule {
     private LinkedList<EventInfo> eventList = new LinkedList<EventInfo>();
 
 
+    private ProcessFlow processFlow = null;
+
 
 
 
@@ -103,9 +107,12 @@ public class WorkSchedule {
 
 
             //this.wait(0,1);
+            /*
             if(gap>1) {
-                Thread.sleep((gap-1),1000);
+                //Thread.sleep((gap-1),100);
+                Thread.sleep(0,1);
             }
+            */
 
             for(int i=0;i<10000000;i++) {
                 /*
@@ -298,7 +305,7 @@ public class WorkSchedule {
                 setStartTime(chkTime);
 
             }else {
-                System.err.println("----- 2 "+this.nextExecuteTime);
+                System.err.println("overtime : "+this.nextExecuteTime);
             }
 
 
@@ -357,7 +364,7 @@ public class WorkSchedule {
         return this;
     }
 
-    public WorkSchedule setFinishTime(long milliSeconds) {
+    public WorkSchedule setFinishTimeFromNow(long milliSeconds) {
         this.workEndTime = System.currentTimeMillis()+milliSeconds;
         return this;
     }
@@ -389,11 +396,42 @@ public class WorkSchedule {
     }
 
 
+    public WorkSchedule setProcessFlow(ProcessFlow processFlow)  {
+        checkLocking();
+
+        this.processFlow = processFlow;
+        return this;
+    }
+
+
+    public ProcessFlow getProcessFlow() {
+
+        return this.processFlow;
+    }
+
+
+    ////////////////
+
+
+
+    public void raiseLocalEvent(EventInfo event) {
+
+        this.clockWorker.addWorkSchedule(this, event);
+
+    }
+
+
+
+
     public WorkSchedule bindEvent(String... eventNames) {
         checkLocking();
 
-        this.clockWorker.bindEvent( this, eventNames);
-
+        for(String eventName:eventNames) {
+            String[] subEventNames = eventRepository.setBindEventNames(eventName);
+            for(String subEventName:subEventNames) {
+                this.clockWorker.bindEvent( this, subEventName);
+            }
+        }
         return this;
     }
 
@@ -448,7 +486,11 @@ public class WorkSchedule {
             this.setStartDelay(1000);
         }
         */
-        this.clockWorker.addWorkSchedule(this);
+
+        if(this.waitTime!=Work.SLEEP) {
+            this.clockWorker.addWorkSchedule(this);
+        }
+
 
         this.clockWorker.managedWorkCount.incrementAndGet();
 
@@ -489,22 +531,10 @@ public class WorkSchedule {
         return clockWorker;
     }
 
-    private boolean isEmpty=true;
 
-    void raiseEvent(EventInfo event) {
-        isEmpty=false;
-        eventList.add(event);
-    }
+    ///////////////////////////////////
 
-    EventInfo checkEvent() {
-        if(isEmpty) return null;
-        try {
-            return eventList.removeFirst();
-        } catch (NoSuchElementException nse) {
-            isEmpty = true;
-            return null;
-        }
-    }
+
 
     private EventInfo defaultEvent = null;
 
@@ -518,17 +548,55 @@ public class WorkSchedule {
 
     }
 
-    private static long contextSeq=0;
+
+
+    private EventRepository eventRepository = new EventRepository();
+
+
+
+    String checkRaiseEventEnable(String eventName) {
+
+
+
+        EventSet eventSet = eventRepository.getEventSet(eventName);
+
+
+        if(eventSet==null) {
+            //System.err.println("checkRaiseEventEnable normal = "+eventName );
+            return eventName;
+        }
+
+
+        if(eventSet.isRaiseEventReady(eventName)) {
+
+            //System.err.println("checkRaiseEventEnable event="+eventName + " set="+eventSet + " fire="+eventSet.getEventSetName());
+            return eventSet.getEventSetName();
+        }
+
+
+        return null;
+
+    }
+
+
+    ////////////////////////////
 
 
 
 
-    Context enterQueue(boolean isFromEvent) {
+
+    ExecuteContext enterQueue(boolean isUserEvent, EventInfo eventInfo) {
 
 
-        contextSeq++;
-        this.contextCheckId = contextSeq;
-        Context ctx = new Context(contextCheckId, this,isFromEvent);
+        ExecuteContext ctx = new ExecuteContext(this,isUserEvent, eventInfo);
+
+        return ctx;
+    }
+
+
+    ExecuteContext enterQueue(boolean isUserEvent) {
+
+        ExecuteContext ctx = new ExecuteContext(this,isUserEvent ,null);
 
 
         return ctx;
@@ -536,40 +604,56 @@ public class WorkSchedule {
 
 
     /**
-     * Context for Queue
+     * ExecuteContext for Queue
      */
-    static class Context {
+    static class ExecuteContext {
 
-        private long contextId;
+
 
         private WorkSchedule workSchedule;
 
-        private boolean isFromEvent = false;
+        private boolean isUserEvent = false;
+
+        private EventInfo eventInfo;
 
 
-        Context(long contextId, WorkSchedule workSchedule, boolean isFromEvent) {
-            this.contextId = contextId;
+
+        ExecuteContext(WorkSchedule workSchedule, boolean isUserEvent, EventInfo event) {
+
             this.workSchedule = workSchedule;
-            this.isFromEvent = isFromEvent;
+            this.isUserEvent = isUserEvent;
+            this.eventInfo = event;
+
         }
 
+
+
         boolean isExecuteImmediately() {
-            if(isFromEvent) {
-                this.isFromEvent = false;
+            if(isUserEvent) {
+                this.isUserEvent = false;
+
                 return true;
             }
+
             return false;
         }
 
         WorkSchedule getWorkSchedule() {
 
-            if (this.contextId == this.workSchedule.contextCheckId) {
+            //if (this.contextId == this.workSchedule.contextCheckId)
+            {
                 return workSchedule;
             }
 
-            return null;
+            //return null;
 
         }
+
+        EventInfo getEventInfo() {
+            return this.eventInfo;
+        }
+
+
     }
 
 }

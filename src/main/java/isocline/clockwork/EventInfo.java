@@ -20,6 +20,11 @@ public class EventInfo {
         this.eventName = eventName;
     }
 
+    public EventInfo setEventName(String eventName) {
+        this.eventName = eventName;
+        return this;
+    }
+
     public String getEventName() {
         return this.eventName;
     }
@@ -42,6 +47,8 @@ public class EventInfo {
     public Object getAttribute(String key) {
         return this.attributeMap.get(key);
     }
+
+
 
     public Object removeAttribute(String key) {
         return this.attributeMap.remove(key);

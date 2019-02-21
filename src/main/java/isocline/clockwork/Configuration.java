@@ -47,6 +47,8 @@ public class Configuration {
 
     public final static Configuration PERFORMANCE = create().setInitThreadWorkerSize(24).setMaxThreadWorkerSize(36).setThreadPriority(Thread.MAX_PRIORITY).lock();
 
+    public final static Configuration HYPER = create().setInitThreadWorkerSize(64).setMaxThreadWorkerSize(128).setThreadPriority(Thread.MAX_PRIORITY).lock();
+
 
 
     /**

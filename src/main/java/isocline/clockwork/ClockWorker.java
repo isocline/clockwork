@@ -15,8 +15,10 @@
  */
 package isocline.clockwork;
 
+import isocline.clockwork.object.WorkInfo;
 import org.apache.log4j.Logger;
 
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,9 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
- *
  * Base class for WorkSchedule management and thread management
- *
  */
 public class ClockWorker extends ThreadGroup {
 
@@ -48,7 +48,7 @@ public class ClockWorker extends ThreadGroup {
 
     private AtomicInteger threadWorkerCount = new AtomicInteger(0);
 
-    private BlockingQueue<WorkSchedule.Context> workQueue;
+    private BlockingQueue<WorkSchedule.ExecuteContext> workQueue;
 
     private WorkChecker workChecker;
 
@@ -56,8 +56,6 @@ public class ClockWorker extends ThreadGroup {
 
 
     AtomicInteger managedWorkCount = new AtomicInteger(0);
-
-
 
 
     /**
@@ -77,14 +75,13 @@ public class ClockWorker extends ThreadGroup {
             this.checkpointWorkQueueSize = 500;
         }
 
-        this.workQueue = new LinkedBlockingQueue<WorkSchedule.Context>(this.configuration.getMaxWorkQueueSize());
+        this.workQueue = new LinkedBlockingQueue<WorkSchedule.ExecuteContext>(this.configuration.getMaxWorkQueueSize());
 
         init(true);
 
 
         logger.info(this.name + " initialized");
     }
-
 
 
     /**
@@ -117,7 +114,7 @@ public class ClockWorker extends ThreadGroup {
 
     public WorkSchedule createSchedule(ScheduleConfig config, Work work) {
         WorkSchedule workSchedule = new WorkSchedule(this, work);
-        if(config!=null) {
+        if (config != null) {
             workSchedule.setScheduleConfig(config);
         }
 
@@ -134,12 +131,11 @@ public class ClockWorker extends ThreadGroup {
      * @throws IllegalAccessException
      */
     public WorkSchedule createSchedule(Class workClass) throws InstantiationException, IllegalAccessException {
-        return createSchedule( (Work) workClass.newInstance());
+        return createSchedule((Work) workClass.newInstance());
     }
 
 
-
-    public WorkSchedule createSchedule(ScheduleConfig config,Class workClass) throws InstantiationException, IllegalAccessException {
+    public WorkSchedule createSchedule(ScheduleConfig config, Class workClass) throws InstantiationException, IllegalAccessException {
         return createSchedule(config, (Work) workClass.newInstance());
     }
 
@@ -232,10 +228,7 @@ public class ClockWorker extends ThreadGroup {
     }
 
 
-
-
     public void awaitShutdown() {
-
 
 
         while (this.getManagedWorkCount() > 0) {
@@ -311,8 +304,22 @@ public class ClockWorker extends ThreadGroup {
         }
 
         return result;
+    }
 
+    boolean addWorkSchedule(WorkSchedule workSchedule,EventInfo eventInfo) {
 
+        boolean result = this.workQueue.offer(workSchedule.enterQueue(true, eventInfo));
+        if (result) {
+
+            int sz = this.workQueue.size();
+            if (sz > checkpointWorkQueueSize) {
+                this.checkPoolThread();
+            }
+        } else {
+            this.checkPoolThread();
+        }
+
+        return result;
     }
 
 
@@ -385,9 +392,6 @@ public class ClockWorker extends ThreadGroup {
     }
 
 
-
-
-
     private WorkScheduleList getWorkScheduleList(String eventName, boolean isCreate) {
         WorkScheduleList workScheduleList = eventMap.get(eventName);
         if (isCreate && workScheduleList == null) {
@@ -404,22 +408,30 @@ public class ClockWorker extends ThreadGroup {
         return workScheduleList;
     }
 
+    void bindEvent(WorkSchedule workSchedule, String eventName) {
 
-    void bindEvent(WorkSchedule workSchedule,String... eventNames) {
 
-        for(String eventName:eventNames) {
-            WorkScheduleList workScheduleMap = getWorkScheduleList(eventName, true);
+        WorkScheduleList workScheduleMap = getWorkScheduleList(eventName, true);
 
-            workScheduleMap.add(workSchedule);
+        workScheduleMap.add(workSchedule);
+
+
+    }
+
+
+    void bindEvent(WorkSchedule workSchedule, String... eventNames) {
+
+        for (String eventName : eventNames) {
+            bindEvent(workSchedule, eventName);
         }
 
 
     }
 
 
-    void unindEvent(WorkSchedule workSchedule, String... eventNames) {
+    void unbindEvent(WorkSchedule workSchedule, String... eventNames) {
 
-        for(String eventName:eventNames) {
+        for (String eventName : eventNames) {
             WorkScheduleList workScheduleMap = getWorkScheduleList(eventName, false);
             if (workScheduleMap == null) {
                 return;
@@ -431,10 +443,11 @@ public class ClockWorker extends ThreadGroup {
 
     public void raiseEvent(EventInfo event) {
         String eventName = event.getEventName();
-        if(eventName!=null && eventName.length()>0) {
+        if (eventName != null && eventName.length() > 0) {
             raiseEvent(eventName, event);
         }
     }
+
 
     public void raiseEvent(String eventName, EventInfo event) {
 
@@ -447,19 +460,29 @@ public class ClockWorker extends ThreadGroup {
 
         //if (workScheduleList != null)
         {
+
             WorkSchedule[] array = workScheduleList.getWorkScheduleArray();
             for (WorkSchedule schedule : array) {
 
+                String newEventName = schedule.checkRaiseEventEnable(eventName);
 
+                if (newEventName != null) {
+                    EventInfo newEventInfo = eventInfo;
+                    if (!newEventName.equals(eventName)) {
+                        newEventInfo = new EventInfo(newEventName);
+                        eventInfo.copyTo(newEventInfo);
 
-                schedule.raiseEvent(eventInfo);
-                this.workQueue.offer(schedule.enterQueue(true));
+                    }
+                    //schedule.raiseEvent(newEventInfo);
+                    this.workQueue.offer(schedule.enterQueue(true, newEventInfo));
+
+                }
+
 
             }
         }
 
     }
-
 
 
     /****************************************
@@ -533,7 +556,7 @@ public class ClockWorker extends ThreadGroup {
 
         private static int totalCount = 0;
 
-        private int sequence=0;
+        private int sequence = 0;
 
         private int maxWaitTime = 2000;
 
@@ -547,7 +570,7 @@ public class ClockWorker extends ThreadGroup {
             totalCount++;
             sequence = totalCount;
 
-            maxWaitTime = 2000 + sequence*100;
+            maxWaitTime = 2000 + sequence * 100;
 
         }
 
@@ -594,29 +617,27 @@ public class ClockWorker extends ThreadGroup {
 
 
             //long chkeckNanoTime =  3*1000000;
-            int count=0;
+            int count = 0;
             while (isWorking()) {
-
 
 
                 WorkSchedule workSchedule = null;
                 try {
 
 
-                    WorkSchedule.Context ctx = this.clockWorker.workQueue.poll(maxWaitTime,
+                    WorkSchedule.ExecuteContext ctx = this.clockWorker.workQueue.poll(maxWaitTime,
                             TimeUnit.MILLISECONDS);
-
 
 
                     if (ctx == null) {
                         continue;
-                    }else if(count==5000) {
-                        Thread.sleep(0,1);
+                    } else if (count == 5000) {
+                        Thread.sleep(0, 1);
 
-                    }else  if(count==10000) {
+                    } else if (count == 10000) {
                         Thread.sleep(10);
-                        count=0;
-                    }else {
+                        count = 0;
+                    } else {
                         count++;
                     }
 
@@ -626,13 +647,18 @@ public class ClockWorker extends ThreadGroup {
 
                     this.lastWorkTime = System.currentTimeMillis();
 
+                    /*
                     if (workSchedule == null) {
                         timeoutCount++;
                         stoplessCount = 0;
-                    } else {
+                    } else
+                    */
+
+                    {
                         timeoutCount = 0;
                         stoplessCount++;
                         Work slc = workSchedule.getWorkObject();
+
 
                         if (check(slc)) {
 
@@ -642,11 +668,11 @@ public class ClockWorker extends ThreadGroup {
                             if (ctx.isExecuteImmediately() || remainMilliTime < workSchedule.getPreemptiveMilliTime()) {
 
 
-                                EventInfo eventInfo = workSchedule.checkEvent();
+                                EventInfo eventInfo = ctx.getEventInfo();
                                 if (eventInfo == null) {
                                     eventInfo = workSchedule.getDefaultEventInfo();
 
-                                }else {
+                                } else {
                                     eventInfo.setWorkSechedule(workSchedule);
                                 }
 
@@ -658,12 +684,13 @@ public class ClockWorker extends ThreadGroup {
                                 workSchedule.adjustWaiting();
 
 
+
                                 long delaytime = slc.execute(eventInfo);
                                 while (delaytime == Work.LOOP) {
                                     delaytime = slc.execute(eventInfo);
                                 }
 
-                                if(delaytime>0) {
+                                if (delaytime > 0) {
 
                                     workSchedule.setRepeatInterval(delaytime);
 
@@ -671,14 +698,16 @@ public class ClockWorker extends ThreadGroup {
                                         this.clockWorker.workChecker
                                                 .addWorkStatusWrapper(workSchedule);
                                         //System.err.println("z1");
-                                    }else {
+                                    } else {
                                         this.clockWorker.addWorkSchedule(workSchedule);
                                     }
                                 } else if (delaytime == Work.SLEEP) {
 
                                     workSchedule.setRepeatInterval(-1);
 
-                                    this.clockWorker.addWorkSchedule(workSchedule);
+
+                                    //v2
+                                    //this.clockWorker.addWorkSchedule(workSchedule);
                                 } else {
 
                                     workSchedule.finish();
@@ -696,7 +725,7 @@ public class ClockWorker extends ThreadGroup {
                                     this.clockWorker.workChecker
                                             .addWorkStatusWrapper(workSchedule);
 
-                                }else {
+                                } else {
                                     this.clockWorker
                                             .addWorkSchedule(workSchedule);
 
@@ -720,8 +749,10 @@ public class ClockWorker extends ThreadGroup {
                     }
 
                 } catch (RuntimeException re) {
+                    //re.printStackTrace();
                     workSchedule.finish();
                 } catch (InterruptedException ite) {
+                    //ite.printStackTrace();
 
                 } catch (Throwable e) {
                     e.printStackTrace();
@@ -769,10 +800,10 @@ public class ClockWorker extends ThreadGroup {
                     Thread.sleep(1);
                 }
                 long t2 = System.currentTimeMillis();
-                long adjTimeout = (t2-t1 -1000)*2 ;
+                long adjTimeout = (t2 - t1 - 1000) * 2;
 
 
-            }catch (Exception e) {
+            } catch (Exception e) {
 
             }
         }
@@ -792,8 +823,8 @@ public class ClockWorker extends ThreadGroup {
 
 
                     if (wrapper != null) {
-                        long gap = (System.currentTimeMillis()+countdown) - wrapper.getNextExecuteTime();
-                        if(gap>=0) {
+                        long gap = (System.currentTimeMillis() + countdown) - wrapper.getNextExecuteTime();
+                        if (gap >= 0) {
 
                             //System.out.print(gap+" "+countdown+ " . ");
 
@@ -819,6 +850,34 @@ public class ClockWorker extends ThreadGroup {
 
             statusWrappers.clear();
         }
+    }
+
+
+    private <T> T invokeAnnonations(T instance) throws IllegalAccessException {
+        Method[] methods = instance.getClass().getDeclaredMethods();
+        for (Method method : methods) {
+            WorkInfo annotation = method.getAnnotation(WorkInfo.class);
+            if (annotation != null) {
+                //field.setAccessible(true);
+                //field.set(instance, annotation.isAsync());
+            }
+        }
+        return instance;
+    }
+
+    /**
+     * 매개변수로 받은 클래스의 객체를 반환합니다.
+     *
+     * @param clazz
+     * @param <T>
+     * @return
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
+    public <T> T get(Class clazz) throws IllegalAccessException, InstantiationException {
+        T instance = (T) clazz.newInstance();
+        instance = invokeAnnonations(instance);
+        return instance;
     }
 
 

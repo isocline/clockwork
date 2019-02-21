@@ -35,16 +35,18 @@ public class EventReceiver implements Work {
 
 
         EventReceiver checker = new EventReceiver();
-        WorkSchedule schedule = worker.createSchedule(checker).setFinishTime(30 * Clock.SECOND).bindEvent("test").setSleepMode();
+        WorkSchedule schedule = worker.createSchedule(checker).setFinishTimeFromNow(30 * Clock.SECOND).bindEvent("test").setSleepMode();
         schedule.activate();
 
 
         SignalGenerator gen = new SignalGenerator();
         gen.setEventName("test");
 
+        long startTime = Clock.nextSecond(900);
 
 
-        worker.createSchedule(gen).setFinishTime(30 * Clock.SECOND).setStrictMode(true).activate();
+
+        worker.createSchedule(gen).setFinishTimeFromNow(30 * Clock.SECOND).setStrictMode(true).setStartTime(startTime).activate();
 
 
         worker.shutdown(20 * Clock.SECOND);

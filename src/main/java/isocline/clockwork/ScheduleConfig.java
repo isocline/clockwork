@@ -149,7 +149,7 @@ public class ScheduleConfig {
         }
 
         if(finishTime!=Long.MIN_VALUE) {
-            workSchedule.setFinishTime(finishTime);
+            workSchedule.setFinishTimeFromNow(finishTime);
         }
 
         if(eventNames!=null) {
