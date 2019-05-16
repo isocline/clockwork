@@ -28,7 +28,7 @@ public class CronDescriptor implements ScheduleDescriptor {
 
         long t1 = Clock.nextMinutes();
 
-        System.err.println("--- "+Clock.toDateFormat(t1));
+        //System.err.println("--- "+Clock.toDateFormat(t1));
 
         workSchedule.setStartDateTime(t1);
         workSchedule.setRepeatInterval(Clock.MINUTE);

@@ -1,13 +1,9 @@
-package isocline.clockwork.examples.object;
+package isocline.clockwork.examples.flow;
 
-import isocline.clockwork.Configuration;
-import isocline.clockwork.ProcessFlow;
-import isocline.clockwork.WorkProcessor;
-import isocline.clockwork.WorkProcessorFactory;
-import isocline.clockwork.object.WorkObject;
+import isocline.clockwork.*;
 import org.apache.log4j.Logger;
 
-public class OrderProcess2 implements WorkObject {
+public class OrderProcess2 implements FlowableWork {
 
     private static Logger logger = Logger.getLogger(OrderProcess2.class.getName());
 
@@ -30,8 +26,8 @@ public class OrderProcess2 implements WorkObject {
         logger.debug(id + " record");
     }
 
-    public String test(){
-        logger.debug(id+ "start test");
+    public String test() {
+        logger.debug(id + "start test");
 
         //if(1>0) throw new RuntimeException("zzzz");
         return "x";
@@ -73,8 +69,6 @@ public class OrderProcess2 implements WorkObject {
     }
 
 
-
-
     private void makeMessage() {
         logger.debug(id + " makeMessage");
     }
@@ -90,23 +84,20 @@ public class OrderProcess2 implements WorkObject {
     }
 
 
-    public void processFlow(ProcessFlow flow) {
-        String z="1234";
+    public void defineWorkFlow(WorkFlow flow) {
+        String z = "1234";
 
         flow
                 .run(this::writeLog)
 
 
-                .run(this::record)
+                .next(this::record)
 
-                .runAsync(this::checkStock, "checkStock")
-                .runAsync(this::checkSupplier, "checkSup")
+                .run(this::checkStock, "checkStock")
+                .run(this::checkSupplier, "checkSup")
 
 
-                .runWait(this::makeMessage, "checkStock&checkSup").run(this::test).end();
-
-        flow
-                .runWait(this::processError, "error").end();
+                .wait("checkStock&checkSup").next(this::makeMessage).next(this::test).finish();
 
 
     }
@@ -119,8 +110,7 @@ public class OrderProcess2 implements WorkObject {
 
         OrderProcess2 p = new OrderProcess2("AutoExpress2");
 
-
-        p.execute(worker);
+        worker.execute(p);
 
 
         worker.shutdown(1000000);

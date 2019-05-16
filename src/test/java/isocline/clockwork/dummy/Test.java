@@ -36,7 +36,7 @@ public class Test {
             System.out.println("WORK COUNT = "+worker.getManagedWorkCount() +"  chk");
 
             if(i==15) {
-                EventInfo event = new EventInfo();
+                WorkEvent event = new WorkEvent();
                 event.put("x","X value setup");
                 worker.raiseEvent("fire", event );
                 System.err.println("xxxxxxx");
@@ -63,7 +63,7 @@ public class Test {
             this.seq = seq;
         }
 
-        public long execute(EventInfo event) throws InterruptedException {
+        public long execute(WorkEvent event) throws InterruptedException {
 
             count ++;
 

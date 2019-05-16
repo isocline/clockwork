@@ -23,7 +23,7 @@ import java.util.Map;
  *
  *
  */
-public class EventInfo {
+public class WorkEvent implements Cloneable{
 
 
     private String eventName;
@@ -38,15 +38,15 @@ public class EventInfo {
     /**
      *
      */
-    public EventInfo() {
+    public WorkEvent() {
 
     }
 
-    public EventInfo(String eventName) {
+    public WorkEvent(String eventName) {
         this.eventName = eventName;
     }
 
-    public EventInfo setEventName(String eventName) {
+    public WorkEvent setEventName(String eventName) {
         this.eventName = eventName;
         return this;
     }
@@ -54,6 +54,7 @@ public class EventInfo {
     public String getEventName() {
         return this.eventName;
     }
+
 
     void setWorkSechedule(WorkSchedule sechedule) {
         this.schedule = sechedule;
@@ -104,9 +105,22 @@ public class EventInfo {
      *
      * @param event
      */
-    public void copyTo(EventInfo event) {
+    public void copyTo(WorkEvent event) {
         event.schedule = this.schedule;
         event.attributeMap = this.attributeMap;
+    }
+
+    public WorkEvent create(String eventName) {
+        try {
+            WorkEvent event = (WorkEvent) this.clone();
+            event.setEventName(eventName);
+            return event;
+        }catch(CloneNotSupportedException cnse) {
+
+        }
+
+
+        return null;
     }
 
 

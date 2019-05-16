@@ -1,14 +1,11 @@
 package isocline.clockwork.examples.flow;
 
-import isocline.clockwork.ProcessFlow;
-import isocline.clockwork.Work;
-import isocline.clockwork.WorkProcessor;
-import isocline.clockwork.WorkProcessorFactory;
+import isocline.clockwork.*;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 
-public class BasicWorkFlow implements Work {
+public class BasicWorkFlow implements FlowableWork {
 
 
     private static Logger logger = Logger.getLogger(BasicWorkFlow.class.getName());
@@ -48,12 +45,10 @@ public class BasicWorkFlow implements Work {
 
     }
 
-    public void processFlow(ProcessFlow flow) {
+    public void defineWorkFlow(WorkFlow flow) {
 
-        flow.run(this::order);
-        flow.runAsync(this::sendSMS).runAsync(this::sendMail, "chk");
-        flow.runWait(this::report, "chk");
-        flow.end();
+        flow.run(this::order).next(this::sendMail).next(this::sendSMS).next(this::report).finish();
+
 
     }
 
@@ -62,7 +57,9 @@ public class BasicWorkFlow implements Work {
     public void test() {
         WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
-        processor.execute(this);
+        processor.createSchedule(this).setStartDelayTime(2000).activate();
+
+        //processor.execute(this);
 
         processor.awaitShutdown();
 

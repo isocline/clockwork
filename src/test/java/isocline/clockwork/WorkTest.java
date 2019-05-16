@@ -34,7 +34,7 @@ public class WorkTest  {
 
 
 
-        workProcessor.execute((EventInfo event) -> {
+        workProcessor.execute((WorkEvent event) -> {
             seq++;
             logger.debug("exec " +seq);
 
@@ -52,14 +52,14 @@ public class WorkTest  {
     public void executeByEvent() throws Exception {
 
 
-        workProcessor.regist((EventInfo event) -> {
+        workProcessor.regist((WorkEvent event) -> {
             seq++;
             logger.debug("exec " +seq + " event:"+event.getEventName());
 
             return Work.WAIT;
         }, "testEvent");
 
-        workProcessor.execute((EventInfo event) -> {
+        workProcessor.execute((WorkEvent event) -> {
             logger.debug("fire event:"+event.getEventName());
 
             event.getWorkSchedule().getWorkProcessor().raiseEvent("testEvent", event);
@@ -80,7 +80,7 @@ public class WorkTest  {
 
 
 
-        workProcessor.createSchedule((EventInfo event) -> {
+        workProcessor.createSchedule((WorkEvent event) -> {
             seq++;
             logger.debug("exec " +seq);
 
@@ -99,7 +99,7 @@ public class WorkTest  {
 
 
 
-        workProcessor.createSchedule((EventInfo event) -> {
+        workProcessor.createSchedule((WorkEvent event) -> {
             seq++;
             logger.debug("exec " +seq);
 
@@ -117,7 +117,7 @@ public class WorkTest  {
 
 
 
-        workProcessor.createSchedule((EventInfo event) -> {
+        workProcessor.createSchedule((WorkEvent event) -> {
             seq++;
             logger.debug("exec " +seq);
 

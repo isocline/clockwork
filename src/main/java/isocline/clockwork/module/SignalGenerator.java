@@ -1,6 +1,6 @@
 package isocline.clockwork.module;
 
-import isocline.clockwork.EventInfo;
+import isocline.clockwork.WorkEvent;
 import isocline.clockwork.Work;
 
 public class SignalGenerator implements Work {
@@ -16,11 +16,11 @@ public class SignalGenerator implements Work {
     }
 
     @Override
-    public long execute(EventInfo event) throws InterruptedException {
+    public long execute(WorkEvent event) throws InterruptedException {
 
 
 
-        EventInfo newEvent = new EventInfo(eventName);
+        WorkEvent newEvent = new WorkEvent(eventName);
         event.copyTo(newEvent);
 
 

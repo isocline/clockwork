@@ -11,7 +11,7 @@ public class SimpleRepeater implements Work {
 
     private int seq = 0;
 
-    public long execute(EventInfo event) throws InterruptedException {
+    public long execute(WorkEvent event) throws InterruptedException {
 
         logger.debug("execute:" + seq++);
 
@@ -83,7 +83,7 @@ public class SimpleRepeater implements Work {
         WorkSchedule schedule = worker.createSchedule(SimpleRepeater.class);
 
         schedule.setRepeatInterval(1 * Clock.SECOND);
-        schedule.setStartDelay(Clock.fromNow(0,0,2));
+        schedule.setStartDelayTime(Clock.fromNow(0,0,2));
         schedule.activate();
 
 

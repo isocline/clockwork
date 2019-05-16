@@ -15,7 +15,7 @@
  */
 package isocline.clockwork;
 
-import isocline.clockwork.object.WorkInfo;
+import isocline.clockwork.flow.WorkInfo;
 import org.apache.log4j.Logger;
 
 import java.lang.reflect.Method;
@@ -123,7 +123,7 @@ public class WorkProcessor extends ThreadGroup {
     public WorkSchedule execute(Work work,long startDelayTime) {
         WorkSchedule workSchedule = new WorkSchedule(this, work);
         if(startDelayTime>0) {
-            workSchedule.setStartDelay(startDelayTime);
+            workSchedule.setStartDelayTime(startDelayTime);
         }
 
         workSchedule.activate();
@@ -353,9 +353,9 @@ public class WorkProcessor extends ThreadGroup {
         return result;
     }
 
-    boolean addWorkSchedule(WorkSchedule workSchedule,EventInfo eventInfo) {
+    boolean addWorkSchedule(WorkSchedule workSchedule,WorkEvent workEvent) {
 
-        boolean result = this.workQueue.offer(workSchedule.enterQueue(true, eventInfo));
+        boolean result = this.workQueue.offer(workSchedule.enterQueue(true, workEvent));
         if (result) {
 
             int sz = this.workQueue.size();
@@ -488,7 +488,7 @@ public class WorkProcessor extends ThreadGroup {
         }
     }
 
-    public void raiseEvent(EventInfo event) {
+    public void raiseEvent(WorkEvent event) {
         String eventName = event.getEventName();
         if (eventName != null && eventName.length() > 0) {
             raiseEvent(eventName, event);
@@ -496,13 +496,13 @@ public class WorkProcessor extends ThreadGroup {
     }
 
 
-    public void raiseEvent(String eventName, EventInfo event) {
+    public void raiseEvent(String eventName, WorkEvent event) {
 
         WorkScheduleList workScheduleList = getWorkScheduleList(eventName, false);
 
-        EventInfo eventInfo = event;
+        WorkEvent workEvent = event;
         if (event == null) {
-            eventInfo = new EventInfo();
+            workEvent = new WorkEvent();
         }
 
         //if (workScheduleList != null)
@@ -514,14 +514,14 @@ public class WorkProcessor extends ThreadGroup {
                 String newEventName = schedule.checkRaiseEventEnable(eventName);
 
                 if (newEventName != null) {
-                    EventInfo newEventInfo = eventInfo;
+                    WorkEvent newWorkEvent = workEvent;
                     if (!newEventName.equals(eventName)) {
-                        newEventInfo = new EventInfo(newEventName);
-                        eventInfo.copyTo(newEventInfo);
+                        newWorkEvent = new WorkEvent(newEventName);
+                        workEvent.copyTo(newWorkEvent);
 
                     }
-                    //schedule.raiseEvent(newEventInfo);
-                    this.workQueue.offer(schedule.enterQueue(true, newEventInfo));
+                    //schedule.raiseEvent(newWorkEvent);
+                    this.workQueue.offer(schedule.enterQueue(true, newWorkEvent));
 
                 }
 
@@ -639,6 +639,9 @@ public class WorkProcessor extends ThreadGroup {
 
         private boolean check(WorkSchedule schedule, long time) {
 
+            if(!schedule.isActivated()) {
+                return false;
+            }
 
             return schedule.isExecuteEnable(time);
         }
@@ -725,6 +728,7 @@ public class WorkProcessor extends ThreadGroup {
                             //System.err.println("["+remainMilliTime+"] " + workSchedule.getPreemptiveMilliTime() +"
                             // " + ""+ctx.isExecuteImmediately());
 
+
                             /*
                             boolean chk1 = ctx.isExecuteImmediately();
                             boolean chk2 = (remainMilliTime < workSchedule.getPreemptiveMilliTime());
@@ -732,15 +736,16 @@ public class WorkProcessor extends ThreadGroup {
                             if (chk1 || chk2) {
                             */
 
+
                             if (ctx.isExecuteImmediately() || remainMilliTime < workSchedule.getPreemptiveMilliTime()) {
 
 
-                                EventInfo eventInfo = ctx.getEventInfo();
-                                if (eventInfo == null) {
-                                    eventInfo = workSchedule.getDefaultEventInfo();
+                                WorkEvent workEvent = ctx.getWorkEvent();
+                                if (workEvent == null) {
+                                    workEvent = workSchedule.getDefaultEventInfo();
 
                                 } else {
-                                    eventInfo.setWorkSechedule(workSchedule);
+                                    workEvent.setWorkSechedule(workSchedule);
                                 }
 
                                 /**
@@ -752,11 +757,12 @@ public class WorkProcessor extends ThreadGroup {
 
 
 
-                                long delaytime = slc.execute(eventInfo);
+                                long delaytime = slc.execute(workEvent);
+
 
                                 int loopCount = 0;
                                 while (delaytime == Work.LOOP && loopCount<1000) {
-                                    delaytime = slc.execute(eventInfo);
+                                    delaytime = slc.execute(workEvent);
                                     loopCount++;
                                 }
 
@@ -766,7 +772,9 @@ public class WorkProcessor extends ThreadGroup {
 
 
                                 if (delaytime == Work.WAIT) {
+
                                     long repeatInterval  = workSchedule.getIntervalTime();
+
                                     if(repeatInterval>0) {
                                         delaytime = repeatInterval;
                                     }
@@ -774,7 +782,9 @@ public class WorkProcessor extends ThreadGroup {
 
                                 if (delaytime > 0) {
 
-                                    workSchedule.adjustRepeatInterval(delaytime);
+                                    //TODO
+                                    //workSchedule.adjustRepeatInterval(delaytime);
+                                    workSchedule.adjustDelayTime(delaytime);
 
                                     if (delaytime > this.workProcessor.configuration.getExecuteCountdownMilliTime()) {
                                         this.workProcessor.workChecker
@@ -797,7 +807,7 @@ public class WorkProcessor extends ThreadGroup {
 
                                 //Thread.sleep(10);
 
-                            } else if (!workSchedule.isEnd()) {
+                            } else if (!workSchedule.isUntilEndTime()) {
                                 timeoutCount++;
                                 stoplessCount = 0;
 

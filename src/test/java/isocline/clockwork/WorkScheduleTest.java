@@ -18,7 +18,7 @@ public class WorkScheduleTest {
 
     @Before
     public void before() {
-        seq=0;
+        seq = 0;
 
         worker = WorkProcessorFactory.getDefaultProcessor();
     }
@@ -33,10 +33,9 @@ public class WorkScheduleTest {
     public void executeOneTime() throws Exception {
 
 
-
-        worker.createSchedule((EventInfo event) -> {
+        worker.createSchedule((WorkEvent event) -> {
             seq++;
-            logger.debug("exec " +seq);
+            logger.debug("exec " + seq);
 
             return Work.TERMINATE;
         }).activate();
@@ -49,13 +48,12 @@ public class WorkScheduleTest {
     }
 
     @Test
-    public void executeSleep() throws Exception{
+    public void executeSleep() throws Exception {
 
 
-
-        worker.createSchedule((EventInfo event) -> {
+        worker.createSchedule((WorkEvent event) -> {
             seq++;
-            logger.debug("exec " +seq);
+            logger.debug("exec " + seq);
 
             return Work.WAIT;
         }).activate();
@@ -67,15 +65,14 @@ public class WorkScheduleTest {
     }
 
     @Test
-    public void executeLoop() throws Exception{
+    public void executeLoop() throws Exception {
 
 
-
-        worker.createSchedule((EventInfo event) -> {
+        worker.createSchedule((WorkEvent event) -> {
             seq++;
-            logger.debug("exec " +seq);
+            logger.debug("exec " + seq);
 
-            if(seq==10) {
+            if (seq == 10) {
                 return Work.TERMINATE;
             }
 

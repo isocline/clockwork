@@ -20,7 +20,7 @@ public class EventReceiver implements Work {
     }
 
 
-    public long execute(EventInfo event) throws InterruptedException {
+    public long execute(WorkEvent event) throws InterruptedException {
 
         logger.debug("receive:" + event.getEventName());
 

@@ -11,7 +11,7 @@ public class MaxCountTermination implements Work {
 
     private int seq = 0;
 
-    public long execute(EventInfo event) throws InterruptedException {
+    public long execute(WorkEvent event) throws InterruptedException {
 
         seq++;
 

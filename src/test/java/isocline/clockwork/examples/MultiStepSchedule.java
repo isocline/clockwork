@@ -32,14 +32,14 @@ public class MultiStepSchedule   {
         private int count = 0;
 
         @Override
-        public long execute(EventInfo event) throws InterruptedException {
+        public long execute(WorkEvent event) throws InterruptedException {
             count++;
 
             logger.debug("count="+count);
 
             if (count > 5) {
 
-                event.getWorkSchedule().getWorkProcessor().raiseEvent(new EventInfo("next"));
+                event.getWorkSchedule().getWorkProcessor().raiseEvent(new WorkEvent("next"));
 
                 return TERMINATE;
             } else {
@@ -53,7 +53,7 @@ public class MultiStepSchedule   {
 
 
         @Override
-        public long execute(EventInfo event) throws InterruptedException {
+        public long execute(WorkEvent event) throws InterruptedException {
 
             logger.debug(event.getEventName() + " XX");
 

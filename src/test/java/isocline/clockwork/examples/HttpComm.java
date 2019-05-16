@@ -50,7 +50,7 @@ public class HttpComm implements Work {
     private int seq=0;
 
     @Override
-    public long execute(EventInfo event) throws InterruptedException {
+    public long execute(WorkEvent event) throws InterruptedException {
         seq++;
         try {
             if (seq%2== 1) {

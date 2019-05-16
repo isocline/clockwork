@@ -17,6 +17,7 @@ package isocline.clockwork;
 
 import isocline.clockwork.event.EventRepository;
 import isocline.clockwork.event.EventSet;
+import isocline.clockwork.flow.WorkFlowFactory;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -36,7 +37,7 @@ public class WorkSchedule {
 
     private String workUUID;
 
-    private long waitTime = 0;
+    private long waitingTime = 0;
 
     private long nextExecuteTime = 0;
 
@@ -47,7 +48,7 @@ public class WorkSchedule {
 
     private boolean isLock = false;
 
-    private boolean isStart = false;
+    private boolean isActivated = false;
 
     private long intervalTime = UNDEFINED_INTERVAL;
 
@@ -69,10 +70,12 @@ public class WorkSchedule {
 
     private WorkProcessor workProcessor = null;
 
-    private LinkedList<EventInfo> eventList = new LinkedList<EventInfo>();
+    private LinkedList<WorkEvent> eventList = new LinkedList<WorkEvent>();
 
 
-    private ProcessFlow processFlow = new ProcessFlow();
+
+
+    private WorkFlow workFlow = null;
 
     private ExecuteChecker executeChecker = null;
 
@@ -128,15 +131,15 @@ public class WorkSchedule {
     long checkRemainMilliTime() {
         needWaiting = false;
 
-        if (!isStart) {
+        if (!isActivated) {
             throw new RuntimeException("service end");
         }
-        if (isEnd()) {
+        if (isUntilEndTime()) {
             return Long.MAX_VALUE;
         }
 
 
-        if (this.waitTime == 0) {
+        if (this.waitingTime == 0) {
             if (this.isStrictMode) {
                 needWaiting = true;
             }
@@ -170,7 +173,7 @@ public class WorkSchedule {
     }
 
 
-    boolean isEnd() {
+    boolean isUntilEndTime() {
         if (this.workEndTime > 0) {
             if (System.currentTimeMillis() >= this.workEndTime) {
                 return true;
@@ -234,8 +237,8 @@ public class WorkSchedule {
      */
     private WorkSchedule setStartTime(long nextExecuteTime) {
 
-        if (waitTime == 0) {
-            waitTime = 1;
+        if (waitingTime == 0) {
+            waitingTime = 1;
         }
 
         this.nextExecuteTime = nextExecuteTime;
@@ -243,15 +246,20 @@ public class WorkSchedule {
         return this;
     }
 
+    public WorkSchedule setStartDelayTime(long waitTime) {
+        checkLocking();
+        this.waitingTime = waitTime;
+
+        return this;
+    }
     /**
      * @param waitTime
      * @return
      */
-    public WorkSchedule setStartDelay(long waitTime) {
+    WorkSchedule adjustDelayTime(long waitTime) {
 
 
-        checkLocking();
-        this.waitTime = waitTime;
+        this.waitingTime = waitTime;
 
         if (waitTime < 0) {
             this.nextExecuteTime = UNDEFINED_INTERVAL;
@@ -260,7 +268,6 @@ public class WorkSchedule {
         } else {
 
             if (this.isBetweenStartTimeMode && this.nextExecuteTime > 0) {
-
 
                 long tmp = System.currentTimeMillis() - nextExecuteTime;
 
@@ -341,7 +348,7 @@ public class WorkSchedule {
 
         this.intervalTime = intervalTime;
 
-        return setStartDelay(intervalTime);
+        return setStartDelayTime(intervalTime);
 
     }
 
@@ -435,24 +442,16 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule setProcessFlow(ProcessFlow processFlow) {
-        checkLocking();
 
-        this.processFlow = processFlow;
-        return this;
-    }
-
-
-    public ProcessFlow getProcessFlow() {
-
-        return this.processFlow;
+    public WorkFlow getWorkFlow() {
+        return this.workFlow;
     }
 
 
     ////////////////
 
 
-    public void raiseLocalEvent(EventInfo event) {
+    public void raiseLocalEvent(WorkEvent event) {
 
         this.workProcessor.addWorkSchedule(this, event);
 
@@ -492,7 +491,7 @@ public class WorkSchedule {
 
     public WorkSchedule setSleepMode() {
         checkLocking();
-        this.setStartDelay(Work.WAIT);
+        this.setStartDelayTime(Work.WAIT);
         return this;
     }
 
@@ -500,47 +499,49 @@ public class WorkSchedule {
         return activate(false);
     }
 
+
+    /**
+     *
+     *
+     * @param checkActivated
+     * @return
+     */
     public WorkSchedule activate(boolean checkActivated) {
-        if (isStart) {
+        if (isActivated) {
             if (checkActivated) {
                 throw new RuntimeException("Already activate!");
             } else {
                 return this;
             }
         }
-        this.isStart = true;
+        this.isActivated = true;
 
 
         try {
-            this.work.processFlow(this.processFlow);
+            this.workFlow = WorkFlowFactory.createWorkFlow();
+
+            this.work.defineWorkFlow(this.workFlow);
+            if(!this.workFlow.isSetFinish()){
+                this.workFlow.finish();
+            }
         } catch (UnsupportedOperationException npe) {
 
         }
 
-        /*
-        if(!isFirstDelaySet) {
-            long s1 = System.currentTimeMillis();
-            long s2 = s1%1000;
-            if(s2>900) {
-                long nextExecuteTime = (s1-s2)
-                this.setStartDateTime()
-            }
 
-            this.setStartDelay(1000);
-        }
-        */
 
 
         if (this.isStrictMode && !this.isDefinedStartTime) {
 
             long startTime = Clock.nextSecond(900);
-            this.setStartTime(startTime);
-
+            this.setStartTime(startTime+this.waitingTime);
+        }else if(this.waitingTime>0) {
+            this.adjustDelayTime(this.waitingTime);
         }
 
 
-        if (this.waitTime != Work.WAIT) {
-            if (this.isStrictMode || this.isDefinedStartTime) {
+        if (this.waitingTime != Work.WAIT) {
+            if (this.isStrictMode || this.isDefinedStartTime || this.waitingTime >1) {
                 this.workProcessor.addWorkSchedule(this, false);
             } else {
                 this.workProcessor.addWorkSchedule(this, true);
@@ -558,10 +559,17 @@ public class WorkSchedule {
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
+    public boolean isActivated() {
+        return isActivated;
+    }
 
     public void finish() {
-        if (this.isStart) {
-            this.isStart = false;
+        if (this.isActivated) {
+            this.isActivated = false;
             this.workProcessor.managedWorkCount.decrementAndGet();
         }
     }
@@ -604,11 +612,11 @@ public class WorkSchedule {
     ///////////////////////////////////
 
 
-    private EventInfo defaultEvent = null;
+    private WorkEvent defaultEvent = null;
 
-    EventInfo getDefaultEventInfo() {
+    WorkEvent getDefaultEventInfo() {
         if (defaultEvent == null) {
-            defaultEvent = new EventInfo();
+            defaultEvent = new WorkEvent();
             defaultEvent.setWorkSechedule(this);
         }
 
@@ -647,10 +655,10 @@ public class WorkSchedule {
     ////////////////////////////
 
 
-    ExecuteContext enterQueue(boolean isUserEvent, EventInfo eventInfo) {
+    ExecuteContext enterQueue(boolean isUserEvent, WorkEvent workEvent) {
 
 
-        ExecuteContext ctx = new ExecuteContext(this, isUserEvent, eventInfo);
+        ExecuteContext ctx = new ExecuteContext(this, isUserEvent, workEvent);
 
         return ctx;
     }
@@ -675,14 +683,14 @@ public class WorkSchedule {
 
         private boolean isUserEvent = false;
 
-        private EventInfo eventInfo;
+        private WorkEvent workEvent;
 
 
-        ExecuteContext(WorkSchedule workSchedule, boolean isUserEvent, EventInfo event) {
+        ExecuteContext(WorkSchedule workSchedule, boolean isUserEvent, WorkEvent event) {
 
             this.workSchedule = workSchedule;
             this.isUserEvent = isUserEvent;
-            this.eventInfo = event;
+            this.workEvent = event;
 
         }
 
@@ -708,8 +716,8 @@ public class WorkSchedule {
 
         }
 
-        EventInfo getEventInfo() {
-            return this.eventInfo;
+        WorkEvent getWorkEvent() {
+            return this.workEvent;
         }
 
 

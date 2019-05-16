@@ -31,7 +31,7 @@ public class MailSender implements Work {
         return false;
     }
 
-    public long execute(EventInfo event) throws InterruptedException {
+    public long execute(WorkEvent event) throws InterruptedException {
 
 
 

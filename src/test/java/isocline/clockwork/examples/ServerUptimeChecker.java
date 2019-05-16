@@ -32,7 +32,7 @@ public class ServerUptimeChecker  implements Work {
         this.url = new URL(strUrl);
     }
 
-    public long execute(EventInfo event) throws InterruptedException {
+    public long execute(WorkEvent event) throws InterruptedException {
 
 
         try {

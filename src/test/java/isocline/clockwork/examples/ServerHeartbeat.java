@@ -42,7 +42,7 @@ public class ServerHeartbeat implements Work {
     }
 
 
-    public long execute(EventInfo event) throws InterruptedException {
+    public long execute(WorkEvent event) throws InterruptedException {
 
         int waterLevel = checkWaterLevel();
 

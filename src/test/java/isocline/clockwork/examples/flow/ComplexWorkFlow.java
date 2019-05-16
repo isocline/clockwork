@@ -1,32 +1,29 @@
 package isocline.clockwork.examples.flow;
 
-import isocline.clockwork.ProcessFlow;
-import isocline.clockwork.Work;
-import isocline.clockwork.WorkProcessor;
-import isocline.clockwork.WorkProcessorFactory;
+import isocline.clockwork.*;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 
-public class ComplexWorkFlow implements Work {
+public class ComplexWorkFlow implements FlowableWork {
 
 
     private static Logger logger = Logger.getLogger(ComplexWorkFlow.class.getName());
 
     public void order() {
-        logger.debug("invoke - order");
+        logger.debug("** invoke - order");
 
     }
 
 
     public void sendSMS() {
-        logger.debug("invoke - sendSMS start");
+        logger.debug("invoke - sendSMS ** start");
         try {
             Thread.sleep(1000);
         } catch (Exception e) {
 
         }
-        logger.debug("invoke - sendSMS end");
+        logger.debug("invoke - sendSMS ** end");
 
 
     }
@@ -34,11 +31,11 @@ public class ComplexWorkFlow implements Work {
     public void sendMail() {
         logger.debug("invoke - sendMail start");
         try {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         } catch (Exception e) {
 
         }
-        logger.debug("invoke - sendSMS end");
+        logger.debug("invoke - sendMail end");
 
     }
 
@@ -48,23 +45,17 @@ public class ComplexWorkFlow implements Work {
 
     }
 
-    public void processFlow(ProcessFlow flow) {
+    public void report2(WorkEvent event) {
+        logger.debug("invoke - report2 " + event.getEventName() + " "+event);
 
-        flow.run(wrwer).next(wewerwr,"multi1");
-        flow.run(werwer).next(werwer,"multi2");
+    }
 
-        flow.wait("multi1 & mult2").run("123").end
+    public void defineWorkFlow(WorkFlow flow) {
 
-        flow.wait("b&a").then(test);
+        flow.run(this::order).next(this::sendMail, "h1");
+        flow.run(this::sendSMS).next(this::report, "h2");
 
-
-        flow.wait("1?&23").end()
-
-
-        flow.run(this::order);
-        flow.runAsync(this::sendSMS).runAsync(this::sendMail, "chk");
-        flow.runWait(this::report, "chk");
-        flow.end();
+        flow.waitAll("h1","h2").next(this::report2).finish();
 
     }
 

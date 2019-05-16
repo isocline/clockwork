@@ -16,8 +16,6 @@
 package isocline.clockwork;
 
 
-import isocline.clockwork.object.FunctionExecutor;
-
 /**
  *
  *
@@ -46,8 +44,7 @@ public interface Work {
     /**
      * @param flow
      */
-    default void processFlow(ProcessFlow flow) {
-
+    default void defineWorkFlow(WorkFlow flow) {
 
         throw new UnsupportedOperationException();
     }
@@ -57,102 +54,7 @@ public interface Work {
      * @return
      * @throws InterruptedException
      */
-    default long execute(EventInfo event) throws InterruptedException {
-
-        WorkSchedule schedule = event.getWorkSchedule();
-
-        ProcessFlow flow = schedule.getProcessFlow();
-        if (flow == null) {
-            return TERMINATE;
-        }
-
-
-        String eventName = event.getEventName();
-
-        FunctionExecutor exec = null;
-
-        if (eventName != null) {
-            exec = flow.getExecutor(eventName);
-
-            if (exec != null) {
-
-                System.out.println("1-exec");
-                exec.execute();
-
-                if (exec.isLastExecutor()) {
-                    System.out.println("2-TERMINATE");
-                    return TERMINATE;
-                } else {
-                    System.out.println("3-WAIT");
-                    return WAIT;
-                }
-
-
-            }
-        }
-
-
-        exec = (FunctionExecutor) event.getAttribute("exec.func");
-
-        if (exec != null) {
-            event.removeAttribute("exec.func");
-            System.out.println("2-exec");
-            exec.execute();
-
-            String eventNm = exec.getFireEventName();
-            if (eventNm != null) {
-
-
-                schedule.raiseLocalEvent(event.setEventName(eventNm));
-            }
-            if (exec.isLastExecutor()) {
-                System.out.println("4-TERMINATE");
-                return TERMINATE;
-            } else {
-                System.out.println("5-WAIT");
-                return WAIT;
-            }
-        }
-
-
-        exec = flow.getNextExecutor();
-
-        if (exec != null) {
-
-            if (exec.isAsync()) {
-                //logger.debug("ASYNC");
-                EventInfo newEvent = new EventInfo();
-                newEvent.setAttribute("exec.func", exec);
-                //worker.createSchedule(this).bindEvent("async").activate();
-
-                //schedule.getWorkProcessor().raiseEvent("async", newEvent);
-
-                schedule.raiseLocalEvent(newEvent);
-
-                //logger.debug("ASYNC - END");
-                return 1;
-            }
-
-
-            System.out.println("3-exec");
-            exec.execute();
-
-            String eventNm = exec.getFireEventName();
-            if (eventNm != null) {
-                schedule.raiseLocalEvent(event.setEventName(eventNm));
-            }
-
-            if (exec.isLastExecutor()) {
-                System.out.println("6-TERMINATE");
-                return TERMINATE;
-            }
-
-        } else {
-            return WAIT;
-        }
-
-        return 1;
-    }
+    long execute(WorkEvent event) throws InterruptedException;
 
 
 }

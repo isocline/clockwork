@@ -27,7 +27,7 @@ public class MultiPlexer implements Work {
     }
 
     @Override
-    public long execute(EventInfo event) throws InterruptedException {
+    public long execute(WorkEvent event) throws InterruptedException {
         //System.out.println("== "+System.currentTimeMillis());
 
         logger.debug(id+" "+seq +" send ");
@@ -36,7 +36,7 @@ public class MultiPlexer implements Work {
 
         /*
         for(int i=0;i<10;i++) {
-            logger.info("execute(EventInfo event) throws InterruptedException");
+            logger.info("execute(WorkEvent event) throws InterruptedException");
         }
         */
 

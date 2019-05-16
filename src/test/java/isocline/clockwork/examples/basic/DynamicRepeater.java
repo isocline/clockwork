@@ -11,7 +11,7 @@ public class DynamicRepeater implements Work {
 
     private int seq = 0;
 
-    public long execute(EventInfo event) throws InterruptedException {
+    public long execute(WorkEvent event) throws InterruptedException {
 
 
         long nexttime = 500 + (long) (Math.random()*1000);

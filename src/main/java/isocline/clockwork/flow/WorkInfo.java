@@ -1,4 +1,4 @@
-package isocline.clockwork.object;
+package isocline.clockwork.flow;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
