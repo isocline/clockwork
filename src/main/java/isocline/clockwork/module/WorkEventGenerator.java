@@ -1,9 +1,9 @@
 package isocline.clockwork.module;
 
-import isocline.clockwork.WorkEvent;
 import isocline.clockwork.Work;
+import isocline.clockwork.WorkEvent;
 
-public class SignalGenerator implements Work {
+public class WorkEventGenerator implements Work {
 
 
     private long timeGap = 1000;
@@ -15,13 +15,15 @@ public class SignalGenerator implements Work {
         this.eventName = eventName;
     }
 
+    public void setRepeatTime(long repeatTime) {
+        this.timeGap = repeatTime;
+    }
+
     @Override
     public long execute(WorkEvent event) throws InterruptedException {
 
 
-
-        WorkEvent newEvent = new WorkEvent(eventName);
-        event.copyTo(newEvent);
+        WorkEvent newEvent = event.create(eventName);
 
 
         event.getWorkSchedule().getWorkProcessor().raiseEvent(eventName, newEvent);
@@ -29,7 +31,7 @@ public class SignalGenerator implements Work {
         //event.getWorkSchedule().getWorkProcessor().raiseEvent(eventName, event);
         //WorkProcessorFactory.getDefaultProcessor().raiseEvent(eventName, newEvent);
 
-        System.out.println("FIRE event:"+eventName);
+        System.out.println("fire event [" + eventName+"]");
 
         return timeGap;
     }

@@ -15,6 +15,7 @@
  */
 package isocline.clockwork;
 
+import isocline.clockwork.event.WorkEventFactory;
 import isocline.clockwork.flow.WorkInfo;
 import org.apache.log4j.Logger;
 
@@ -502,7 +503,7 @@ public class WorkProcessor extends ThreadGroup {
 
         WorkEvent workEvent = event;
         if (event == null) {
-            workEvent = new WorkEvent();
+            workEvent = WorkEventFactory.create();
         }
 
         //if (workScheduleList != null)
@@ -516,7 +517,7 @@ public class WorkProcessor extends ThreadGroup {
                 if (newEventName != null) {
                     WorkEvent newWorkEvent = workEvent;
                     if (!newEventName.equals(eventName)) {
-                        newWorkEvent = new WorkEvent(newEventName);
+                        newWorkEvent = WorkEventFactory.create(newEventName);
                         workEvent.copyTo(newWorkEvent);
 
                     }

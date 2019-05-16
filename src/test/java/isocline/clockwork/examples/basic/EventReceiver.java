@@ -2,7 +2,7 @@ package isocline.clockwork.examples.basic;
 
 import isocline.clockwork.*;
 import isocline.clockwork.examples.TestConfiguration;
-import isocline.clockwork.module.SignalGenerator;
+import isocline.clockwork.module.WorkEventGenerator;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -42,7 +42,7 @@ public class EventReceiver implements Work {
         schedule.activate();
 
 
-        SignalGenerator gen = new SignalGenerator();
+        WorkEventGenerator gen = new WorkEventGenerator();
         gen.setEventName("example-event");
 
 
@@ -67,7 +67,7 @@ public class EventReceiver implements Work {
 
 
 
-        SignalGenerator gen = new SignalGenerator();
+        WorkEventGenerator gen = new WorkEventGenerator();
         gen.setEventName("example-event");
 
         processor.createSchedule(gen).setFinishTimeFromNow(30 * Clock.SECOND).setStrictMode().setStartDateTime

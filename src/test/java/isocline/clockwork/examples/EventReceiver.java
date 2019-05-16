@@ -1,7 +1,7 @@
 package isocline.clockwork.examples;
 
 import isocline.clockwork.*;
-import isocline.clockwork.module.SignalGenerator;
+import isocline.clockwork.module.WorkEventGenerator;
 import org.apache.log4j.Logger;
 
 
@@ -39,7 +39,7 @@ public class EventReceiver implements Work {
         schedule.activate();
 
 
-        SignalGenerator gen = new SignalGenerator();
+        WorkEventGenerator gen = new WorkEventGenerator();
         gen.setEventName("test");
 
         long startTime = Clock.nextSecond(900);

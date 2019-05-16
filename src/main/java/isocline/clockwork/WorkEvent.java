@@ -15,113 +15,56 @@
  */
 package isocline.clockwork;
 
-import java.util.Hashtable;
-import java.util.Map;
-
-
 /**
  *
  *
  */
-public class WorkEvent implements Cloneable{
+public interface WorkEvent {
 
 
-    private String eventName;
+    public String getEventName();
 
 
-    private Map attributeMap = new Hashtable();
-
-
-    private WorkSchedule schedule;
+    void setWorkSechedule(WorkSchedule sechedule);
 
 
     /**
-     *
-     */
-    public WorkEvent() {
-
-    }
-
-    public WorkEvent(String eventName) {
-        this.eventName = eventName;
-    }
-
-    public WorkEvent setEventName(String eventName) {
-        this.eventName = eventName;
-        return this;
-    }
-
-    public String getEventName() {
-        return this.eventName;
-    }
-
-
-    void setWorkSechedule(WorkSchedule sechedule) {
-        this.schedule = sechedule;
-    }
-
-
-    /**
-     *
      * @return
      */
-    public WorkSchedule getWorkSchedule() {
-
-        return this.schedule;
-    }
+    WorkSchedule getWorkSchedule();
 
 
     /**
-     *
      * @param key
      * @param value
      */
-    public void setAttribute(String key, Object value) {
-        this.attributeMap.put(key, value);
-
-    }
+    void setAttribute(String key, Object value);
 
     /**
-     *
      * @param key
      * @return
      */
-    public Object getAttribute(String key) {
-        return this.attributeMap.get(key);
-    }
-
+    Object getAttribute(String key);
 
     /**
-     *
      * @param key
      * @return
      */
-    public Object removeAttribute(String key) {
-        return this.attributeMap.remove(key);
-    }
+    Object removeAttribute(String key);
 
 
     /**
-     *
      * @param event
      */
-    public void copyTo(WorkEvent event) {
-        event.schedule = this.schedule;
-        event.attributeMap = this.attributeMap;
-    }
-
-    public WorkEvent create(String eventName) {
-        try {
-            WorkEvent event = (WorkEvent) this.clone();
-            event.setEventName(eventName);
-            return event;
-        }catch(CloneNotSupportedException cnse) {
-
-        }
+    void copyTo(WorkEvent event);
 
 
-        return null;
-    }
+    /**
+     *
+     * @param eventName
+     * @return
+     */
+    WorkEvent create(String eventName);
 
 
 }

@@ -43,6 +43,8 @@ public interface FlowableWork extends Work {
 
         String eventName = event.getEventName();
 
+
+
         FunctionExecutor executor = null;
 
         boolean existNextExecutor = false;
@@ -53,7 +55,9 @@ public interface FlowableWork extends Work {
                 //System.out.println("___________   EVENT  "+eventName);
             }
 
-        } else {
+        }
+
+        if(executor == null){
             executor = flow.getNextExecutor();
             if (executor != null) {
                 existNextExecutor = flow.existNexExcutor();

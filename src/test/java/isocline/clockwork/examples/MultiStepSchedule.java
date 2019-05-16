@@ -1,6 +1,7 @@
 package isocline.clockwork.examples;
 
 import isocline.clockwork.*;
+import isocline.clockwork.event.WorkEventFactory;
 import org.apache.log4j.Logger;
 
 
@@ -39,7 +40,7 @@ public class MultiStepSchedule   {
 
             if (count > 5) {
 
-                event.getWorkSchedule().getWorkProcessor().raiseEvent(new WorkEvent("next"));
+                event.getWorkSchedule().getWorkProcessor().raiseEvent(WorkEventFactory.create("next"));
 
                 return TERMINATE;
             } else {

@@ -17,6 +17,7 @@ package isocline.clockwork;
 
 import isocline.clockwork.event.EventRepository;
 import isocline.clockwork.event.EventSet;
+import isocline.clockwork.event.WorkEventFactory;
 import isocline.clockwork.flow.WorkFlowFactory;
 
 import java.util.Date;
@@ -61,6 +62,8 @@ public class WorkSchedule {
 
     private boolean needWaiting = false;
 
+    private boolean isEventBindding = false;
+
 
     private Work work;
 
@@ -71,8 +74,6 @@ public class WorkSchedule {
     private WorkProcessor workProcessor = null;
 
     private LinkedList<WorkEvent> eventList = new LinkedList<WorkEvent>();
-
-
 
 
     private WorkFlow workFlow = null;
@@ -252,6 +253,7 @@ public class WorkSchedule {
 
         return this;
     }
+
     /**
      * @param waitTime
      * @return
@@ -442,7 +444,6 @@ public class WorkSchedule {
     }
 
 
-
     public WorkFlow getWorkFlow() {
         return this.workFlow;
     }
@@ -467,6 +468,8 @@ public class WorkSchedule {
                 this.workProcessor.bindEvent(this, subEventName);
             }
         }
+        this.isEventBindding = true;
+
         return this;
     }
 
@@ -501,8 +504,6 @@ public class WorkSchedule {
 
 
     /**
-     *
-     *
      * @param checkActivated
      * @return
      */
@@ -521,27 +522,24 @@ public class WorkSchedule {
             this.workFlow = WorkFlowFactory.createWorkFlow();
 
             this.work.defineWorkFlow(this.workFlow);
-            if(!this.workFlow.isSetFinish()){
+            if (!this.workFlow.isSetFinish()) {
                 this.workFlow.finish();
             }
         } catch (UnsupportedOperationException npe) {
 
         }
 
-
-
-
         if (this.isStrictMode && !this.isDefinedStartTime) {
 
             long startTime = Clock.nextSecond(900);
-            this.setStartTime(startTime+this.waitingTime);
-        }else if(this.waitingTime>0) {
+            this.setStartTime(startTime + this.waitingTime);
+        } else if (this.waitingTime > 0) {
             this.adjustDelayTime(this.waitingTime);
         }
 
 
         if (this.waitingTime != Work.WAIT) {
-            if (this.isStrictMode || this.isDefinedStartTime || this.waitingTime >1) {
+            if (this.isStrictMode || this.isDefinedStartTime || this.waitingTime > 1 || isEventBindding) {
                 this.workProcessor.addWorkSchedule(this, false);
             } else {
                 this.workProcessor.addWorkSchedule(this, true);
@@ -560,7 +558,6 @@ public class WorkSchedule {
     }
 
     /**
-     *
      * @return
      */
     public boolean isActivated() {
@@ -616,8 +613,9 @@ public class WorkSchedule {
 
     WorkEvent getDefaultEventInfo() {
         if (defaultEvent == null) {
-            defaultEvent = new WorkEvent();
+            defaultEvent = WorkEventFactory.create();
             defaultEvent.setWorkSechedule(this);
+
         }
 
         return defaultEvent;
@@ -690,8 +688,15 @@ public class WorkSchedule {
 
             this.workSchedule = workSchedule;
             this.isUserEvent = isUserEvent;
+
             this.workEvent = event;
 
+            /*
+            if(event!=null) {
+                event.setWorkSechedule(workSchedule);
+
+            }
+            */
         }
 
 
