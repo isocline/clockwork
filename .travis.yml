@@ -1,0 +1,10 @@
+language: java
+
+notifications:
+  email: false
+
+jdk:
+- oraclejdk8
+
+script:
+ - mvn clean package
