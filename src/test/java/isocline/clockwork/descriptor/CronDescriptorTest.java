@@ -3,6 +3,8 @@ package isocline.clockwork.descriptor;
 import isocline.clockwork.Clock;
 import org.junit.Test;
 
+import java.util.Calendar;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -287,6 +289,26 @@ public class CronDescriptorTest {
         CronDescriptor descriptor = new CronDescriptor("* * * * 0");
 
         CronDescriptor.CrontabChecker chk = descriptor.getChecker();
+
+
+        long x = Clock.toMilliSeconds("2019-05-05T02:30:00+09:00");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new java.util.Date(x));
+        int min = calendar.get(Calendar.MINUTE);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int dayOfMon = calendar.get(Calendar.DAY_OF_MONTH);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+
+        System.out.println("x ="+x);
+        System.out.println("min ="+min);
+        System.out.println("hour ="+hour);
+        System.out.println("dayOfMon ="+dayOfMon);
+        System.out.println("month ="+month);
+        System.out.println("dayOfWeek ="+dayOfWeek);
+
+        System.out.println("min ="+min);System.out.println("min ="+min);
+
 
 
         result = chk.check(Clock.toMilliSeconds("2019-05-05T02:30:00+09:00"));
