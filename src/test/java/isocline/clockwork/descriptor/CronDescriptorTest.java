@@ -24,10 +24,10 @@ public class CronDescriptorTest {
 
         boolean result = false;
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-14T11:59:59+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-14T11:59:59Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:30:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:30:00Z"));
         assertEquals(true, result);
 
 
@@ -35,10 +35,10 @@ public class CronDescriptorTest {
         chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-14T11:30:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-14T11:30:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:40:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:40:00Z"));
         assertEquals(false, result);
 
 
@@ -46,16 +46,16 @@ public class CronDescriptorTest {
         chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-14T11:30:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-14T11:30:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:40:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:40:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:48:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:48:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:49:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:49:00Z"));
         assertEquals(false, result);
 
 
@@ -65,19 +65,19 @@ public class CronDescriptorTest {
         chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-14T11:30:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-14T11:30:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:40:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:40:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:51:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:51:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:53:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:53:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:54:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:54:00Z"));
         assertEquals(false, result);
 
 
@@ -86,16 +86,16 @@ public class CronDescriptorTest {
         chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-14T11:15:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-14T11:15:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:20:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:20:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:51:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:51:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:56:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:56:00Z"));
         assertEquals(false, result);
     }
 
@@ -111,10 +111,10 @@ public class CronDescriptorTest {
         CronDescriptor.CrontabChecker chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-14T02:30:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-14T02:30:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T03:40:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T03:40:00Z"));
         assertEquals(false, result);
 
 
@@ -125,19 +125,19 @@ public class CronDescriptorTest {
         chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-14T03:30:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-14T03:30:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T04:40:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T04:40:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T09:51:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T09:51:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T10:53:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T10:53:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:54:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:54:00Z"));
         assertEquals(false, result);
 
 
@@ -146,16 +146,16 @@ public class CronDescriptorTest {
         chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-14T05:15:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-14T05:15:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T10:20:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T10:20:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T09:51:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T09:51:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:56:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T11:56:00Z"));
         assertEquals(false, result);
     }
 
@@ -171,10 +171,10 @@ public class CronDescriptorTest {
         CronDescriptor.CrontabChecker chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-05T02:30:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-05T02:30:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-06T03:40:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-06T03:40:00Z"));
         assertEquals(false, result);
 
 
@@ -185,19 +185,19 @@ public class CronDescriptorTest {
         chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-03-03T03:30:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-03-03T03:30:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-04-04T04:40:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-04-04T04:40:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-08-09T09:51:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-08-09T09:51:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-10-10T10:53:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-10-10T10:53:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-11-14T11:54:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-11-14T11:54:00Z"));
         assertEquals(false, result);
 
 
@@ -206,16 +206,16 @@ public class CronDescriptorTest {
         chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-03-03T05:15:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-03-03T05:15:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-06-06T10:20:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-06-06T10:20:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-08-09T09:51:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-08-09T09:51:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-11-14T11:56:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-11-14T11:56:00Z"));
         assertEquals(false, result);
     }
 
@@ -231,10 +231,10 @@ public class CronDescriptorTest {
         CronDescriptor.CrontabChecker chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-14T02:30:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-14T02:30:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-01-14T03:40:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-01-14T03:40:00Z"));
         assertEquals(false, result);
 
 
@@ -245,19 +245,19 @@ public class CronDescriptorTest {
         chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-03-14T03:30:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-03-14T03:30:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-04-14T04:40:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-04-14T04:40:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-08-14T09:51:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-08-14T09:51:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-10-14T10:53:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-10-14T10:53:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-11-14T11:54:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-11-14T11:54:00Z"));
         assertEquals(false, result);
 
 
@@ -266,16 +266,16 @@ public class CronDescriptorTest {
         chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-03-14T05:15:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-03-14T05:15:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-06-14T10:20:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-06-14T10:20:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-08-14T09:51:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-08-14T09:51:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-11-14T11:56:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-11-14T11:56:00Z"));
         assertEquals(false, result);
     }
 
@@ -315,10 +315,10 @@ public class CronDescriptorTest {
 
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-05T02:30:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-05T02:30:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-06T03:40:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-06T03:40:00Z"));
         assertEquals(false, result);
 
 
@@ -329,17 +329,17 @@ public class CronDescriptorTest {
         chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-06T03:30:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-06T03:30:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-07T04:40:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-07T04:40:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-08T09:51:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-08T09:51:00Z"));
         assertEquals(true, result);
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-09T11:54:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-09T11:54:00Z"));
         assertEquals(false, result);
 
 
@@ -348,16 +348,16 @@ public class CronDescriptorTest {
         chk = descriptor.getChecker();
 
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-06T05:15:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-06T05:15:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-08T10:20:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-08T10:20:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-10T09:51:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-10T09:51:00Z"));
         assertEquals(true, result);
 
-        result = chk.check(Clock.toMilliSeconds("2019-05-12T11:56:00+09:00"));
+        result = chk.check(Clock.toMilliSeconds("2019-05-12T11:56:00Z"));
         assertEquals(false, result);
     }
 }
