@@ -15,27 +15,8 @@
  */
 package isocline.clockwork;
 
+public interface ScheduleDescriptor {
 
-/**
- * Interface for Work session information
- *
- */
-public interface WorkSession {
-
-
-    void onError(Work work, Throwable error);
-
-
-    void beforeExcute(Work work);
-
-
-    void afterExcute(Work work);
-
-
-    void setAttribute(String key, Object object);
-
-    Object getAttriute(String key);
-
-    Object removeAttribute(String key);
+    void build(WorkSchedule workSchedule);
 
 }

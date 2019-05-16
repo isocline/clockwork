@@ -14,10 +14,10 @@ public class MultiStepSchedule   {
     private static Logger logger = Logger.getLogger(MultiStepSchedule.class.getName());
 
     public static void main(String[] args) throws Exception {
-        ClockWorker worker = ClockWorkerContext.getWorker();
+        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
 
 
-        WorkSchedule schedule = worker.createSchedule(Step1Schedule.class).setStrictMode(true);
+        WorkSchedule schedule = worker.createSchedule(Step1Schedule.class).setStrictMode();
         schedule.activate();
 
         schedule = worker.createSchedule(Step2Schedule.class).bindEvent("next");
@@ -39,9 +39,9 @@ public class MultiStepSchedule   {
 
             if (count > 5) {
 
-                event.getWorkSchedule().getClockWorker().raiseEvent(new EventInfo("next"));
+                event.getWorkSchedule().getWorkProcessor().raiseEvent(new EventInfo("next"));
 
-                return FINISH;
+                return TERMINATE;
             } else {
                 return 1 * Clock.SECOND;
             }
@@ -58,7 +58,7 @@ public class MultiStepSchedule   {
             logger.debug(event.getEventName() + " XX");
 
             if("next".equals(event.getEventName())) {
-                return FINISH;
+                return TERMINATE;
             }
 
 

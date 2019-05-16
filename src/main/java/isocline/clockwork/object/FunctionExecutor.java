@@ -1,34 +1,53 @@
 package isocline.clockwork.object;
 
-public class Executor {
+import java.util.function.Consumer;
 
 
-    private Runnable runnable;
+/**
+ *
+ *
+ */
+public class FunctionExecutor {
+
+
+
+    private boolean isAsync;
+
+    private boolean isLastExecutor = false;
 
     private String fireEventName;
 
     private String recvEventName;
 
-    private boolean isAsync;
 
-    private boolean isEnd = false;
 
-    public Executor(Runnable runnable, boolean isAsync) {
+    private Runnable runnable;
+
+    private Consumer cusumer;
+
+
+    public FunctionExecutor(Runnable runnable, boolean isAsync) {
         this.runnable = runnable;
         this.isAsync = isAsync;
     }
 
-    public void setEnd(boolean isEnd) {
-        this.isEnd = isEnd;
+    public FunctionExecutor(Consumer cusumer, boolean isAsync) {
+        this.cusumer = cusumer;
+        this.isAsync = isAsync;
     }
 
-    public boolean isEndExecutor() {
-        return isEnd;
+    public void setLastExecutor(boolean isEnd) {
+        this.isLastExecutor = isEnd;
+    }
+
+    public boolean isLastExecutor() {
+        return isLastExecutor;
     }
 
     public boolean isAsync() {
         return this.isAsync;
     }
+
     public void setFireEventName(String eventName) {
         this.fireEventName = eventName;
     }
@@ -46,8 +65,13 @@ public class Executor {
     }
 
     public void execute() {
-        if(runnable!=null) {
+
+        if (runnable != null) {
             runnable.run();
+        }
+
+        if (cusumer != null) {
+            cusumer.accept("");
         }
     }
 }

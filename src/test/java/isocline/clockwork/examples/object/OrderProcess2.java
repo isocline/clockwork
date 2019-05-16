@@ -1,8 +1,9 @@
 package isocline.clockwork.examples.object;
 
-import isocline.clockwork.ClockWorker;
 import isocline.clockwork.Configuration;
 import isocline.clockwork.ProcessFlow;
+import isocline.clockwork.WorkProcessor;
+import isocline.clockwork.WorkProcessorFactory;
 import isocline.clockwork.object.WorkObject;
 import org.apache.log4j.Logger;
 
@@ -27,6 +28,13 @@ public class OrderProcess2 implements WorkObject {
 
     private void record() {
         logger.debug(id + " record");
+    }
+
+    public String test(){
+        logger.debug(id+ "start test");
+
+        //if(1>0) throw new RuntimeException("zzzz");
+        return "x";
     }
 
 
@@ -65,6 +73,8 @@ public class OrderProcess2 implements WorkObject {
     }
 
 
+
+
     private void makeMessage() {
         logger.debug(id + " makeMessage");
     }
@@ -75,19 +85,28 @@ public class OrderProcess2 implements WorkObject {
     }
 
 
+    public void processError() {
+        System.err.println("ERRR --");
+    }
+
+
     public void processFlow(ProcessFlow flow) {
+        String z="1234";
 
         flow
                 .run(this::writeLog)
+
+
                 .run(this::record)
+
                 .runAsync(this::checkStock, "checkStock")
-                .runAsync(this::checkSupplier, "checkSup");
+                .runAsync(this::checkSupplier, "checkSup")
+
+
+                .runWait(this::makeMessage, "checkStock&checkSup").run(this::test).end();
 
         flow
-                .runWait(this::makeMessage, "checkStock&checkSup").end();
-
-        flow
-                .runWait(this::recordUserInfo, "error");
+                .runWait(this::processError, "error").end();
 
 
     }
@@ -95,7 +114,7 @@ public class OrderProcess2 implements WorkObject {
 
     public static void main(String[] args) throws Exception {
 
-        ClockWorker worker = new ClockWorker("perform", Configuration.PERFORMANCE);
+        WorkProcessor worker = WorkProcessorFactory.getProcessor("perform", Configuration.PERFORMANCE);
 
 
         OrderProcess2 p = new OrderProcess2("AutoExpress2");

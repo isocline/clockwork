@@ -25,19 +25,23 @@ import java.util.UUID;
 
 /**
  *
+ *
  */
 public class WorkSchedule {
 
     private static final long UNDEFINED_INTERVAL = -1;
 
+    private static final long PREEMPTIVE_CHECK_MILLITIME = 2;
 
-    private String workUuid;
+
+    private String workUUID;
 
     private long waitTime = 0;
 
     private long nextExecuteTime = 0;
 
 
+    private boolean isDefinedStartTime = false;
 
     private long workEndTime = 0;
 
@@ -49,15 +53,12 @@ public class WorkSchedule {
 
     private long jitter = 0;
 
-    private long contextCheckId;
 
-    private boolean isStrictMode = true;
+    private boolean isStrictMode = false;
 
     private boolean isBetweenStartTimeMode = true;
 
     private boolean needWaiting = false;
-
-    private static long preemptiveCheckMilliTime = 2;
 
 
     private Work work;
@@ -66,27 +67,26 @@ public class WorkSchedule {
 
     private Object lockOwner = null;
 
-    private ClockWorker clockWorker = null;
+    private WorkProcessor workProcessor = null;
 
     private LinkedList<EventInfo> eventList = new LinkedList<EventInfo>();
 
 
-    private ProcessFlow processFlow = null;
+    private ProcessFlow processFlow = new ProcessFlow();
+
+    private ExecuteChecker executeChecker = null;
 
 
-
-
-
-    WorkSchedule(ClockWorker clockWorker, Work work) {
-        this.clockWorker = clockWorker;
+    WorkSchedule(WorkProcessor workProcessor, Work work) {
+        this.workProcessor = workProcessor;
         this.work = work;
 
-        this.workUuid = UUID.randomUUID().toString();
+        this.workUUID = UUID.randomUUID().toString();
     }
 
 
     public String getId() {
-        return this.workUuid;
+        return this.workUUID;
     }
 
     //
@@ -98,31 +98,14 @@ public class WorkSchedule {
     }
 
 
+    synchronized void adjustWaiting() throws InterruptedException {
+        if (this.isStrictMode && needWaiting) {
 
-    synchronized void adjustWaiting()  throws InterruptedException{
-        if(this.isStrictMode && needWaiting) {
+            //long gap = this.nextExecuteTime - System.currentTimeMillis();
 
+            for (int i = 0; i < 10000000; i++) {
 
-            long gap = this.nextExecuteTime - System.currentTimeMillis();
-
-
-            //this.wait(0,1);
-            /*
-            if(gap>1) {
-                //Thread.sleep((gap-1),100);
-                Thread.sleep(0,1);
-            }
-            */
-
-            for(int i=0;i<10000000;i++) {
-                /*
-                if(nextExecuteNanoTime<=nanoTime()) {
-                    //System.out.println(">>                           "+gap+" "+gap2+ " "+i+ " "+this.nextExecuteTime + " "+this.jitter + " "+System.currentTimeMillis());
-                    return;
-                }
-                */
-                if(nextExecuteTime<=System.currentTimeMillis()) {
-                    //System.out.println(" . "+i);
+                if (nextExecuteTime <= System.currentTimeMillis()) {
                     return;
                 }
 
@@ -133,22 +116,19 @@ public class WorkSchedule {
     }
 
 
-
-
-
     long getPreemptiveMilliTime() {
-        if(this.isStrictMode) {
-            return preemptiveCheckMilliTime;
-        }else {
+        if (this.isStrictMode) {
+            return PREEMPTIVE_CHECK_MILLITIME;
+        } else {
             return 0;
         }
 
     }
 
-    long checkRemainMilliTime(){
+    long checkRemainMilliTime() {
         needWaiting = false;
 
-        if(!isStart) {
+        if (!isStart) {
             throw new RuntimeException("service end");
         }
         if (isEnd()) {
@@ -156,26 +136,22 @@ public class WorkSchedule {
         }
 
 
-
-
-        if (this.waitTime == 0 ) {
-            if(this.isStrictMode) {
+        if (this.waitTime == 0) {
+            if (this.isStrictMode) {
                 needWaiting = true;
             }
 
             return 0;
         } else if (this.eventList.size() > 0) {
             return 0;
-        } else if (this.nextExecuteTime > 0 ) {
+        } else if (this.nextExecuteTime > 0) {
 
-            long t1 = this.nextExecuteTime  - System.currentTimeMillis();
+            long t1 = this.nextExecuteTime - System.currentTimeMillis();
 
-            //System.out.print("("+t1+") "+System.currentTimeMillis());
-            //System.err.print("("+nextExecuteNanoTime+")_ ");
-            //System.err.print("("+System.nanoTime()+"). ");
-            if(t1<=0) {
+
+            if (t1 <= 0) {
                 return t1;
-            }else  if(this.isStrictMode && t1<this.getPreemptiveMilliTime()) {
+            } else if (this.isStrictMode && t1 < this.getPreemptiveMilliTime()) {
                 needWaiting = true;
                 return t1;
             }
@@ -183,7 +159,6 @@ public class WorkSchedule {
             return t1;
 
         }
-
 
 
         return Clock.HOUR;
@@ -217,6 +192,11 @@ public class WorkSchedule {
         this.isLock = true;
     }
 
+
+    /**
+     * @param lockOwner
+     * @throws IllegalAccessException
+     */
     public void unlock(Object lockOwner) throws IllegalAccessException {
         if (lockOwner == this.lockOwner) {
             this.isLock = false;
@@ -227,30 +207,48 @@ public class WorkSchedule {
     }
 
 
+    /**
+     * @param workObject
+     */
+    public void setWorkObject(Work workObject) {
+        this.work = workObject;
+    }
+
+    /**
+     * @return
+     */
     public Work getWorkObject() {
         return this.work;
     }
 
-    private boolean isFirstDelaySet = false;
 
+    public WorkSchedule setStartDateTime(long nextExecuteTime) {
 
-    public WorkSchedule setStartTime(long nextExecuteTime) {
+        this.isDefinedStartTime = true;
+        return setStartTime(nextExecuteTime);
+    }
 
-        if(waitTime==0) {
+    /**
+     * @param nextExecuteTime
+     * @return
+     */
+    private WorkSchedule setStartTime(long nextExecuteTime) {
+
+        if (waitTime == 0) {
             waitTime = 1;
         }
 
-
-
-        this.nextExecuteTime  = nextExecuteTime;
-
-
+        this.nextExecuteTime = nextExecuteTime;
 
         return this;
     }
 
+    /**
+     * @param waitTime
+     * @return
+     */
     public WorkSchedule setStartDelay(long waitTime) {
-        isFirstDelaySet=true;
+
 
         checkLocking();
         this.waitTime = waitTime;
@@ -261,36 +259,34 @@ public class WorkSchedule {
 
         } else {
 
-            if(this.isBetweenStartTimeMode && this.nextExecuteTime>0) {
+            if (this.isBetweenStartTimeMode && this.nextExecuteTime > 0) {
 
 
+                long tmp = System.currentTimeMillis() - nextExecuteTime;
 
 
-                    long tmp = System.currentTimeMillis()-nextExecuteTime;
+                if (tmp > 0) {
+                    long x = (long) Math.ceil((double) tmp / (double) waitTime);
 
+                    setStartTime(this.nextExecuteTime + waitTime * (x));
 
-                    if(tmp>0) {
-                        long x = (long) Math.ceil(  (double) tmp/ (double) waitTime );
-
-                        setStartTime( this.nextExecuteTime + waitTime*(x) );
-
-                        return this;
-                    }else if(tmp==0) {
-                        setStartTime( this.nextExecuteTime + waitTime );
-                        return this;
-                    }
+                    return this;
+                } else if (tmp == 0) {
+                    setStartTime(this.nextExecuteTime + waitTime);
+                    return this;
+                }
 
 
             }
 
             long crntTime = System.currentTimeMillis();
             long adjCrntTime = crntTime;
-            if(this.isStrictMode) {
-                for(int i=0;i<5;i++) {
-                    long adjTime = (crntTime - (crntTime%1000)) + this.jitter + i*1000;
+            if (this.isStrictMode) {
+                for (int i = 0; i < 5; i++) {
+                    long adjTime = (crntTime - (crntTime % 1000)) + this.jitter + i * 1000;
                     long nextTime = adjTime + waitTime;
 
-                    if((crntTime+this.jitter)<nextTime) {
+                    if ((crntTime + this.jitter) < nextTime) {
                         adjCrntTime = adjTime;
                         break;
                     }
@@ -298,14 +294,12 @@ public class WorkSchedule {
             }
 
 
-
-
             long chkTime = adjCrntTime + waitTime;
             if (this.nextExecuteTime < chkTime) {
                 setStartTime(chkTime);
 
-            }else {
-                System.err.println("overtime : "+this.nextExecuteTime);
+            } else {
+                //System.err.println("overtime : "+this.nextExecuteTime);
             }
 
 
@@ -316,18 +310,40 @@ public class WorkSchedule {
     }
 
 
+    /**
+     * @return
+     */
     public long getIntervalTime() {
         return this.intervalTime;
     }
 
+
+    /**
+     * @param intervalTime
+     * @return
+     */
     public WorkSchedule setRepeatInterval(long intervalTime) {
 
-        this.intervalTime = intervalTime;
-        return setStartDelay(intervalTime);
+        checkLocking();
 
+        this.intervalTime = intervalTime;
+
+        return this;
     }
 
 
+    /**
+     * @param intervalTime
+     * @return
+     */
+    WorkSchedule adjustRepeatInterval(long intervalTime) {
+
+
+        this.intervalTime = intervalTime;
+
+        return setStartDelay(intervalTime);
+
+    }
 
 
     /**
@@ -337,11 +353,15 @@ public class WorkSchedule {
      */
     public WorkSchedule setStartDateTime(String isoDateTime) throws java.text.ParseException {
 
-        return setStartDateTime(Clock.getDate(isoDateTime));
+        this.isDefinedStartTime = true;
+
+        return setStartDateTime(Clock.toDate(isoDateTime));
     }
 
 
     public WorkSchedule setStartDateTime(Date startDateTime) {
+
+        this.isDefinedStartTime = true;
 
         this.setStartTime(startDateTime.getTime());
         return this;
@@ -353,31 +373,50 @@ public class WorkSchedule {
      *
      * @param isoDateTime
      */
-    public WorkSchedule setEndDateTime(String isoDateTime) throws java.text.ParseException {
+    public WorkSchedule setFinishTime(String isoDateTime) throws java.text.ParseException {
 
-        return setEndDateTime(Clock.getDate(isoDateTime));
+        return setFinishTime(Clock.toDate(isoDateTime));
     }
 
-    public WorkSchedule setEndDateTime(Date endDateTime) {
+
+    /**
+     * @param endDateTime
+     * @return
+     */
+    public WorkSchedule setFinishTime(Date endDateTime) {
 
         this.workEndTime = endDateTime.getTime();
         return this;
     }
 
+    /**
+     * @param milliSeconds
+     * @return
+     */
     public WorkSchedule setFinishTimeFromNow(long milliSeconds) {
-        this.workEndTime = System.currentTimeMillis()+milliSeconds;
+        this.workEndTime = System.currentTimeMillis() + milliSeconds;
         return this;
     }
 
 
+    /**
+     * @param className
+     * @return
+     * @throws ClassNotFoundException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
     public WorkSchedule setWorkSession(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         checkLocking();
         this.workSession = (WorkSession) Class.forName(className).newInstance();
         return this;
     }
 
-
-    public WorkSchedule setWorkSession(WorkSession workSession)  {
+    /**
+     * @param workSession
+     * @return
+     */
+    public WorkSchedule setWorkSession(WorkSession workSession) {
         checkLocking();
 
         this.workSession = workSession;
@@ -396,7 +435,7 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule setProcessFlow(ProcessFlow processFlow)  {
+    public WorkSchedule setProcessFlow(ProcessFlow processFlow) {
         checkLocking();
 
         this.processFlow = processFlow;
@@ -413,32 +452,29 @@ public class WorkSchedule {
     ////////////////
 
 
-
     public void raiseLocalEvent(EventInfo event) {
 
-        this.clockWorker.addWorkSchedule(this, event);
+        this.workProcessor.addWorkSchedule(this, event);
 
     }
-
-
 
 
     public WorkSchedule bindEvent(String... eventNames) {
         checkLocking();
 
-        for(String eventName:eventNames) {
+        for (String eventName : eventNames) {
             String[] subEventNames = eventRepository.setBindEventNames(eventName);
-            for(String subEventName:subEventNames) {
-                this.clockWorker.bindEvent( this, subEventName);
+            for (String subEventName : subEventNames) {
+                this.workProcessor.bindEvent(this, subEventName);
             }
         }
         return this;
     }
 
 
-    public WorkSchedule setStrictMode(boolean isStrictMode) {
+    public WorkSchedule setStrictMode() {
         checkLocking();
-        this.isStrictMode = isStrictMode;
+        this.isStrictMode = true;
         return this;
     }
 
@@ -456,7 +492,7 @@ public class WorkSchedule {
 
     public WorkSchedule setSleepMode() {
         checkLocking();
-        this.setStartDelay(Work.SLEEP);
+        this.setStartDelay(Work.WAIT);
         return this;
     }
 
@@ -466,13 +502,20 @@ public class WorkSchedule {
 
     public WorkSchedule activate(boolean checkActivated) {
         if (isStart) {
-            if(checkActivated) {
+            if (checkActivated) {
                 throw new RuntimeException("Already activate!");
-            }else {
+            } else {
                 return this;
             }
         }
         this.isStart = true;
+
+
+        try {
+            this.work.processFlow(this.processFlow);
+        } catch (UnsupportedOperationException npe) {
+
+        }
 
         /*
         if(!isFirstDelaySet) {
@@ -487,27 +530,39 @@ public class WorkSchedule {
         }
         */
 
-        if(this.waitTime!=Work.SLEEP) {
-            this.clockWorker.addWorkSchedule(this);
+
+        if (this.isStrictMode && !this.isDefinedStartTime) {
+
+            long startTime = Clock.nextSecond(900);
+            this.setStartTime(startTime);
+
         }
 
 
-        this.clockWorker.managedWorkCount.incrementAndGet();
+        if (this.waitTime != Work.WAIT) {
+            if (this.isStrictMode || this.isDefinedStartTime) {
+                this.workProcessor.addWorkSchedule(this, false);
+            } else {
+                this.workProcessor.addWorkSchedule(this, true);
+            }
+
+        }
+
+        this.workProcessor.managedWorkCount.incrementAndGet();
 
         return this;
     }
 
-    public WorkSchedule setScheduleConfig(ScheduleConfig config) {
-        config.setup(this);
-
+    public WorkSchedule setScheduleDescriptor(ScheduleDescriptor descriptor) {
+        descriptor.build(this);
         return this;
     }
 
 
     public void finish() {
-        if(this.isStart) {
+        if (this.isStart) {
             this.isStart = false;
-            this.clockWorker.managedWorkCount.decrementAndGet();
+            this.workProcessor.managedWorkCount.decrementAndGet();
         }
     }
 
@@ -518,28 +573,41 @@ public class WorkSchedule {
 
         WorkSchedule schedule = (WorkSchedule) o;
 
-        return workUuid.equals(schedule.workUuid);
+        return workUUID.equals(schedule.workUUID);
     }
 
     @Override
     public int hashCode() {
-        return workUuid.hashCode();
+        return workUUID.hashCode();
     }
 
 
-    public ClockWorker getClockWorker() {
-        return clockWorker;
+    public WorkProcessor getWorkProcessor() {
+        return workProcessor;
+    }
+
+
+    public WorkSchedule setExecuteChecker(ExecuteChecker checker) {
+        this.executeChecker = checker;
+        return this;
+    }
+
+    boolean isExecuteEnable(long time) {
+        if (this.executeChecker != null) {
+            return this.executeChecker.check(time);
+        }
+
+        return true;
     }
 
 
     ///////////////////////////////////
 
 
-
     private EventInfo defaultEvent = null;
 
     EventInfo getDefaultEventInfo() {
-        if(defaultEvent==null) {
+        if (defaultEvent == null) {
             defaultEvent = new EventInfo();
             defaultEvent.setWorkSechedule(this);
         }
@@ -549,25 +617,22 @@ public class WorkSchedule {
     }
 
 
-
     private EventRepository eventRepository = new EventRepository();
-
 
 
     String checkRaiseEventEnable(String eventName) {
 
 
-
         EventSet eventSet = eventRepository.getEventSet(eventName);
 
 
-        if(eventSet==null) {
+        if (eventSet == null) {
             //System.err.println("checkRaiseEventEnable normal = "+eventName );
             return eventName;
         }
 
 
-        if(eventSet.isRaiseEventReady(eventName)) {
+        if (eventSet.isRaiseEventReady(eventName)) {
 
             //System.err.println("checkRaiseEventEnable event="+eventName + " set="+eventSet + " fire="+eventSet.getEventSetName());
             return eventSet.getEventSetName();
@@ -582,13 +647,10 @@ public class WorkSchedule {
     ////////////////////////////
 
 
-
-
-
     ExecuteContext enterQueue(boolean isUserEvent, EventInfo eventInfo) {
 
 
-        ExecuteContext ctx = new ExecuteContext(this,isUserEvent, eventInfo);
+        ExecuteContext ctx = new ExecuteContext(this, isUserEvent, eventInfo);
 
         return ctx;
     }
@@ -596,7 +658,7 @@ public class WorkSchedule {
 
     ExecuteContext enterQueue(boolean isUserEvent) {
 
-        ExecuteContext ctx = new ExecuteContext(this,isUserEvent ,null);
+        ExecuteContext ctx = new ExecuteContext(this, isUserEvent, null);
 
 
         return ctx;
@@ -609,13 +671,11 @@ public class WorkSchedule {
     static class ExecuteContext {
 
 
-
         private WorkSchedule workSchedule;
 
         private boolean isUserEvent = false;
 
         private EventInfo eventInfo;
-
 
 
         ExecuteContext(WorkSchedule workSchedule, boolean isUserEvent, EventInfo event) {
@@ -627,9 +687,8 @@ public class WorkSchedule {
         }
 
 
-
         boolean isExecuteImmediately() {
-            if(isUserEvent) {
+            if (isUserEvent) {
                 this.isUserEvent = false;
 
                 return true;

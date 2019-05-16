@@ -1,94 +1,158 @@
+/*
+ * Copyright 2018 The Isocline Project
+ *
+ * The Isocline Project licenses this file to you under the Apache License,
+ * version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at:
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
 package isocline.clockwork;
 
 import isocline.clockwork.event.EventRepository;
 import isocline.clockwork.event.EventSet;
-import isocline.clockwork.object.Executor;
+import isocline.clockwork.object.FunctionExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
-public class ProcessFlow extends ArrayList<Executor> {
+
+/**
+ *
+ *
+ */
+public class ProcessFlow extends ArrayList<FunctionExecutor> {
 
 
-    private Executor e;
+
     private int sequence = 0;
 
-    private List<Executor> waiters = new ArrayList<Executor>();
+    private FunctionExecutor functionExecutor;
+
+    private List<FunctionExecutor> waiters = new ArrayList<FunctionExecutor>();
 
 
 
-    private EventRepository<String,Executor> eventRepository = new EventRepository();
+    private EventRepository<String,FunctionExecutor> eventRepository = new EventRepository();
 
 
     public void reset() {
         sequence = 0;
     }
 
+    /**
+     *
+     * @return
+     */
     public ProcessFlow end() {
-        if(e!=null) {
-            e.setEnd(true);
+        if(functionExecutor !=null) {
+            functionExecutor.setLastExecutor(true);
         }
 
         return this;
     }
 
 
+    /**
+     *
+     * @param runnable
+     * @return
+     */
     public ProcessFlow run(Runnable runnable) {
+        functionExecutor = new FunctionExecutor(runnable, false);
 
-        add(new Executor(runnable, false));
+        add(functionExecutor);
 
         return this;
     }
 
+
+    /**
+     *
+     * @param consumer
+     * @return
+     */
+    public ProcessFlow run(Consumer consumer) {
+        functionExecutor = new FunctionExecutor(consumer, false);
+        add(functionExecutor);
+
+        return this;
+    }
+
+
+    /**
+     *
+     * @param runnable
+     * @return
+     */
     public ProcessFlow runAsync(Runnable runnable) {
 
-        add(new Executor(runnable, true));
+        add(new FunctionExecutor(runnable, true));
         return this;
     }
 
 
-
-
+    /**
+     *
+     * @param runnable
+     * @param eventName
+     * @return
+     */
     public ProcessFlow runAsync(Runnable runnable, String eventName) {
-        e = new Executor(runnable, true);
-        e.setFireEventName(eventName);
+        functionExecutor = new FunctionExecutor(runnable, true);
+        functionExecutor.setFireEventName(eventName);
 
-        add(e);
+        add(functionExecutor);
 
         return this;
     }
 
 
+    /**
+     *
+     * @param runnable
+     * @param eventNames
+     * @return
+     */
+    public ProcessFlow runWait(Runnable runnable, String... eventNames) {
 
+        for(String eventName:eventNames) {
 
+            String[] subEventNames = eventRepository.setBindEventNames(eventName);
 
-    public ProcessFlow runWait(Runnable runnable, String eventName) {
+            functionExecutor = new FunctionExecutor(runnable, false);
+            functionExecutor.setRecvEventName(eventName);
 
-        String[] subEventNames = eventRepository.setBindEventNames(eventName);
+            waiters.add(functionExecutor);
 
-
-
-        e = new Executor(runnable, false);
-        e.setRecvEventName(eventName);
-
-        waiters.add(e);
-
-        eventRepository.put(eventName, e);
-        for(String subEventName:subEventNames) {
-            eventRepository.put(subEventName, e);
+            eventRepository.put(eventName, functionExecutor);
+            for (String subEventName : subEventNames) {
+                eventRepository.put(subEventName, functionExecutor);
+            }
         }
 
         return this;
     }
 
 
-
-    public Executor getExecutor(String eventName) {
+    /**
+     *
+     * @param eventName
+     * @return
+     */
+    public FunctionExecutor getExecutor(String eventName) {
         if(eventName==null) return null;
 
 
         /*
-        Executor x =  this.eventRepository.get(eventName);
+        FunctionExecutor x =  this.eventRepository.get(eventName);
         System.err.println(eventName + " --> "+x);
 
         return x;
@@ -108,11 +172,16 @@ public class ProcessFlow extends ArrayList<Executor> {
 
     }
 
-    public Executor getNextExecutor() {
+
+    /**
+     *
+     * @return
+     */
+    public FunctionExecutor getNextExecutor() {
 
         //IndexOutOfBoundsException
 
-        Executor exec = null;
+        FunctionExecutor exec = null;
         try {
             exec = this.get(this.sequence);
             //System.err.println("getNextExecutor:"+sequence );
@@ -126,7 +195,12 @@ public class ProcessFlow extends ArrayList<Executor> {
         return exec;
     }
 
-    public List<Executor> getWaiters() {
+    /**
+     *
+     *
+     * @return
+     */
+    public List<FunctionExecutor> getWaiters() {
         return this.waiters;
     }
 

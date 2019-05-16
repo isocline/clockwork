@@ -17,7 +17,7 @@ package isocline.clockwork;
 
 /**
  *
- * Configuration class for ClockWorker
+ * Configuration class for WorkProcessor
  */
 public class Configuration {
 
@@ -62,6 +62,10 @@ public class Configuration {
 
     }
 
+    /**
+     *
+     * @return
+     */
     public Configuration lock() {
         this.isPropertyLocking = true;
         return this;
@@ -77,36 +81,70 @@ public class Configuration {
         }
     }
 
+    /**
+     * Returns a initial thread worker size
+     *
+     * @return
+     */
     public int getInitThreadWorkerSize() {
         return initThreadWorkerSize;
     }
 
+
+    /**
+     *
+     * @param initThreadWorkerSize
+     * @return
+     */
     public Configuration setInitThreadWorkerSize(int initThreadWorkerSize) {
         this.check();
         this.initThreadWorkerSize = initThreadWorkerSize;
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
     public int getMaxThreadWorkerSize() {
         return maxThreadWorkerSize;
     }
 
+    /**
+     *
+     * @param maxThreadWorkerSize
+     * @return
+     */
     public Configuration setMaxThreadWorkerSize(int maxThreadWorkerSize) {
         this.check();
         this.maxThreadWorkerSize = maxThreadWorkerSize;
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
     public int getThreadPriority() {
         return threadPriority;
     }
 
+
+    /**
+     *
+     * @param threadPriority
+     * @return
+     */
     public Configuration setThreadPriority(int threadPriority) {
         this.check();
         this.threadPriority = threadPriority;
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
     public long getExecuteTimeout() {
         return executeTimeout;
     }
@@ -117,21 +155,40 @@ public class Configuration {
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
     public int getMaxWorkQueueSize() {
         return maxWorkQueueSize;
     }
 
+
+    /**
+     *
+     * @param maxWorkQueueSize
+     * @return
+     */
     public Configuration setMaxWorkQueueSize(int maxWorkQueueSize) {
         this.check();
         this.maxWorkQueueSize = maxWorkQueueSize;
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
     public long getExecuteCountdownMilliTime() {
         return executeCountdownMilliTime;
     }
 
 
+    /**
+     *
+     * @param countdownTime
+     * @return
+     */
     public Configuration setExecuteCountdownMilliTime(long countdownTime) {
         this.check();
         this.executeCountdownMilliTime =countdownTime;

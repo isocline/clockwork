@@ -37,14 +37,14 @@ public class MailSender implements Work {
 
 
         if(send()) {
-            return FINISH;
+            return TERMINATE;
         }else {
             logger.error("send fail");
             failCount++;
 
             if(failCount>20) {
                 logger.error("max fail count");
-                return FINISH;
+                return TERMINATE;
             }
 
             long timeGap = failCount * 15 * timeUnit;
@@ -61,7 +61,7 @@ public class MailSender implements Work {
    }
 
    public static void main(String[] args) throws Exception {
-       ClockWorker worker = ClockWorkerContext.getWorker();
+       WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
 
 
        String[] emails = new String[] {"test@test.com","test2@test.com"};

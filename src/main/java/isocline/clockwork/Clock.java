@@ -19,17 +19,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * @author webplugger
+ * Utility Class with time setting related functions
+ *
+ * @author Richard Dean Kim
+ * @see WorkSchedule
  */
 public class Clock {
 
     /**
-     *
-     *
+     * right now
      */
     public final static long AGAIN_RIGHT_WAY = 0;
-
-
 
 
     /**
@@ -56,18 +56,20 @@ public class Clock {
 
 
     /**
+     * Obtains a time to the current system millisecond time using ISO 8601 in the specified time zone.
+     *
      * @param isoDateTime
      * @return
      */
-    public static long at(String isoDateTime) throws java.text.ParseException {
+    public static long fromNow(String isoDateTime) throws java.text.ParseException {
 
 
-        Date date = getDate(isoDateTime);
+        Date date = toDate(isoDateTime);
 
-        long gap = date.getTime() - System.currentTimeMillis()-1;
+        long gap = date.getTime() - System.currentTimeMillis() - 1;
 
         if (gap < 1) {
-            return Work.FINISH;
+            return Work.TERMINATE;
         }
 
         return gap;
@@ -76,42 +78,98 @@ public class Clock {
     }
 
 
+    /**
+     * Obtains a millisecond
+     *
+     * @param hour
+     * @param minute
+     * @param second
+     * @return
+     */
+    public static long fromNow(long hour, long minute, long second) {
+        return hour * HOUR + minute * MINUTE + second * SECOND;
+    }
+
 
     /**
-     *
+     * Returns a next second from now
      *
      * @return
      */
     public static long nextSecond(long maximumWait) {
         long s = System.currentTimeMillis();
-        long s1 = s%1000;
+        long s1 = s % SECOND;
 
-        if(s1>maximumWait) {
-            return (s-s1) + 2000;
-        }else {
-            return (s - s1) + 1000;
+        if (s1 > maximumWait) {
+            return (s - s1) + SECOND * 2;
+        } else {
+            return (s - s1) + SECOND;
         }
     }
 
 
+    public static long nextSecond() {
+        return nextSecond(990);
+    }
+
+    public static long nextMinutes() {
+
+
+        long s = System.currentTimeMillis();
+        long s1 = s % MINUTE;
+
+        if (s1 > (MINUTE-20)) {
+            return (s - s1) + MINUTE * 2;
+        } else {
+            return (s - s1) + MINUTE;
+        }
+    }
+
     /**
+     * Obtains a DateTime set to the current system millisecond time using ISO 8601 in the specified time zone.
+     *
      * @param isoDateTime
      * @return
      * @throws java.text.ParseException
      */
-    public static Date getDate(String isoDateTime) throws java.text.ParseException {
+    public static Date toDate(String isoDateTime) throws java.text.ParseException {
 
         String isoDateTimeTxt = isoDateTime.replaceAll("\\+0([0-9]){1}\\:00", "+0$100");
 
-        SimpleDateFormat form = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+
+        SimpleDateFormat form = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
         Date date;
         try {
             date = form.parse(isoDateTimeTxt);
         } catch (java.text.ParseException pe) {
+            pe.printStackTrace();
             form = new SimpleDateFormat("yyyyMMdd'T'HHmmssZ");
             date = form.parse(isoDateTimeTxt);
         }
         return date;
 
+    }
+
+    /**
+     *
+     * @param isoDateTime
+     * @return
+     * @throws java.text.ParseException
+     */
+    public static long toMilliSeconds(String isoDateTime) throws java.text.ParseException {
+        return toDate(isoDateTime).getTime();
+    }
+
+
+    /**
+     *
+     * @param time
+     * @return
+     */
+    public static String toDateFormat(long time) {
+        SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Date date = new Date(time);
+
+        return dt.format(date);
     }
 }

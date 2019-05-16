@@ -1,6 +1,6 @@
 package isocline.clockwork.object;
 
-import isocline.clockwork.ClockWorkerContext;
+import isocline.clockwork.WorkProcessorFactory;
 import isocline.clockwork.EventInfo;
 import isocline.clockwork.Work;
 
@@ -15,7 +15,7 @@ public abstract class LiveObject implements Work {
 
     public void start() {
 
-        ClockWorkerContext.getWorker().createSchedule(this).activate();
+        WorkProcessorFactory.getDefaultProcessor().createSchedule(this).activate();
     }
 
     public abstract long check();

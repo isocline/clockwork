@@ -1,7 +1,7 @@
 package isocline.clockwork.examples.object;
 
 import isocline.clockwork.Clock;
-import isocline.clockwork.ClockWorkerContext;
+import isocline.clockwork.WorkProcessorFactory;
 import isocline.clockwork.object.LiveObject;
 
 public class ServerCheck extends LiveObject {
@@ -13,7 +13,7 @@ public class ServerCheck extends LiveObject {
         count++;
 
         if(count>10) {
-            return FINISH;
+            return TERMINATE;
         }
         System.err.println("check");
         return Clock.SECOND;
@@ -27,7 +27,7 @@ public class ServerCheck extends LiveObject {
 
         System.out.println("zzz");
 
-        ClockWorkerContext.getWorker().awaitShutdown();
+        WorkProcessorFactory.getDefaultProcessor().awaitShutdown();
 
     }
 

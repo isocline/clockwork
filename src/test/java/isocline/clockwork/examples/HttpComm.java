@@ -60,23 +60,24 @@ public class HttpComm implements Work {
                 read();
 
                 if(seq>50)
-                    return FINISH;
+                    return TERMINATE;
                 return Work.LOOP;
             }
         }catch (IOException ioe) {
 
         }
-        return FINISH;
+        return TERMINATE;
     }
 
     public static void main(String[] args) throws Exception {
-        ClockWorker worker = ClockWorkerContext.getWorker();
+        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
 
-        long startTime = Clock.nextSecond(900);
+        long startTime = Clock.nextSecond();
 
         for(int i=0;i<20;i++) {
-            HttpComm work = new HttpComm("https://solution.cyber-i.com/main");
-            worker.createSchedule(work).setStartTime(startTime+i*50).activate();
+            HttpComm work = new HttpComm("https://www.google.com");
+            //worker.createSchedule(work).setStartTime(startTime+i*50).activate();
+            worker.createSchedule(work).setStrictMode().activate();
 
         }
         worker.awaitShutdown();

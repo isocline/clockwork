@@ -10,7 +10,7 @@ public interface WorkObject extends Work {
 
 
 
-    default WorkSchedule regist(ClockWorker worker, ProcessFlow flow) {
+    default WorkSchedule regist(WorkProcessor worker, ProcessFlow flow) {
 
         processFlow(flow);
 
@@ -24,13 +24,13 @@ public interface WorkObject extends Work {
      *
      * @param worker
      */
-    default void execute(ClockWorker worker) {
+    default void execute(WorkProcessor worker) {
 
         ProcessFlow flow = new ProcessFlow();
 
         WorkSchedule schedule = regist(worker, flow);
 
-        schedule.setProcessFlow(flow).setStartTime(1).activate();
+        schedule.setProcessFlow(flow).activate();
     }
 
 
@@ -42,7 +42,7 @@ public interface WorkObject extends Work {
         ProcessFlow flow = event.getWorkSchedule().getProcessFlow();
 
         String eventName = event.getEventName();
-        Executor exec = null;
+        FunctionExecutor exec = null;
 
         if(eventName!=null) {
             exec = flow.getExecutor(eventName);
@@ -51,33 +51,44 @@ public interface WorkObject extends Work {
 
             if (exec != null) {
 
-                exec.execute();
+                try {
+                    exec.execute();
+                }catch (Exception e) {
+                    e.printStackTrace();
+                    event.getWorkSchedule().raiseLocalEvent(event.setEventName("error"));
 
-                if (exec.isEndExecutor()) {
-                    return FINISH;
+                }
+
+                if (exec.isLastExecutor()) {
+                    return TERMINATE;
                 } else {
-                    return SLEEP;
+                    return WAIT;
                 }
             }
         }
 
 
-        exec = (Executor) event.getAttribute("exec.func");
+        exec = (FunctionExecutor) event.getAttribute("exec.func");
         if (exec != null) {
             event.removeAttribute("exec.func");
-            exec.execute();
+            try {
+                exec.execute();
+            }catch (Exception e) {
+                e.printStackTrace();
+                event.getWorkSchedule().raiseLocalEvent(event.setEventName("error"));
+            }
 
             String eventNm = exec.getFireEventName();
             if (eventNm != null) {
 
 
-                //event.getWorkSchedule().getClockWorker().raiseEvent(eventNm, event);
+                //event.getWorkSchedule().getWorkProcessor().raiseEvent(eventNm, event);
                 event.getWorkSchedule().raiseLocalEvent(event.setEventName(eventNm));
             }
-            if (exec.isEndExecutor()) {
-                return FINISH;
+            if (exec.isLastExecutor()) {
+                return TERMINATE;
             } else {
-                return SLEEP;
+                return WAIT;
             }
         }
 
@@ -95,21 +106,27 @@ public interface WorkObject extends Work {
             }
 
 
-            exec.execute();
+            try {
+                exec.execute();
+            }catch (Exception e) {
+                e.printStackTrace();
+                event.getWorkSchedule().raiseLocalEvent(event.setEventName("error"));
+                return WAIT;
+            }
 
             String eventNm = exec.getFireEventName();
             if (eventNm != null) {
 
-                //event.getWorkSchedule().getClockWorker().raiseEvent(eventNm, event);
+                //event.getWorkSchedule().getWorkProcessor().raiseEvent(eventNm, event);
                 event.getWorkSchedule().raiseLocalEvent(event.setEventName(eventNm));
             }
 
-            if (exec.isEndExecutor()) {
-                return FINISH;
+            if (exec.isLastExecutor()) {
+                return TERMINATE;
             }
 
         } else {
-            return SLEEP;
+            return WAIT;
         }
         return 1;
     }

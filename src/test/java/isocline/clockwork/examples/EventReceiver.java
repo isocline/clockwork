@@ -25,13 +25,13 @@ public class EventReceiver implements Work {
         logger.debug("receive:" + event.getEventName());
 
 
-        return SLEEP;
+        return WAIT;
 
     }
 
     public static void main(String[] args) throws Exception {
 
-        ClockWorker worker = ClockWorkerContext.getWorker();
+        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
 
 
         EventReceiver checker = new EventReceiver();
@@ -46,7 +46,8 @@ public class EventReceiver implements Work {
 
 
 
-        worker.createSchedule(gen).setFinishTimeFromNow(30 * Clock.SECOND).setStrictMode(true).setStartTime(startTime).activate();
+        worker.createSchedule(gen).setFinishTimeFromNow(30 * Clock.SECOND).setStrictMode().setStartDateTime
+                (startTime).activate();
 
 
         worker.shutdown(20 * Clock.SECOND);

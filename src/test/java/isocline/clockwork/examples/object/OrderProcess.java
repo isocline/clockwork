@@ -1,7 +1,7 @@
 package isocline.clockwork.examples.object;
 
 import isocline.clockwork.*;
-import isocline.clockwork.object.Executor;
+import isocline.clockwork.object.FunctionExecutor;
 import isocline.clockwork.ProcessFlow;
 import org.apache.log4j.Logger;
 
@@ -100,7 +100,7 @@ public class OrderProcess implements Work {
 
     WorkSchedule schedule;
 
-    public void regist(ClockWorker worker) {
+    public void regist(WorkProcessor worker) {
 
         logger.debug("regist");
         processFlow(flow);
@@ -109,7 +109,7 @@ public class OrderProcess implements Work {
 
         schedule = worker.createSchedule(this);
 
-        for (Executor waiter : flow.getWaiters()) {
+        for (FunctionExecutor waiter : flow.getWaiters()) {
             String eventName = waiter.getRecvEventName();
 
             logger.debug("event bind "+eventName);
@@ -122,14 +122,15 @@ public class OrderProcess implements Work {
 
     }
 
-    public void execute(ClockWorker worker) {
+    public void execute(WorkProcessor worker) {
 
 
 
         regist(worker);
 
         logger.debug("start exec");
-        this.schedule.setStartTime(1).activate();
+        //this.schedule.setStartTime(1).activate();
+        this.schedule.activate();
 
 
     }
@@ -138,7 +139,7 @@ public class OrderProcess implements Work {
 
     public static void main(String[] args) throws Exception {
 
-        ClockWorker worker = new ClockWorker("perform", Configuration.PERFORMANCE);
+        WorkProcessor worker = WorkProcessorFactory.getProcessor("perform", Configuration.PERFORMANCE);
 
 
         OrderProcess p = new OrderProcess("AutoExpress");
@@ -162,25 +163,26 @@ public class OrderProcess implements Work {
 
 
         String eventName = event.getEventName();
-        Executor exec = null;
+        FunctionExecutor exec = null;
 
         if(eventName!=null) {
             exec = flow.getExecutor(eventName);
 
             if (exec != null) {
 
+
                 exec.execute();
 
-                if (exec.isEndExecutor()) {
-                    return FINISH;
+                if (exec.isLastExecutor()) {
+                    return TERMINATE;
                 } else {
-                    return SLEEP;
+                    return WAIT;
                 }
 
 
             }
         }
-        exec = (Executor) event.getAttribute("exec.func");
+        exec = (FunctionExecutor) event.getAttribute("exec.func");
         if(exec!=null) {
             exec.execute();
 
@@ -188,12 +190,12 @@ public class OrderProcess implements Work {
             if (eventNm != null) {
 
                 logger.debug("fire event "+eventNm);
-                event.getWorkSchedule().getClockWorker().raiseEvent(eventNm, event);
+                event.getWorkSchedule().getWorkProcessor().raiseEvent(eventNm, event);
             }
-            if(exec.isEndExecutor()) {
-                return FINISH;
+            if(exec.isLastExecutor()) {
+                return TERMINATE;
             }else {
-                return SLEEP;
+                return WAIT;
             }
         }
 
@@ -207,7 +209,7 @@ public class OrderProcess implements Work {
                 newEvent.setAttribute("exec.func",exec);
                 //worker.createSchedule(this).bindEvent("async").activate();
 
-                //event.getWorkSchedule().getClockWorker().raiseEvent("async", newEvent);
+                //event.getWorkSchedule().getWorkProcessor().raiseEvent("async", newEvent);
 
                 event.getWorkSchedule().raiseLocalEvent(newEvent);
 
@@ -221,15 +223,15 @@ public class OrderProcess implements Work {
             String eventNm = exec.getFireEventName();
             if (eventNm != null) {
 
-                event.getWorkSchedule().getClockWorker().raiseEvent(eventNm, event);
+                event.getWorkSchedule().getWorkProcessor().raiseEvent(eventNm, event);
             }
 
-            if(exec.isEndExecutor()) {
-                return FINISH;
+            if(exec.isLastExecutor()) {
+                return TERMINATE;
             }
 
         }else {
-            return SLEEP;
+            return WAIT;
         }
         return 1;
     }

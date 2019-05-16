@@ -1,5 +1,6 @@
-package isocline.clockwork;
+package isocline.clockwork.dummy;
 
+import isocline.clockwork.*;
 import org.apache.log4j.Logger;
 
 public class Test {
@@ -7,7 +8,7 @@ public class Test {
     public static void main(String[] args) throws Exception {
 
 
-        ClockWorker worker = ClockWorkerContext.getWorker();
+        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
 
 
 
@@ -16,8 +17,8 @@ public class Test {
 
             TestJob work = new TestJob(i);
             //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStartDelay(1000);
-            //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStartDelay(Clock.at("2019-01-17T13:32:30+09:00"));
-            WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStrictMode(true);
+            //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStartDelay(Clock.fromNow("2019-01-17T13:32:30+09:00"));
+            WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStrictMode();
             //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire");
 
             schedule.activate();
@@ -70,7 +71,7 @@ public class Test {
             log(seq + "th job execute. count="+count + " "+eventMsg);
 
             if(eventMsg!=null) {
-                return FINISH;
+                return TERMINATE;
             }
 
 
@@ -80,9 +81,9 @@ public class Test {
             } else if (count >3 && count<6) {
                 return 2*Clock.SECOND;
             } else if(count >= 6) {
-                return SLEEP;
+                return WAIT;
             }else {
-                return FINISH;
+                return TERMINATE;
             }
 
 

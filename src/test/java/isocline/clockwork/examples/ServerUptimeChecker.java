@@ -93,7 +93,7 @@ public class ServerUptimeChecker  implements Work {
             failCount++;
 
             if(failCount>10) {
-                return FINISH;
+                return TERMINATE;
             }
             return 30*Clock.SECOND;
 
@@ -102,14 +102,14 @@ public class ServerUptimeChecker  implements Work {
    }
 
    public static void main(String[] args) throws Exception {
-       ClockWorker worker = ClockWorkerContext.getWorker();
+       WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
 
 
        String[] urls = new String[] {"https://www.google.com","https://www.apple.com"};
        for(String url:urls) {
 
            ServerUptimeChecker checker = new ServerUptimeChecker( url);
-           WorkSchedule schedule = worker.createSchedule(checker).bindEvent("connectTypeChange").setJitter(200).setStrictMode(true);
+           WorkSchedule schedule = worker.createSchedule(checker).bindEvent("connectTypeChange").setJitter(200).setStrictMode();
            schedule.activate();
        }
 

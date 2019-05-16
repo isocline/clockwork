@@ -16,37 +16,59 @@
 package isocline.clockwork;
 
 import javax.servlet.ServletContextEvent;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
  *
  *
  */
-public class ClockWorkerContext implements
+public class WorkProcessorFactory implements
         javax.servlet.ServletContextListener {
 
-    private static ClockWorker worker;
+    private static WorkProcessor worker;
+
+    private static Map<String, WorkProcessor> processorMap = new HashMap<String, WorkProcessor>();
 
 
     /**
      *
      * @return
      */
-    public static ClockWorker getWorker() {
+    public static WorkProcessor getDefaultProcessor() {
 
 
-        if (worker == null) {
-            worker = new ClockWorker("default", Configuration.NOMAL);
+        if (worker == null || ! worker.isWorking()) {
+            worker = new WorkProcessor("default", Configuration.NOMAL);
         }
 
         return worker;
+    }
+
+
+    /**
+     *
+     * @param id
+     * @param config
+     * @return
+     */
+    public static synchronized WorkProcessor getProcessor(String id, Configuration config) {
+        WorkProcessor processor = processorMap.get(id);
+        if (processor == null || ! processor.isWorking()) {
+            processor = new WorkProcessor(id, config);
+            processorMap.put(id, processor);
+        }
+
+        return processor;
+
     }
 
     /**
      * @param sce
      */
     public void contextInitialized(ServletContextEvent sce) {
-        getWorker();
+        getDefaultProcessor();
 
     }
 

@@ -62,10 +62,10 @@ public class ServerHeartbeat implements Work {
     }
 
     public static void main(String[] args) throws Exception {
-        ClockWorker worker = ClockWorkerContext.getWorker();
+        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
 
 
-        WorkSchedule schedule = worker.createSchedule(ServerHeartbeat.class).setStrictMode(true);
+        WorkSchedule schedule = worker.createSchedule(ServerHeartbeat.class).setStrictMode();
         schedule.activate();
 
 

@@ -1,6 +1,5 @@
 package isocline.clockwork.module;
 
-import isocline.clockwork.ClockWorkerContext;
 import isocline.clockwork.EventInfo;
 import isocline.clockwork.Work;
 
@@ -25,10 +24,12 @@ public class SignalGenerator implements Work {
         event.copyTo(newEvent);
 
 
+        event.getWorkSchedule().getWorkProcessor().raiseEvent(eventName, newEvent);
 
-        //event.getWorkSchedule().getClockWorker().raiseEvent(eventName, event);
-        ClockWorkerContext.getWorker().raiseEvent(eventName, newEvent);
-        System.out.println("FIRE");
+        //event.getWorkSchedule().getWorkProcessor().raiseEvent(eventName, event);
+        //WorkProcessorFactory.getDefaultProcessor().raiseEvent(eventName, newEvent);
+
+        System.out.println("FIRE event:"+eventName);
 
         return timeGap;
     }

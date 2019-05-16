@@ -1,11 +1,13 @@
-package isocline.clockwork;
+package isocline.clockwork.dummy;
+
+import isocline.clockwork.*;
 
 public class Test2 {
 
     public static void main(String[] args) throws Exception {
 
 
-        ClockWorker worker = ClockWorkerContext.getWorker();
+        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
 
 
 
@@ -62,7 +64,7 @@ public class Test2 {
             if (count % 3 == 0) {
                 return 2 * Clock.SECOND;
             } else if (count >3) {
-                return FINISH;
+                return TERMINATE;
             } else {
                 return Clock.SECOND;
             }

@@ -64,9 +64,9 @@ public class MultiPlexer implements Work {
     }
 
     public static void main(String[] args) throws Exception {
-        ClockWorker worker = new ClockWorker("perform", Configuration.PERFORMANCE);
+        WorkProcessor worker = WorkProcessorFactory.getProcessor("perform", Configuration.PERFORMANCE);
 
-        long startTime = Clock.nextSecond(900);
+        long startTime = Clock.nextSecond();
 
         System.out.println(startTime);
         System.out.println(System.currentTimeMillis());
@@ -74,7 +74,8 @@ public class MultiPlexer implements Work {
 
 
         for(int i=0;i< 10;i++ ) {
-            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("A",i)).setStartTime(startTime+i*10);
+            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("A",i)).setStartDateTime(startTime+i*10)
+                    .setStrictMode();
             schedule.activate();
         }
 
