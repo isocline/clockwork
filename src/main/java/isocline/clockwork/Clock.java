@@ -136,8 +136,15 @@ public class Clock {
 
         String isoDateTimeTxt = isoDateTime.replaceAll("\\+0([0-9]){1}\\:00", "+0$100");
 
+        SimpleDateFormat form = null;
+        //System.err.println( isoDateTime + " "+isoDateTime.length());
+        if(isoDateTime.length()==25) {
+            form = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+        }else {
+            form = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        }
 
-        SimpleDateFormat form = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+
         Date date;
         try {
             date = form.parse(isoDateTimeTxt);

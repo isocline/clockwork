@@ -290,8 +290,11 @@ public class CronDescriptorTest {
 
         CronDescriptor.CrontabChecker chk = descriptor.getChecker();
 
+        long x2 = Clock.toMilliSeconds("2019-05-05T02:30:00Z");
+        long x = Clock.toMilliSeconds("2019-05-05T02:30:00Z");
+        long x3 = Clock.toMilliSeconds("2019-05-05T02:30:00Z");
 
-        long x = Clock.toMilliSeconds("2019-05-05T02:30:00+09:00");
+
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new java.util.Date(x));
         int min = calendar.get(Calendar.MINUTE);
@@ -301,6 +304,7 @@ public class CronDescriptorTest {
         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 
         System.out.println("x ="+x);
+        System.out.println("x2 ="+x2);
         System.out.println("min ="+min);
         System.out.println("hour ="+hour);
         System.out.println("dayOfMon ="+dayOfMon);
