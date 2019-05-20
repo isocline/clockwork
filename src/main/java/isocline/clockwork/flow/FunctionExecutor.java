@@ -13,8 +13,6 @@ import java.util.function.Consumer;
 public class FunctionExecutor {
 
 
-    private boolean isAsync;
-
     private boolean isLastExecutor = false;
 
     private String fireEventName;
@@ -29,7 +27,10 @@ public class FunctionExecutor {
     private Consumer cusumer;
 
 
-    public FunctionExecutor(Object obj, boolean isAsync) {
+    private long delayTimeFireEvent = 0;
+
+
+    public FunctionExecutor(Object obj) {
 
         if (obj != null) {
             if (obj instanceof Runnable) {
@@ -42,11 +43,9 @@ public class FunctionExecutor {
         }
 
 
-        this.isAsync = isAsync;
-
         this.eventUUID = UUID.randomUUID().toString();
 
-
+        //System.out.println(this.eventUUID + "   regist ===== " + obj);
     }
 
 
@@ -62,9 +61,6 @@ public class FunctionExecutor {
         return isLastExecutor;
     }
 
-    public boolean isAsync() {
-        return this.isAsync;
-    }
 
     public void setFireEventName(String eventName) {
         this.fireEventName = eventName;
@@ -82,13 +78,24 @@ public class FunctionExecutor {
         return this.recvEventName;
     }
 
+    public long getDelayTimeFireEvent() {
+        return delayTimeFireEvent;
+    }
+
+    public void setDelayTimeFireEvent(long delayTimeFireEvent) {
+        this.delayTimeFireEvent = delayTimeFireEvent;
+    }
+
     public void execute(WorkEvent event) {
 
         if (runnable != null) {
+
             runnable.run();
+            return;
         }
 
         if (cusumer != null) {
+
             cusumer.accept(event);
         }
     }

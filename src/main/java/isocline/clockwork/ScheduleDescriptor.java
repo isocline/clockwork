@@ -15,8 +15,19 @@
  */
 package isocline.clockwork;
 
+
+/**
+ *
+ * @see isocline.clockwork.WorkSchedule
+ */
 public interface ScheduleDescriptor {
 
+
+    /**
+     *
+     *
+     * @param workSchedule
+     */
     void build(WorkSchedule workSchedule);
 
 }

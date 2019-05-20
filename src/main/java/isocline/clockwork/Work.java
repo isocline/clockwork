@@ -41,13 +41,7 @@ public interface Work {
     long LOOP = 0;
 
 
-    /**
-     * @param flow
-     */
-    default void defineWorkFlow(WorkFlow flow) {
 
-        throw new UnsupportedOperationException();
-    }
 
 
     /**

@@ -34,7 +34,7 @@ public interface WorkSession {
 
     void setAttribute(String key, Object object);
 
-    Object getAttriute(String key);
+    Object getAttribute(String key);
 
     Object removeAttribute(String key);
 

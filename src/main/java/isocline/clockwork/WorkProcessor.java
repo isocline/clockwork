@@ -30,6 +30,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Base class for WorkSchedule management and thread management
+ *
+ * @see isocline.clockwork.Work
+ * @see isocline.clockwork.FlowableWork
+ * @see isocline.clockwork.WorkSchedule
  */
 public class WorkProcessor extends ThreadGroup {
 
@@ -102,7 +106,6 @@ public class WorkProcessor extends ThreadGroup {
     }
 
     /**
-     *
      * @param work
      * @param eventNames
      * @return
@@ -121,9 +124,9 @@ public class WorkProcessor extends ThreadGroup {
         return execute(work, 0);
     }
 
-    public WorkSchedule execute(Work work,long startDelayTime) {
+    public WorkSchedule execute(Work work, long startDelayTime) {
         WorkSchedule workSchedule = new WorkSchedule(this, work);
-        if(startDelayTime>0) {
+        if (startDelayTime > 0) {
             workSchedule.setStartDelayTime(startDelayTime);
         }
 
@@ -354,7 +357,7 @@ public class WorkProcessor extends ThreadGroup {
         return result;
     }
 
-    boolean addWorkSchedule(WorkSchedule workSchedule,WorkEvent workEvent) {
+    boolean addWorkSchedule(WorkSchedule workSchedule, WorkEvent workEvent) {
 
         boolean result = this.workQueue.offer(workSchedule.enterQueue(true, workEvent));
         if (result) {
@@ -368,6 +371,16 @@ public class WorkProcessor extends ThreadGroup {
         }
 
         return result;
+    }
+
+
+    boolean addWorkSchedule(WorkSchedule workSchedule, WorkEvent workEvent, long delayTime) {
+
+        workEvent.setFireTime(System.currentTimeMillis() + delayTime);
+
+        this.workChecker.addWorkStatusWrapper(workSchedule, workEvent);
+
+        return true;
     }
 
 
@@ -512,13 +525,16 @@ public class WorkProcessor extends ThreadGroup {
             WorkSchedule[] array = workScheduleList.getWorkScheduleArray();
             for (WorkSchedule schedule : array) {
 
-                String newEventName = schedule.checkRaiseEventEnable(eventName);
+                String newEventName = schedule.getDeliverableEventName(eventName);
 
                 if (newEventName != null) {
                     WorkEvent newWorkEvent = workEvent;
                     if (!newEventName.equals(eventName)) {
+                        /*
                         newWorkEvent = WorkEventFactory.create(newEventName);
                         workEvent.copyTo(newWorkEvent);
+                        */
+                        newWorkEvent = workEvent.create(newEventName);
 
                     }
                     //schedule.raiseEvent(newWorkEvent);
@@ -640,7 +656,7 @@ public class WorkProcessor extends ThreadGroup {
 
         private boolean check(WorkSchedule schedule, long time) {
 
-            if(!schedule.isActivated()) {
+            if (!schedule.isActivated()) {
                 return false;
             }
 
@@ -677,7 +693,6 @@ public class WorkProcessor extends ThreadGroup {
             while (isWorking()) {
 
 
-
                 WorkSchedule workSchedule = null;
                 try {
 
@@ -685,7 +700,6 @@ public class WorkProcessor extends ThreadGroup {
 
                     WorkSchedule.ExecuteContext ctx = this.workProcessor.workQueue.poll(maxWaitTime,
                             TimeUnit.MILLISECONDS);
-
 
 
                     if (ctx == null) {
@@ -718,9 +732,7 @@ public class WorkProcessor extends ThreadGroup {
                     {
                         timeoutCount = 0;
                         stoplessCount++;
-                        Work slc = workSchedule.getWorkObject();
-
-
+                        Work workObject = workSchedule.getWorkObject();
 
 
                         if (check(workSchedule, this.lastWorkTime)) {
@@ -738,8 +750,9 @@ public class WorkProcessor extends ThreadGroup {
                             */
 
 
+                            //System.err.println("1-- "+Math.random());
                             if (ctx.isExecuteImmediately() || remainMilliTime < workSchedule.getPreemptiveMilliTime()) {
-
+                                //System.err.println("2-- "+Math.random());
 
                                 WorkEvent workEvent = ctx.getWorkEvent();
                                 if (workEvent == null) {
@@ -757,26 +770,25 @@ public class WorkProcessor extends ThreadGroup {
                                 workSchedule.adjustWaiting();
 
 
-
-                                long delaytime = slc.execute(workEvent);
+                                long delaytime = workObject.execute(workEvent);
 
 
                                 int loopCount = 0;
-                                while (delaytime == Work.LOOP && loopCount<1000) {
-                                    delaytime = slc.execute(workEvent);
+                                while (delaytime == Work.LOOP && loopCount < 1000) {
+                                    delaytime = workObject.execute(workEvent);
                                     loopCount++;
                                 }
 
-                                if(delaytime==Work.LOOP) {
-                                    delaytime = 1*Clock.SECOND;
+                                if (delaytime == Work.LOOP) {
+                                    delaytime = 1 * Clock.SECOND;
                                 }
 
 
                                 if (delaytime == Work.WAIT) {
 
-                                    long repeatInterval  = workSchedule.getIntervalTime();
+                                    long repeatInterval = workSchedule.getIntervalTime();
 
-                                    if(repeatInterval>0) {
+                                    if (repeatInterval > 0) {
                                         delaytime = repeatInterval;
                                     }
                                 }
@@ -868,6 +880,33 @@ public class WorkProcessor extends ThreadGroup {
 
     }
 
+    private static class WorkScheduleWrapper {
+
+        private WorkSchedule workSchedule = null;
+
+        private WorkEvent workEvent = null;
+
+        WorkScheduleWrapper(WorkSchedule workSchedule) {
+            this.workSchedule = workSchedule;
+        }
+
+        WorkScheduleWrapper(WorkSchedule workSchedule, WorkEvent workEvent) {
+            this(workSchedule);
+            this.workEvent = workEvent;
+        }
+
+
+        WorkSchedule getWorkSchedule() {
+            return workSchedule;
+        }
+
+        WorkEvent getWorkEvent() {
+            return workEvent;
+        }
+
+
+    }
+
 
     /****************************************
      *
@@ -877,7 +916,7 @@ public class WorkProcessor extends ThreadGroup {
 
         private WorkProcessor workProcessor;
 
-        private BlockingQueue<WorkSchedule> statusWrappers = new LinkedBlockingQueue<WorkSchedule>();
+        private BlockingQueue<WorkScheduleWrapper> statusWrappers = new LinkedBlockingQueue<WorkScheduleWrapper>();
 
         WorkChecker(WorkProcessor workProcessor) {
             this.workProcessor = workProcessor;
@@ -904,7 +943,11 @@ public class WorkProcessor extends ThreadGroup {
         }
 
         void addWorkStatusWrapper(WorkSchedule sb) {
-            statusWrappers.add(sb);
+            statusWrappers.add(new WorkScheduleWrapper(sb));
+        }
+
+        void addWorkStatusWrapper(WorkSchedule sb, WorkEvent event) {
+            statusWrappers.add(new WorkScheduleWrapper(sb, event));
         }
 
         @Override
@@ -914,19 +957,41 @@ public class WorkProcessor extends ThreadGroup {
             while (workProcessor.isWorking) {
 
                 try {
-                    WorkSchedule wrapper = statusWrappers.poll(5, TimeUnit.SECONDS);
+                    WorkScheduleWrapper workScheduleWrapper = statusWrappers.poll(5, TimeUnit.SECONDS);
 
 
-                    if (wrapper != null) {
-                        long gap = (System.currentTimeMillis() + countdown) - wrapper.getNextExecuteTime();
+                    if (workScheduleWrapper != null) {
+                        WorkSchedule workSchedule = workScheduleWrapper.getWorkSchedule();
+
+                        long nextExecuteTime = -1;
+
+                        WorkEvent event = workScheduleWrapper.getWorkEvent();
+                        if (event != null) {
+                            nextExecuteTime = event.getFireTime();
+
+                            //System.err.println( nextExecuteTime +" <<< ");
+                        }
+
+                        if (nextExecuteTime < 0) {
+                            nextExecuteTime = workSchedule.getNextExecuteTime();
+
+                        }
+
+                        long gap = (System.currentTimeMillis() + countdown) - nextExecuteTime;
                         if (gap >= 0) {
 
-                            workProcessor.addWorkSchedule(wrapper);
+                            if (event != null) {
+                                workProcessor.addWorkSchedule(workSchedule, event);
+                            } else {
+                                workProcessor.addWorkSchedule(workSchedule);
+
+                            }
+
+
                         } else {
 
                             Thread.sleep(1);
-
-                            statusWrappers.add(wrapper);
+                            statusWrappers.add(workScheduleWrapper);
 
 
                         }

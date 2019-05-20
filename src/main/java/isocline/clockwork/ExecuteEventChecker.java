@@ -15,7 +15,12 @@
  */
 package isocline.clockwork;
 
-public interface ExecuteChecker {
+
+/**
+ *
+ *
+ */
+public interface ExecuteEventChecker {
 
 
     boolean check(long time);

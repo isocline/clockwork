@@ -1,7 +1,7 @@
 package isocline.clockwork.descriptor;
 
 import isocline.clockwork.Clock;
-import isocline.clockwork.ExecuteChecker;
+import isocline.clockwork.ExecuteEventChecker;
 import isocline.clockwork.ScheduleDescriptor;
 import isocline.clockwork.WorkSchedule;
 
@@ -11,13 +11,13 @@ import java.util.List;
 
 public class CronDescriptor implements ScheduleDescriptor {
 
-    private CrontabChecker checker;
+    private CrontabEventChecker checker;
 
     private String className;
 
     public CronDescriptor(String descript) throws IllegalArgumentException {
 
-        this.checker = new CrontabChecker();
+        this.checker = new CrontabEventChecker();
 
         className = this.checker.parse(descript);
     }
@@ -32,20 +32,20 @@ public class CronDescriptor implements ScheduleDescriptor {
 
         workSchedule.setStartDateTime(t1);
         workSchedule.setRepeatInterval(Clock.MINUTE);
-        workSchedule.setExecuteChecker(this.checker);
+        workSchedule.setExecuteEventChecker(this.checker);
 
 
     }
 
 
-    CrontabChecker getChecker() {
+    CrontabEventChecker getChecker() {
         return this.checker;
     }
 
     /**
      *
      */
-    public static class CrontabChecker implements ExecuteChecker {
+    public static class CrontabEventChecker implements ExecuteEventChecker {
         private Checker minChk;
 
         private Checker hourChk;
@@ -57,7 +57,7 @@ public class CronDescriptor implements ScheduleDescriptor {
         private Checker weekChk;
 
 
-        CrontabChecker() {
+        CrontabEventChecker() {
 
         }
 

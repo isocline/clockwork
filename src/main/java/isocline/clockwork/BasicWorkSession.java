@@ -20,6 +20,7 @@ import java.util.Map;
 
 
 /**
+ *
  * Basic implementation of WorkSession
  *
  */
@@ -35,7 +36,7 @@ public class BasicWorkSession implements WorkSession {
     }
 
     @Override
-    public Object getAttriute(String key) {
+    public Object getAttribute(String key) {
         return this.map.get(key);
     }
 

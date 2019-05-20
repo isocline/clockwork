@@ -67,4 +67,10 @@ public interface WorkEvent {
     WorkEvent create(String eventName);
 
 
+
+    void setFireTime(long time);
+
+    long getFireTime();
+
+
 }

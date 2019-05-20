@@ -21,7 +21,7 @@ public class MultiStepSchedule   {
         WorkSchedule schedule = worker.createSchedule(Step1Schedule.class).setStrictMode();
         schedule.activate();
 
-        schedule = worker.createSchedule(Step2Schedule.class).bindEvent("next");
+        schedule = worker.createSchedule(Step2Schedule.class).bindEvent("fireEvent");
         schedule.activate();
 
 
@@ -40,7 +40,7 @@ public class MultiStepSchedule   {
 
             if (count > 5) {
 
-                event.getWorkSchedule().getWorkProcessor().raiseEvent(WorkEventFactory.create("next"));
+                event.getWorkSchedule().getWorkProcessor().raiseEvent(WorkEventFactory.create("fireEvent"));
 
                 return TERMINATE;
             } else {
@@ -58,7 +58,7 @@ public class MultiStepSchedule   {
 
             logger.debug(event.getEventName() + " XX");
 
-            if("next".equals(event.getEventName())) {
+            if("fireEvent".equals(event.getEventName())) {
                 return TERMINATE;
             }
 

@@ -109,7 +109,13 @@ public class WorkFlowImpl implements WorkFlow {
     }
 
 
-    private boolean process(Object runnable, boolean reset) {
+    /**
+     *
+     * @param funcExecutor
+     * @param reset
+     * @return
+     */
+    private boolean bindEvent(FunctionExecutor funcExecutor , boolean reset) {
 
         if (eventNameArray == null) {
             return false;
@@ -118,8 +124,39 @@ public class WorkFlowImpl implements WorkFlow {
 
             String[] subEventNames = eventRepository.setBindEventNames(eventName);
 
-            lastFuncExecutor = new FunctionExecutor(runnable, false);
+            if(funcExecutor==null) {
+                funcExecutor = new FunctionExecutor(null);
+            }
+
+
+            eventRepository.put(eventName, funcExecutor);
+
+            for (String subEventName : subEventNames) {
+                eventRepository.put(subEventName, funcExecutor);
+            }
+        }
+
+        if (reset) {
+            eventNameArray = null;
+        }
+
+        return true;
+    }
+
+    private boolean processBindEvent2(Object runnable, String fireEvent, boolean reset) {
+
+        if (eventNameArray == null) {
+            return false;
+        }
+        for (String eventName : eventNameArray) {
+
+            String[] subEventNames = eventRepository.setBindEventNames(eventName);
+
+            lastFuncExecutor = new FunctionExecutor(runnable);
             lastFuncExecutor.setRecvEventName(eventName);
+            if(fireEvent!=null) {
+                lastFuncExecutor.setFireEventName(fireEvent);
+            }
 
 
             eventRepository.put(eventName, lastFuncExecutor);
@@ -157,21 +194,27 @@ public class WorkFlowImpl implements WorkFlow {
      * @return
      */
     private WorkFlowImpl processRun(Object execObject, String eventName) {
-        lastFuncExecutor = new FunctionExecutor(execObject, true);
+        lastFuncExecutor = new FunctionExecutor(execObject);
         if (eventName != null) {
             lastFuncExecutor.setFireEventName(eventName);
         }
 
+
         eventRepository.put(eventName, lastFuncExecutor);
 
 
-        boolean isRegist = process(execObject, false);
+        boolean isRegist = bindEvent(lastFuncExecutor,false);
 
         if (!isRegist) {
             functionExecutorList.add(lastFuncExecutor);
         }
 
         return this;
+    }
+
+    public WorkFlowImpl fireEvent(String eventName, long delayTime) {
+
+        return processNext(null, eventName,false , false, delayTime);
     }
 
     public WorkFlowImpl next(Runnable execObject) {
@@ -190,19 +233,24 @@ public class WorkFlowImpl implements WorkFlow {
         return processNext(execObject, eventName, false);
     }
 
-
     private WorkFlowImpl processNext(Object execObject, String eventName, boolean checkNull) {
+        return processNext(execObject, eventName,checkNull, false,0);
+    }
+
+
+    private WorkFlowImpl processNext(Object execObject, String eventName, boolean checkNull, boolean isLast, long delayTime) {
 
         if (checkNull && execObject == null) {
             throw new IllegalArgumentException("function interface is null");
         }
 
-        FunctionExecutor newFuncExecutor = new FunctionExecutor(execObject, true);
-        if (execObject == null) {
+        FunctionExecutor newFuncExecutor = new FunctionExecutor(execObject);
+        if (isLast) {
             newFuncExecutor.setLastExecutor(true);
         }
         if (eventName != null) {
             newFuncExecutor.setFireEventName(eventName);
+            newFuncExecutor.setDelayTimeFireEvent(delayTime);
         }
 
         boolean isInitialExecutor = false;
@@ -216,10 +264,10 @@ public class WorkFlowImpl implements WorkFlow {
 
         lastFuncExecutor = newFuncExecutor;
 
-        eventRepository.put(eventName, lastFuncExecutor);
+        //eventRepository.put(eventName, lastFuncExecutor);
 
 
-        boolean isRegist = process(execObject, true);
+        boolean isRegist = bindEvent(lastFuncExecutor,true);
 
         if (!isRegist && isInitialExecutor) {
             functionExecutorList.add(lastFuncExecutor);
@@ -232,7 +280,7 @@ public class WorkFlowImpl implements WorkFlow {
 
 
         this.isSetFinish = true;
-        return processNext(null, null, false);
+        return processNext(null, null, false, true,0);
     }
 
     public boolean isSetFinish() {
@@ -268,6 +316,7 @@ public class WorkFlowImpl implements WorkFlow {
 
     public FunctionExecutor getExecutor(String eventName) {
         if (eventName == null) return null;
+
 
         EventSet eventSet = eventRepository.getEventSet(eventName);
 

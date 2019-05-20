@@ -19,7 +19,7 @@ public class CronDescriptorTest {
 
         CronDescriptor descriptor = new CronDescriptor("* * * * *");
 
-        CronDescriptor.CrontabChecker chk = descriptor.getChecker();
+        CronDescriptor.CrontabEventChecker chk = descriptor.getChecker();
 
 
         boolean result = false;
@@ -108,7 +108,7 @@ public class CronDescriptorTest {
 
         CronDescriptor descriptor = new CronDescriptor("* 2 * * *");
 
-        CronDescriptor.CrontabChecker chk = descriptor.getChecker();
+        CronDescriptor.CrontabEventChecker chk = descriptor.getChecker();
 
 
         result = chk.check(Clock.toMilliSeconds("2019-05-14T02:30:00Z"));
@@ -168,7 +168,7 @@ public class CronDescriptorTest {
 
         CronDescriptor descriptor = new CronDescriptor("* * 5 * *");
 
-        CronDescriptor.CrontabChecker chk = descriptor.getChecker();
+        CronDescriptor.CrontabEventChecker chk = descriptor.getChecker();
 
 
         result = chk.check(Clock.toMilliSeconds("2019-05-05T02:30:00Z"));
@@ -228,7 +228,7 @@ public class CronDescriptorTest {
 
         CronDescriptor descriptor = new CronDescriptor("* * * 5 *");
 
-        CronDescriptor.CrontabChecker chk = descriptor.getChecker();
+        CronDescriptor.CrontabEventChecker chk = descriptor.getChecker();
 
 
         result = chk.check(Clock.toMilliSeconds("2019-05-14T02:30:00Z"));
@@ -288,7 +288,7 @@ public class CronDescriptorTest {
 
         CronDescriptor descriptor = new CronDescriptor("* * * * 0");
 
-        CronDescriptor.CrontabChecker chk = descriptor.getChecker();
+        CronDescriptor.CrontabEventChecker chk = descriptor.getChecker();
 
         long x2 = Clock.toMilliSeconds("2019-05-05T02:30:00Z");
         long x = Clock.toMilliSeconds("2019-05-05T02:30:00Z");

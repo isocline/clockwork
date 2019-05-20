@@ -28,6 +28,7 @@ import java.util.UUID;
 /**
  *
  *
+ * @see isocline.clockwork.Work
  */
 public class WorkSchedule {
 
@@ -78,7 +79,7 @@ public class WorkSchedule {
 
     private WorkFlow workFlow = null;
 
-    private ExecuteChecker executeChecker = null;
+    private ExecuteEventChecker executeEventChecker = null;
 
 
     WorkSchedule(WorkProcessor workProcessor, Work work) {
@@ -459,6 +460,22 @@ public class WorkSchedule {
     }
 
 
+    public void raiseLocalEvent(WorkEvent event, long delayTime) {
+
+        if(delayTime>0) {
+            //this.workProcessor.workChecker
+
+            this.getWorkProcessor().addWorkSchedule(this,event, delayTime);
+
+        }else {
+            raiseLocalEvent(event);
+        }
+
+
+
+    }
+
+
     public WorkSchedule bindEvent(String... eventNames) {
         checkLocking();
 
@@ -519,12 +536,19 @@ public class WorkSchedule {
 
 
         try {
-            this.workFlow = WorkFlowFactory.createWorkFlow();
+            if(this.work instanceof FlowableWork) {
+                this.workFlow = WorkFlowFactory.createWorkFlow();
 
-            this.work.defineWorkFlow(this.workFlow);
-            if (!this.workFlow.isSetFinish()) {
-                this.workFlow.finish();
+                FlowableWork fw = (FlowableWork) this.work;
+
+
+                fw.defineWorkFlow(this.workFlow);
+
+                if (!this.workFlow.isSetFinish()) {
+                    this.workFlow.finish();
+                }
             }
+
         } catch (UnsupportedOperationException npe) {
 
         }
@@ -592,14 +616,14 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule setExecuteChecker(ExecuteChecker checker) {
-        this.executeChecker = checker;
+    public WorkSchedule setExecuteEventChecker(ExecuteEventChecker checker) {
+        this.executeEventChecker = checker;
         return this;
     }
 
     boolean isExecuteEnable(long time) {
-        if (this.executeChecker != null) {
-            return this.executeChecker.check(time);
+        if (this.executeEventChecker != null) {
+            return this.executeEventChecker.check(time);
         }
 
         return true;
@@ -626,21 +650,27 @@ public class WorkSchedule {
     private EventRepository eventRepository = new EventRepository();
 
 
-    String checkRaiseEventEnable(String eventName) {
+    /**
+     *
+     *
+     * @param eventName
+     * @return
+     */
+    String getDeliverableEventName(String eventName) {
 
 
         EventSet eventSet = eventRepository.getEventSet(eventName);
 
 
         if (eventSet == null) {
-            //System.err.println("checkRaiseEventEnable normal = "+eventName );
+            //System.err.println("getDeliverableEventName normal = "+eventName );
             return eventName;
         }
 
 
         if (eventSet.isRaiseEventReady(eventName)) {
 
-            //System.err.println("checkRaiseEventEnable event="+eventName + " set="+eventSet + " fire="+eventSet.getEventSetName());
+            //System.err.println("getDeliverableEventName event="+eventName + " set="+eventSet + " fire="+eventSet.getEventSetName());
             return eventSet.getEventSetName();
         }
 

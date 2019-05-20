@@ -37,6 +37,8 @@ public class WorkEventImpl implements WorkEvent {
 
     protected WorkSchedule schedule;
 
+    private long fireTime = -1;
+
 
     /**
      *
@@ -121,4 +123,13 @@ public class WorkEventImpl implements WorkEvent {
     }
 
 
+    @Override
+    public void setFireTime(long time) {
+        this.fireTime = time;
+    }
+
+    @Override
+    public long getFireTime() {
+        return this.fireTime;
+    }
 }

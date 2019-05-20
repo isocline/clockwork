@@ -21,11 +21,24 @@ import isocline.clockwork.flow.FunctionExecutor;
 /**
  *
  *
+ * @see isocline.clockwork.Work
  */
 public interface FlowableWork extends Work {
 
 
     /**
+     * @param flow
+     */
+    default void defineWorkFlow(WorkFlow flow) {
+
+        throw new UnsupportedOperationException();
+    }
+
+
+
+    /**
+     *
+     *
      * @return
      * @throws InterruptedException
      */
@@ -43,6 +56,7 @@ public interface FlowableWork extends Work {
 
         String eventName = event.getEventName();
 
+        //System.out.println("RECV ___________ >  EVENT  "+eventName);
 
 
         FunctionExecutor executor = null;
@@ -52,7 +66,7 @@ public interface FlowableWork extends Work {
         if (eventName != null) {
             executor = flow.getExecutor(eventName);
             if (executor != null) {
-                //System.out.println("___________   EVENT  "+eventName);
+                ////System.out.println("___________   EVENT  "+eventName);
             }
 
         }
@@ -61,7 +75,7 @@ public interface FlowableWork extends Work {
             executor = flow.getNextExecutor();
             if (executor != null) {
                 existNextExecutor = flow.existNexExcutor();
-                //System.out.println("~~~~~~~~~~~~~  NEXT  EXEC");
+                ////System.out.println("~~~~~~~~~~~~~  NEXT  EXEC");
             }
 
 
@@ -69,17 +83,20 @@ public interface FlowableWork extends Work {
 
 
         if (executor != null) {
+            //System.out.println("EXEC ___________ >  EVENT  "+eventName);
             executor.execute(event);
 
             String eventNm = executor.getFireEventName();
             if (eventNm != null) {
-                schedule.raiseLocalEvent(event.create(eventNm));
+                long delayTime = executor.getDelayTimeFireEvent();
+                //System.out.println( "[FlowableWork]raise event C____ --->>>>  "+eventNm +" --------- "+delayTime);
+                schedule.raiseLocalEvent(event.create(eventNm),delayTime);
                 //System.out.println("                                            * FIRE "+eventNm );
             }
 
 
             schedule.raiseLocalEvent(event.create(executor.getEventUUID()));
-            //System.out.println("                                            ^ FIRE "+executor.getEventUUID() );
+            //System.out.println("[FlowableWork]raise event  UUIDv--->>>>  "+executor.getEventUUID() );
 
 
             if (executor.isLastExecutor()) {

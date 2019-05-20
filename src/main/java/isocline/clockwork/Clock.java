@@ -92,7 +92,7 @@ public class Clock {
 
 
     /**
-     * Returns a next second from now
+     * Returns a fireEvent second from now
      *
      * @return
      */

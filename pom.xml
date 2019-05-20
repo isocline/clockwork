@@ -7,7 +7,7 @@
     <groupId>isocline</groupId>
     <artifactId>clockwork</artifactId>
     <packaging>jar</packaging>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
 
     <name>Isocline Clockwork</name>
     <url>https://github.com/isocline/clockwork</url>
@@ -15,6 +15,7 @@
         Isocline Clockwork is a smart java schedule service.
         clients.
     </description>
+
 
     <licenses>
         <license>
@@ -38,6 +39,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+
+        <!-- github server corresponds to entry in ~/.m2/settings.xml -->
+        <github.global.server>github</github.global.server>
     </properties>
 
 
@@ -109,10 +113,10 @@
                     <message>Maven artifacts for ${project.version}</message>  <!-- git commit message -->
                     <noJekyll>true</noJekyll>                                  <!-- disable webpage processing -->
                     <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
-                    <branch>refs/heads/mvn-repo</branch>                       <!-- remote branch name -->
+                    <branch>refs/heads/master</branch>                       <!-- remote branch name -->
                     <includes><include>**/*</include></includes>
-                    <repositoryName>YOUR-REPOSITORY-NAME</repositoryName>      <!-- github repo name -->
-                    <repositoryOwner>YOUR-GITHUB-USERNAME</repositoryOwner>    <!-- github username  -->
+                    <repositoryName>mvn-repo</repositoryName>      <!-- github repo name -->
+                    <repositoryOwner>isocline</repositoryOwner>    <!-- github username  -->
                 </configuration>
                 <executions>
                     <!-- run site-maven-plugin's 'site' target as part of the build's normal 'deploy' phase -->
