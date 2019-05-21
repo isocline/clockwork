@@ -17,6 +17,7 @@ package isocline.clockwork;
 
 import isocline.clockwork.flow.FunctionExecutor;
 
+import java.util.Queue;
 import java.util.function.Consumer;
 
 /**
@@ -30,6 +31,17 @@ public interface WorkFlow {
     WorkFlow wait(String... eventNames);
 
     WorkFlow waitAll(String... eventNames);
+
+
+    WorkFlow onError(String... eventNames);
+
+
+    WorkFlow wait(WorkFlow... workFlows);
+
+    WorkFlow waitAll(WorkFlow... workFlows);
+
+
+    WorkFlow onError(WorkFlow... workFlows);
 
 
     /**
@@ -150,7 +162,13 @@ public interface WorkFlow {
      * @param eventName
      * @return
      */
-    FunctionExecutor getExecutor(String eventName);
+    Queue<FunctionExecutor> getExecutorQueue(String eventName);
+
+
+    String cursor();
+
+
+
 
 
 }
