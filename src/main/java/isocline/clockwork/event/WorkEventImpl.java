@@ -111,7 +111,7 @@ public class WorkEventImpl implements WorkEvent {
         event2.attributeMap = this.attributeMap;
     }
 
-    public WorkEventImpl create(String eventName) {
+    public WorkEventImpl createChild(String eventName) {
 
         WorkEventImpl newEvent = new WorkEventImpl(eventName);
         newEvent.attributeMap = this.attributeMap;
@@ -131,5 +131,16 @@ public class WorkEventImpl implements WorkEvent {
     @Override
     public long getFireTime() {
         return this.fireTime;
+    }
+
+    @Override
+    public void setThrowable(Throwable e) {
+        this.setAttribute(this.eventName +"_throwable", e);
+
+    }
+
+    @Override
+    public Throwable getThrowable() {
+        return (Throwable) this.getAttribute(this.eventName + "_throwable");
     }
 }

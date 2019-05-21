@@ -531,10 +531,10 @@ public class WorkProcessor extends ThreadGroup {
                     WorkEvent newWorkEvent = workEvent;
                     if (!newEventName.equals(eventName)) {
                         /*
-                        newWorkEvent = WorkEventFactory.create(newEventName);
+                        newWorkEvent = WorkEventFactory.createChild(newEventName);
                         workEvent.copyTo(newWorkEvent);
                         */
-                        newWorkEvent = workEvent.create(newEventName);
+                        newWorkEvent = workEvent.createChild(newEventName);
 
                     }
                     //schedule.raiseEvent(newWorkEvent);

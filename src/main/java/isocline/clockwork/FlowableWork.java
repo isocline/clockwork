@@ -16,11 +16,12 @@
 package isocline.clockwork;
 
 
+import isocline.clockwork.event.WorkEventFactory;
 import isocline.clockwork.flow.FunctionExecutor;
 
+import java.util.Queue;
+
 /**
- *
- *
  * @see isocline.clockwork.Work
  */
 public interface FlowableWork extends Work {
@@ -35,10 +36,7 @@ public interface FlowableWork extends Work {
     }
 
 
-
     /**
-     *
-     *
      * @return
      * @throws InterruptedException
      */
@@ -64,14 +62,25 @@ public interface FlowableWork extends Work {
         boolean existNextExecutor = false;
 
         if (eventName != null) {
-            executor = flow.getExecutor(eventName);
-            if (executor != null) {
-                ////System.out.println("___________   EVENT  "+eventName);
+            Queue<FunctionExecutor> q = flow.getExecutorQueue(eventName);
+            if (q != null) {
+
+                executor = q.poll();
+                if (executor != null) {
+
+                    FunctionExecutor nextFuncExector = q.peek();
+                    if (nextFuncExector != null) {
+                        schedule.raiseLocalEvent(event.createChild(eventName));
+                    }
+
+
+                    ////System.out.println("___________   EVENT  "+eventName);
+                }
             }
 
         }
 
-        if(executor == null){
+        if (executor == null) {
             executor = flow.getNextExecutor();
             if (executor != null) {
                 existNextExecutor = flow.existNexExcutor();
@@ -84,19 +93,58 @@ public interface FlowableWork extends Work {
 
         if (executor != null) {
             //System.out.println("EXEC ___________ >  EVENT  "+eventName);
-            executor.execute(event);
 
-            String eventNm = executor.getFireEventName();
-            if (eventNm != null) {
-                long delayTime = executor.getDelayTimeFireEvent();
-                //System.out.println( "[FlowableWork]raise event C____ --->>>>  "+eventNm +" --------- "+delayTime);
-                schedule.raiseLocalEvent(event.create(eventNm),delayTime);
-                //System.out.println("                                            * FIRE "+eventNm );
+            boolean isFireEvent = false;
+
+            try {
+                if(event.getThrowable()!=null) {
+                    isFireEvent = true;
+                }
+                executor.execute(event);
+
+                isFireEvent = true;
+
+            } catch (Throwable e) {
+                String eventNm = executor.getFireEventName();
+                if (eventNm != null) {
+                    String errEventName = eventName + "::error";
+
+                    WorkEvent errEvent = WorkEventFactory.create(errEventName);
+                    errEvent.setThrowable(e);
+
+                    schedule.raiseLocalEvent(errEvent);
+
+                }
+                String errEventName = executor.getEventUUID() + "::error";
+
+                WorkEvent errEvent = WorkEventFactory.create(errEventName);
+                errEvent.setThrowable(e);
+
+
+                schedule.raiseLocalEvent(errEvent);
+
+
+                errEventName = "*::error";
+
+                errEvent = WorkEventFactory.create(errEventName);
+                errEvent.setThrowable(e);
+
+                schedule.raiseLocalEvent(errEvent);
+            } finally {
+                if(isFireEvent) {
+                    String eventNm = executor.getFireEventName();
+                    if (eventNm != null) {
+                        long delayTime = executor.getDelayTimeFireEvent();
+                        //System.out.println( "[FlowableWork]raise event C____ --->>>>  "+eventNm +" --------- "+delayTime);
+                        schedule.raiseLocalEvent(event.createChild(eventNm), delayTime);
+                        //System.out.println("                                            * FIRE "+eventNm );
+                    }
+
+
+                    schedule.raiseLocalEvent(event.createChild(executor.getEventUUID()));
+                    //System.out.println("[FlowableWork]raise event  UUIDv--->>>>  "+executor.getEventUUID() );
+                }
             }
-
-
-            schedule.raiseLocalEvent(event.create(executor.getEventUUID()));
-            //System.out.println("[FlowableWork]raise event  UUIDv--->>>>  "+executor.getEventUUID() );
 
 
             if (executor.isLastExecutor()) {

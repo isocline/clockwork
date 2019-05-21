@@ -28,3 +28,73 @@ Clockwork Work Processor는 이러한 문제를 매우 손쉽게 해결해 줄 �
 
 - **아주 작은 크기**: 다른 라이브러리 종석성없이 매우 작은 크기의 라이브러리를 제공합니ㅏ
 
+ 
+ 
+## Example
+
+ 
+```java
+
+public class BasicWorkFlowTest implements FlowableWork {
+
+     
+
+    public void checkMemory() {
+        log("check MEMORY");
+    }
+
+    public void checkStorage() {
+        log("check STORAGE");
+    }
+
+    public void sendSignal() {
+        log("send SIGNAL");
+    }
+
+    public void sendStatusMsg() {
+        log("send STATUS MSG");
+    }
+
+    public void sendReportMsg() {
+        log("send REPORT MSG");
+    }
+
+    public void report() {
+        log("REPORT");
+    }
+
+
+    /**
+     * design work flow
+     *
+    **/
+    public void defineWorkFlow(WorkFlow flow) {
+
+        WorkFlow p1 = flow.run(this::checkMemory).next(this::checkStorage);
+
+        WorkFlow t1 = flow.wait(p1).next(this::sendSignal);
+
+        WorkFlow t2 = flow.wait(p1).next(this::sendStatusMsg).next(this::sendReportMsg);
+
+        flow.waitAll(t1, t2).next(this::report).finish();
+    }
+
+
+    @Test
+    public void startMethod() {
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+
+        processor.createSchedule(this).activate();
+        
+
+        processor.awaitShutdown();
+
+    }
+
+    
+
+
+}
+
+```
+ 

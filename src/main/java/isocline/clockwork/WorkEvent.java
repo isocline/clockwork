@@ -64,7 +64,13 @@ public interface WorkEvent {
      * @param eventName
      * @return
      */
-    WorkEvent create(String eventName);
+    WorkEvent createChild(String eventName);
+
+
+    void setThrowable(Throwable e) ;
+
+
+    Throwable getThrowable();
 
 
 
