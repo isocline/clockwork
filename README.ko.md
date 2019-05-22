@@ -245,7 +245,7 @@ public class EventReceiver implements Work {
 }
 ```
 
-###Control flow
+### Control flow
 
 ![alt tag](https://raw.github.com/isocline/clockwork/master/docs/img/sample_flow.png)
 <br/><br/>
