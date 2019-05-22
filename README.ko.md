@@ -54,7 +54,7 @@ public class SimpleRepeater implements Work {
             .setRepeatInterval(10 * Clock.SECOND)
             .activate();
 
-        worker.shutdown(2000); // wait until 2000 milli seconds
+        processor.shutdown(2000); // wait until 2000 milli seconds
     }
 
 }
@@ -77,7 +77,7 @@ public class SimpleRepeater  {
                 }).activate();
 
 
-        worker.shutdown(2000); // wait until 2000 milli seconds
+        processor.shutdown(2000); // wait until 2000 milli seconds
     }
 
 }
@@ -107,11 +107,11 @@ public class PreciseRepeater implements Work {
 
         WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
 
-        WorkSchedule schedule = worker.createSchedule(new PreciseRepeater())
+        WorkSchedule schedule = processor.createSchedule(new PreciseRepeater())
             .setStrictMode()
             .activate();
 
-        worker.shutdown(2000); // wait until 2000 milli seconds
+        processor.shutdown(2000); // wait until 2000 milli seconds
     }
 
 }
@@ -161,7 +161,7 @@ public class SimpleRepeater implements Work {
                         .activate();
 
 
-        //worker.shutdown();
+        //processor.shutdown();
     }
 
 }
@@ -195,7 +195,7 @@ public class SimpleRepeater implements Work {
                         .activate();
 
 
-        //worker.shutdown();
+        //processor.shutdown();
     }
 
 }
@@ -239,7 +239,7 @@ public class EventReceiver implements Work {
                         }).activate();
 
 
-        //worker.shutdown();
+        //processor.shutdown();
     }
 
 }
