@@ -28,16 +28,230 @@ The Clockwork Work Processor can solve this problem very easily
  
 ## Example
 
-**Work flow**
+### Simple Repeater
+
+Repeated tasks every 10 seconds
+
+```java
+import isocline.clockwork.*;
+
+public class SimpleRepeater implements Work {
+
+
+    public long execute(WorkEvent event) throws InterruptedException {
+
+        // DO YOUR WORK
+
+        return WAIT;
+    }
+
+    @Test
+    public void startMethod() throws Exception {
+
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+
+        WorkSchedule schedule = processor.createSchedule(new SimpleRepeater())
+            .setRepeatInterval(10 * Clock.SECOND)
+            .activate();
+
+        worker.shutdown(2000); // wait until 2000 milli seconds
+    }
+
+}
+```
+OR 
+```java
+import isocline.clockwork.*;
+
+public class SimpleRepeater  {
+
+
+    @Test
+    public void startMethod() throws Exception {
+
+        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+
+        workProcessor.createSchedule((WorkEvent event) -> {
+                     // DO YOUR WORK
+                    return 10 * Clock.SECOND;
+                }).activate();
+
+
+        worker.shutdown(2000); // wait until 2000 milli seconds
+    }
+
+}
+```
+
+Real-time processing mode: Repeats exactly in milliseconds
+
+```java
+
+import isocline.clockwork.*;
+
+public class PreciseRepeater implements Work {
+
+    private static Logger logger = Logger.getLogger(PreciseRepeater.class.getName());
+
+    private int seq = 0;
+
+    public long execute(WorkEvent event) throws InterruptedException {
+
+        logger.debug("execute:" + seq++);
+
+        return 10; // 10 milli seconds
+    }
+
+    @Test
+    public void startMethod() throws Exception {
+
+        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+
+        WorkSchedule schedule = worker.createSchedule(new PreciseRepeater())
+            .setStrictMode()
+            .activate();
+
+        worker.shutdown(2000); // wait until 2000 milli seconds
+    }
+
+}
+
+```
+
+##Output
+<pre>
+2019-06-16 16:00:00.000 DEBUG execute:0
+2019-06-16 16:00:00.010 DEBUG execute:1
+2019-06-16 16:00:00.020 DEBUG execute:2
+2019-06-16 16:00:00.030 DEBUG execute:3
+2019-06-16 16:00:00.040 DEBUG execute:4
+2019-06-16 16:00:00.050 DEBUG execute:5
+2019-06-16 16:00:00.060 DEBUG execute:6
+2019-06-16 16:00:00.070 DEBUG execute:7
+
+</pre>
+
+
+### Scheduling
+
+Repeated tasks every 1 hour
+
+```java
+import isocline.clockwork.*;
+
+public class SimpleRepeater implements Work {
+
+
+    public long execute(WorkEvent event) throws InterruptedException {
+
+        // DO YOUR WORK
+
+        return WAIT;
+    }
+
+    @Test
+    public void startMethod() throws Exception {
+
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+
+        WorkSchedule schedule = processor.createSchedule(new ScheduledWork())
+                        .setRepeatInterval(1 * Clock.HOUR)
+                        .setStartDateTime("2020-04-24T09:00:00Z")
+                        .setFinishDateTime("2020-06-16T16:00:00Z")
+                        .activate();
+
+
+        //worker.shutdown();
+    }
+
+}
+```
+
+Or crontab style
+
+```java
+import isocline.clockwork.*;
+
+public class SimpleRepeater implements Work {
+
+
+    public long execute(WorkEvent event) throws InterruptedException {
+
+        // DO YOUR WORK
+
+        return WAIT;
+    }
+
+    @Test
+    public void startMethod() throws Exception {
+
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        
+        WorkSchedule schedule = processor.createSchedule(new CronDescriptor("* 1,4-6 * * *"), new ScheduledWork())
+                        .setStartDateTime("2020-04-24T09:00:00Z")
+                        .setFinishDateTime("2020-06-16T16:00:00Z")
+                        .activate();
+
+
+        //worker.shutdown();
+    }
+
+}
+```
+### Execution by event
+
+
+
+
+```java
+import isocline.clockwork.*;
+
+public class EventReceiver implements Work {
+
+
+    public long execute(WorkEvent event) throws InterruptedException {
+
+        // DO YOUR WORK
+
+        return WAIT;
+    }
+
+    @Test
+    public void startMethod() throws Exception {
+
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        
+        WorkSchedule schedule = processor.createSchedule(new EventReceiver())
+                .bindEvent("example-event")
+                .activate();
+        
+        
+        // generate event
+        processor.createSchedule((WorkEvent event) -> {
+            
+                        event.getWorkSchedule().getWorkProcessor()
+                        .raiseEvent(event.createChild("example-event"));
+                        
+                        return 2 * Clock.SECOND; // every 2 seconds
+                        
+                        }).activate();
+
+
+        //worker.shutdown();
+    }
+
+}
+```
+
+###Work flow
 
 ![alt tag](https://raw.github.com/isocline/clockwork/master/docs/img/sample_flow.png)
 <br/><br/>
  
 ```java
+import isocline.clockwork.*;
 
 public class BasicWorkFlowTest implements FlowableWork {
-
-     
 
     public void checkMemory() {
         log("check MEMORY");
@@ -73,7 +287,6 @@ public class BasicWorkFlowTest implements FlowableWork {
         WorkFlow p1 = flow.run(this::checkMemory).next(this::checkStorage);
 
         WorkFlow t1 = flow.wait(p1).next(this::sendSignal);
-
         WorkFlow t2 = flow.wait(p1).next(this::sendStatusMsg).next(this::sendReportMsg);
 
         flow.waitAll(t1, t2).next(this::report).finish();
@@ -83,18 +296,14 @@ public class BasicWorkFlowTest implements FlowableWork {
     @Test
     public void startMethod() {
         WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
-
-        processor.createSchedule(this).activate();
-        
-
+        processor.createSchedule(this).activate();       
         processor.awaitShutdown();
 
     }
 
-    
-
-
 }
 
 ```
+
+
  

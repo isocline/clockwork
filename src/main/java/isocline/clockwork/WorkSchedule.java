@@ -383,9 +383,9 @@ public class WorkSchedule {
      *
      * @param isoDateTime
      */
-    public WorkSchedule setFinishTime(String isoDateTime) throws java.text.ParseException {
+    public WorkSchedule setFinishDateTime(String isoDateTime) throws java.text.ParseException {
 
-        return setFinishTime(Clock.toDate(isoDateTime));
+        return setFinishDateTime(Clock.toDate(isoDateTime));
     }
 
 
@@ -393,7 +393,7 @@ public class WorkSchedule {
      * @param endDateTime
      * @return
      */
-    public WorkSchedule setFinishTime(Date endDateTime) {
+    public WorkSchedule setFinishDateTime(Date endDateTime) {
 
         this.workEndTime = endDateTime.getTime();
         return this;
