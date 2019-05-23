@@ -346,4 +346,4 @@ Link [https://github.com/isocline/clockwork/tree/master/src/test/java/isocline/c
 
 API
 ------
-javadoc [https://isocline.github.io/clockwork/apidocs/gi]
+javadoc [https://isocline.github.io/clockwork/apidocs/]
