@@ -28,7 +28,28 @@ and code each time using a different API The Clockwork Work Processor can solve 
 - **Accurate execution**: You can precisely adjust the execution in 1 ms increments aiming at the almost real-time level.
 - **Easy coding**: Simple, easy to understand coding method, the code is straightforward.
 - **Small footprint library**: Provides a tiny size library without compromising other libraries.
+
+Download
+--------
+
+Download [https://github.com/isocline/mvn-repo/raw/master/isocline/clockwork/1.0/clockwork-1.0.jar][dl] or depend via Maven:
+```xml
+<dependency>
+  <groupId>isocline</groupId>
+  <artifactId>clockwork</artifactId>
+  <version>1.0</version>
+</dependency>
+
+<repositories>
+    <repository>
+       <id>isocline</id>
+       <url>https://raw.github.com/isocline/mvn-repo</url>
+    </repository>
+</repositories>
+```
  
+
+
  
 ## Example
 
@@ -311,6 +332,10 @@ public class BasicWorkFlowTest implements FlowableWork {
 }
 
 ```
+
+More examples
+------
+Link [https://github.com/isocline/clockwork/tree/master/src/test/java/isocline/clockwork/examples]
 
 
  

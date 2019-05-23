@@ -25,6 +25,24 @@ Clockwork Work Processor 는 이러한 문제를 매우 손쉽게 해결해 줄 
 - **간편한 코딩**: 매우 간결하고 이해하기 쉬윈 방식으로 코딩을 할 수 있으며, 코드가 매우 심플합니다
 - **아주 작은 크기**: 다른 라이브러리 종석성없이 매우 작은 크기의 라이브러리를 제공합니다.
 
+Download
+--------
+
+Download [https://github.com/isocline/mvn-repo/raw/master/isocline/clockwork/1.0/clockwork-1.0.jar][dl] or depend via Maven:
+```xml
+<dependency>
+  <groupId>isocline</groupId>
+  <artifactId>clockwork</artifactId>
+  <version>1.0</version>
+</dependency>
+
+<repositories>
+    <repository>
+       <id>isocline</id>
+       <url>https://raw.github.com/isocline/mvn-repo</url>
+    </repository>
+</repositories>
+```
  
 ## Example
 

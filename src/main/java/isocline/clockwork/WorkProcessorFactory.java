@@ -15,7 +15,6 @@
  */
 package isocline.clockwork;
 
-import javax.servlet.ServletContextEvent;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,8 +23,7 @@ import java.util.Map;
  *
  *
  */
-public class WorkProcessorFactory implements
-        javax.servlet.ServletContextListener {
+public class WorkProcessorFactory {
 
     private static WorkProcessor worker;
 
@@ -33,13 +31,12 @@ public class WorkProcessorFactory implements
 
 
     /**
-     *
      * @return
      */
     public static WorkProcessor getDefaultProcessor() {
 
 
-        if (worker == null || ! worker.isWorking()) {
+        if (worker == null || !worker.isWorking()) {
             worker = new WorkProcessor("default", Configuration.NOMAL);
         }
 
@@ -48,14 +45,13 @@ public class WorkProcessorFactory implements
 
 
     /**
-     *
      * @param id
      * @param config
      * @return
      */
     public static synchronized WorkProcessor getProcessor(String id, Configuration config) {
         WorkProcessor processor = processorMap.get(id);
-        if (processor == null || ! processor.isWorking()) {
+        if (processor == null || !processor.isWorking()) {
             processor = new WorkProcessor(id, config);
             processorMap.put(id, processor);
         }
@@ -64,20 +60,5 @@ public class WorkProcessorFactory implements
 
     }
 
-    /**
-     * @param sce
-     */
-    public void contextInitialized(ServletContextEvent sce) {
-        getDefaultProcessor();
-
-    }
-
-    /**
-     * @see javax.servlet.ServletContextListener#contextDestroyed(javax.servlet.ServletContextEvent)
-     */
-    public void contextDestroyed(ServletContextEvent sce) {
-        worker.shutdown();
-
-    }
 
 }
