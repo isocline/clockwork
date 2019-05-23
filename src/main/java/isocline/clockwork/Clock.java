@@ -58,8 +58,9 @@ public class Clock {
     /**
      * Obtains a time to the current system millisecond time using ISO 8601 in the specified time zone.
      *
-     * @param isoDateTime
-     * @return
+     * @param isoDateTime datetime
+     * @return timestamp
+     * @throws ParseException ParseException
      */
     public static long fromNow(String isoDateTime) throws java.text.ParseException {
 
