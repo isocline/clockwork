@@ -28,7 +28,7 @@ Clockwork Work Processor 는 이러한 문제를 매우 손쉽게 해결해 줄 
 Download
 --------
 
-Download [https://github.com/isocline/mvn-repo/raw/master/isocline/clockwork/1.0/clockwork-1.0.jar][dl] or depend via Maven:
+Download [https://github.com/isocline/mvn-repo/raw/master/isocline/clockwork/1.0/clockwork-1.0.jar] or depend via Maven:
 ```xml
 <dependency>
   <groupId>isocline</groupId>
