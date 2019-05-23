@@ -3,7 +3,7 @@
 # Clockwork
 ### Multi-purpose work processing engine for JVM and Android
 
-<img src="https://raw.github.com/isocline/clockwork/master/docs/img/logo.png">
+<img src="https://raw.github.com/isocline/clockwork/master/docs/img/logo.png" width="300">
 
 
 [![Build Status](https://travis-ci.org/isocline/clockwork.svg?branch=develop)](https://travis-ci.org/isocline/clockwork)
@@ -251,7 +251,8 @@ public class EventReceiver implements Work {
 
 ### Control flow
 
-![alt tag](https://raw.github.com/isocline/clockwork/master/docs/img/sample_flow.png)
+
+<img src="https://raw.github.com/isocline/clockwork/master/docs/img/sample_flow.png" width="400"/>
 <br/><br/>
  
 ```java
