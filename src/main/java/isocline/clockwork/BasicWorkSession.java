@@ -26,7 +26,8 @@ import java.util.Map;
  */
 public class BasicWorkSession implements WorkSession {
 
-    private Map<String, Object> map = new HashMap<String, Object>();
+
+    private Map<String, Object> map = new HashMap<>();
 
 
     @Override
@@ -40,6 +41,7 @@ public class BasicWorkSession implements WorkSession {
         return this.map.get(key);
     }
 
+
     @Override
     public Object removeAttribute(String key) {
         return this.map.remove(key);
@@ -51,12 +53,12 @@ public class BasicWorkSession implements WorkSession {
     }
 
     @Override
-    public void beforeExcute(Work work) {
+    public void beforeExecute(Work work) {
 
     }
 
     @Override
-    public void afterExcute(Work work) {
+    public void afterExecute(Work work) {
 
     }
 }

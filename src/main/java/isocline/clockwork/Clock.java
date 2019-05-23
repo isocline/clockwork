@@ -59,8 +59,8 @@ public class Clock {
      * Obtains a time to the current system millisecond time using ISO 8601 in the specified time zone.
      *
      * @param isoDateTime datetime
-     * @return timestamp
-     * @throws ParseException ParseException
+     * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
+     * @throws java.text.ParseException If isoDateTime format is invalid
      */
     public static long fromNow(String isoDateTime) throws java.text.ParseException {
 
@@ -82,10 +82,10 @@ public class Clock {
     /**
      * Obtains a millisecond
      *
-     * @param hour
-     * @param minute
-     * @param second
-     * @return
+     * @param hour hour
+     * @param minute minute
+     * @param second second
+     * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
      */
     public static long fromNow(long hour, long minute, long second) {
         return hour * HOUR + minute * MINUTE + second * SECOND;
@@ -95,7 +95,7 @@ public class Clock {
     /**
      * Returns a fireEvent second from now
      *
-     * @return
+     * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
      */
     public static long nextSecond(long maximumWait) {
         long s = System.currentTimeMillis();
@@ -109,10 +109,21 @@ public class Clock {
     }
 
 
+    /**
+     * Returns the exact next 1 second unit time from the current time.
+     *
+     * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
+     */
     public static long nextSecond() {
         return nextSecond(990);
     }
 
+
+    /**
+     * Returns the exact next 1-minute unit time from the current time.
+     *
+     * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
+     */
     public static long nextMinutes() {
 
 
@@ -129,16 +140,16 @@ public class Clock {
     /**
      * Obtains a DateTime set to the current system millisecond time using ISO 8601 in the specified time zone.
      *
-     * @param isoDateTime
-     * @return
-     * @throws java.text.ParseException
+     * @param isoDateTime ISO8610 style datetime
+     * @return Date java.util.Date
+     * @throws java.text.ParseException If input datetime format is error
      */
     public static Date toDate(String isoDateTime) throws java.text.ParseException {
 
-        String isoDateTimeTxt = isoDateTime.replaceAll("\\+0([0-9]){1}\\:00", "+0$100");
+        final String isoDateTimeTxt = isoDateTime.replaceAll("\\+0([0-9]){1}\\:00", "+0$100");
 
-        SimpleDateFormat form = null;
-        //System.err.println( isoDateTime + " "+isoDateTime.length());
+        SimpleDateFormat form;
+
         if(isoDateTime.length()==25) {
             form = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
         }else {
@@ -159,10 +170,11 @@ public class Clock {
     }
 
     /**
+     * Convert a formatted string to the numeric type time information.
      *
-     * @param isoDateTime
-     * @return
-     * @throws java.text.ParseException
+     * @param isoDateTime ISO 8601 style datetime
+     * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
+     * @throws java.text.ParseException If input data format is error
      */
     public static long toMilliSeconds(String isoDateTime) throws java.text.ParseException {
         return toDate(isoDateTime).getTime();
@@ -170,9 +182,10 @@ public class Clock {
 
 
     /**
+     * Convert the numeric type time information to a formatted string. [yyyy-MM-dd HH:mm:ss.SSS]
      *
-     * @param time
-     * @return
+     * @param time the milliseconds since January 1, 1970, 00:00:00 GMT.
+     * @return datetime text format[yyyy-MM-dd HH:mm:ss.SSS]
      */
     public static String toDateFormat(long time) {
         SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");

@@ -41,12 +41,32 @@ public class Configuration {
     private boolean isPropertyLocking = false;
 
 
+    /**
+     * Initialization settings related to thread settings for WorkProcessor initialization.
+     * By default, the initial thread count is 3, the maximum thread count is 12, and the thread priority setting is Thread.NORM_PRIORITY state.
+     *
+     */
     public final static Configuration NOMAL = create().setInitThreadWorkerSize(3).setMaxThreadWorkerSize(12).setThreadPriority(Thread.NORM_PRIORITY).lock();
 
+    /**
+     * Initialization settings related to thread settings for WorkProcessor initialization
+     * Preset for low-end environments, the initial thread count is 1, the maximum thread count is 3,
+     * and the thread priority setting is Thread.NORM_PRIORITY state.
+     */
     public final static Configuration ECHO = create().setInitThreadWorkerSize(1).setMaxThreadWorkerSize(3).setThreadPriority(Thread.MIN_PRIORITY).lock();
 
+    /**
+     * Initialization settings related to thread settings for WorkProcessor initialization
+     * Preset for low-end environments, the initial thread count is 24, the maximum thread count is 36,
+     * and the thread priority setting is Thread.MAX_PRIORITY state.
+     */
     public final static Configuration PERFORMANCE = create().setInitThreadWorkerSize(24).setMaxThreadWorkerSize(36).setThreadPriority(Thread.MAX_PRIORITY).lock();
 
+    /**
+     * Initialization settings related to thread settings for WorkProcessor initialization
+     * Preset for HYPER environments, the initial thread count is 64, the maximum thread count is 128,
+     * and the thread priority setting is Thread.MAX_PRIORITY state.
+     */
     public final static Configuration HYPER = create().setInitThreadWorkerSize(64).setMaxThreadWorkerSize(128).setThreadPriority(Thread.MAX_PRIORITY).lock();
 
 
@@ -84,7 +104,7 @@ public class Configuration {
     /**
      * Returns a initial thread worker size
      *
-     * @return
+     * @return size of ThreadWorker
      */
     public int getInitThreadWorkerSize() {
         return initThreadWorkerSize;
@@ -92,9 +112,10 @@ public class Configuration {
 
 
     /**
+     * Set a initial thread worker size
      *
      * @param initThreadWorkerSize
-     * @return
+     * @return Configuration
      */
     public Configuration setInitThreadWorkerSize(int initThreadWorkerSize) {
         this.check();
@@ -122,8 +143,8 @@ public class Configuration {
     }
 
     /**
-     *
-     * @return
+     * Returns a Thread priority
+     * @return thread priority
      */
     public int getThreadPriority() {
         return threadPriority;
@@ -131,9 +152,10 @@ public class Configuration {
 
 
     /**
+     * Set a priority of Thread
      *
-     * @param threadPriority
-     * @return
+     * @param threadPriority thread priority
+     * @return Configuration
      */
     public Configuration setThreadPriority(int threadPriority) {
         this.check();
@@ -142,13 +164,20 @@ public class Configuration {
     }
 
     /**
-     *
-     * @return
+     * Returns a timeout for executing job.
+     * @return timeout
      */
     public long getExecuteTimeout() {
         return executeTimeout;
     }
 
+
+    /**
+     * Set a timeout
+     *
+     * @param executeTimeout timeout(milliseconds)
+     * @return Configuration instance
+     */
     public Configuration setExecuteTimeout(long executeTimeout) {
         this.check();
         this.executeTimeout = executeTimeout;
@@ -156,8 +185,8 @@ public class Configuration {
     }
 
     /**
-     *
-     * @return
+     * Returns a max queue size
+     * @return queue size
      */
     public int getMaxWorkQueueSize() {
         return maxWorkQueueSize;
@@ -166,8 +195,10 @@ public class Configuration {
 
     /**
      *
+     * Set a queue size for max
+     *
      * @param maxWorkQueueSize
-     * @return
+     * @return Configuration instance
      */
     public Configuration setMaxWorkQueueSize(int maxWorkQueueSize) {
         this.check();
@@ -176,8 +207,8 @@ public class Configuration {
     }
 
     /**
-     *
-     * @return
+     * Returns a milliseconds of execute countdown
+     * @return mulliseconds
      */
     public long getExecuteCountdownMilliTime() {
         return executeCountdownMilliTime;
@@ -185,9 +216,10 @@ public class Configuration {
 
 
     /**
+     * Set a a milliseconds of execute countdown
      *
      * @param countdownTime
-     * @return
+     * @return Configuration instance
      */
     public Configuration setExecuteCountdownMilliTime(long countdownTime) {
         this.check();

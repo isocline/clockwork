@@ -33,7 +33,7 @@ public interface FlowableWork extends Work {
     /**
      * It is a method that must be implemented in order to do flow control.
      *
-     * @param flow
+     * @param flow WorkFlow instance
      */
     default void defineWorkFlow(WorkFlow flow) {
 
@@ -44,13 +44,13 @@ public interface FlowableWork extends Work {
     /**
      * It is not necessary to implement additional methods as extended methods implemented from the Work interface.
      *
-     * @return
-     * @throws InterruptedException
+     * @return delay time
+     * @throws InterruptedException If interrupt occur
      */
     default long execute(WorkEvent event) throws InterruptedException {
 
 
-        WorkSchedule schedule = event.getWorkSchedule();
+        final WorkSchedule schedule = event.getWorkSchedule();
 
         WorkFlow flow = schedule.getWorkFlow();
 
@@ -58,10 +58,7 @@ public interface FlowableWork extends Work {
             return TERMINATE;
         }
 
-
-        String eventName = event.getEventName();
-
-        //System.out.println("RECV ___________ >  EVENT  "+eventName);
+        final String eventName = event.getEventName();
 
 
         FunctionExecutor executor = null;
@@ -80,8 +77,6 @@ public interface FlowableWork extends Work {
                         schedule.raiseLocalEvent(event.createChild(eventName));
                     }
 
-
-                    ////System.out.println("___________   EVENT  "+eventName);
                 }
             }
 
@@ -91,15 +86,11 @@ public interface FlowableWork extends Work {
             executor = flow.getNextExecutor();
             if (executor != null) {
                 existNextExecutor = flow.existNexExcutor();
-                ////System.out.println("~~~~~~~~~~~~~  NEXT  EXEC");
             }
-
-
         }
 
 
         if (executor != null) {
-            //System.out.println("EXEC ___________ >  EVENT  "+eventName);
 
             boolean isFireEvent = false;
 
@@ -142,25 +133,20 @@ public interface FlowableWork extends Work {
                     String eventNm = executor.getFireEventName();
                     if (eventNm != null) {
                         long delayTime = executor.getDelayTimeFireEvent();
-                        //System.out.println( "[FlowableWork]raise event C____ --->>>>  "+eventNm +" --------- "+delayTime);
                         schedule.raiseLocalEvent(event.createChild(eventNm), delayTime);
-                        //System.out.println("                                            * FIRE "+eventNm );
                     }
 
-
                     schedule.raiseLocalEvent(event.createChild(executor.getEventUUID()));
-                    //System.out.println("[FlowableWork]raise event  UUIDv--->>>>  "+executor.getEventUUID() );
                 }
             }
 
 
             if (executor.isLastExecutor()) {
-                //System.out.println("=============== TEMINATE ============");
                 return TERMINATE;
             }
 
             if (existNextExecutor) {
-                return 1;
+                return LOOP;
             }
         }
 

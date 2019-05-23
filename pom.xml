@@ -11,10 +11,7 @@
 
     <name>Isocline Clockwork</name>
     <url>https://github.com/isocline/clockwork</url>
-    <description>
-        Isocline Clockwork is a smart java schedule service.
-        clients.
-    </description>
+    <description>Multi-purpose work processing engine for JVM</description>
 
 
     <licenses>
@@ -141,7 +138,6 @@
                 <configuration>
                     <reportOutputDirectory>./docs</reportOutputDirectory>
                     <destDir>apidocs</destDir>
-
                 </configuration>
             </plugin>
 
