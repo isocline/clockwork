@@ -1,7 +1,7 @@
 
 
 # Clockwork
-### Multi-purpose work processing engine for JVM and Android
+### Multi-purpose work processing engine for JVM,Android,IoT and Edge Computing
 
 <img src="https://raw.github.com/isocline/clockwork/master/docs/img/logo.png" width="300">
 
