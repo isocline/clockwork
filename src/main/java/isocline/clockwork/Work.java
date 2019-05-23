@@ -17,26 +17,30 @@ package isocline.clockwork;
 
 
 /**
+ * An interface implemented by an object that defines the underlying operation.
+ * The corresponding operation is performed through the execute method call,
+ * and the identical operation is performed by the WorkProcessor.
  *
- *
+ * @author Richard D. Kim
  */
 public interface Work {
 
 
     /**
-     *
+     * This means that the job is waiting. In general, the corresponding status value is used.
      */
     long WAIT = -1;
 
 
     /**
-     * terminate job
+     * Which means that the job is terminated without further processing.
      */
-    long TERMINATE = -99;
+    long TERMINATE = -2;
 
 
     /**
-     *
+     * It means a state that repeats immediately without delay.
+     * Check the specific country so that it does not become an infinite repeating state.
      */
     long LOOP = 0;
 
@@ -44,8 +48,15 @@ public interface Work {
 
 
 
+
     /**
-     * @return
+     *
+     * The default response value is the time interval at which this method is called again.
+     * The response time unit is milliseconds, and its own method iteration time can be determined through coding.
+     * Or if the loop time is set through an external event or API, the WAIT value is returned.
+     *
+     * @param event
+     * @return DelayTime
      * @throws InterruptedException
      */
     long execute(WorkEvent event) throws InterruptedException;

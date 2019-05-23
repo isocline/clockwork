@@ -17,24 +17,45 @@ package isocline.clockwork;
 
 /**
  *
+ *  A interface that represents the event to be delivered when the work object is executed.
  *
+ * @see Work
+ * @see FlowableWork
+ * @author Richard D. Kim
  */
 public interface WorkEvent {
 
 
+    /**
+     * Returns the event name.
+     *
+     * @return
+     */
     public String getEventName();
 
 
+    /**
+     *
+     * Set the WorkSchedule object.
+     *
+     * @param sechedule
+     */
     void setWorkSechedule(WorkSchedule sechedule);
 
 
     /**
+     * Returns the WorkSchedule object.
+     *
      * @return
      */
     WorkSchedule getWorkSchedule();
 
 
     /**
+     *
+     * Set additional custom attribute values.
+     * The stored property value is also propagated to the derived child object.
+     *
      * @param key
      * @param value
      */
@@ -47,6 +68,8 @@ public interface WorkEvent {
     Object getAttribute(String key);
 
     /**
+     * Delete the attribute value.
+     *
      * @param key
      * @return
      */
@@ -54,12 +77,16 @@ public interface WorkEvent {
 
 
     /**
+     * Copy internal information to another Event object.
+     *
      * @param event
      */
     void copyTo(WorkEvent event);
 
 
     /**
+     * Creates a child object of the object.
+     * The child object shares the property value information of the parent object.
      *
      * @param eventName
      * @return
@@ -67,15 +94,35 @@ public interface WorkEvent {
     WorkEvent createChild(String eventName);
 
 
+    /**
+     * Set error information.
+     *
+     * @param e
+     */
     void setThrowable(Throwable e) ;
 
 
+    /**
+     * Returns error information. Null is returned in normal state.
+     *
+     */
     Throwable getThrowable();
 
 
-
+    /**
+     * Defines the valid time at which the event occurs.
+     *
+     * @param time
+     */
     void setFireTime(long time);
 
+
+    /**
+     *
+     *  Returns the valid time at which the event occurs.
+     *
+     * @return
+     */
     long getFireTime();
 
 

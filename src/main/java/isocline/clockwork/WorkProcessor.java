@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @see isocline.clockwork.Work
  * @see isocline.clockwork.FlowableWork
  * @see isocline.clockwork.WorkSchedule
+ * @author Richard D. Kim
  */
 public class WorkProcessor extends ThreadGroup {
 

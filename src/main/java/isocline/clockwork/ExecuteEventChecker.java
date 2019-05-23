@@ -18,10 +18,20 @@ package isocline.clockwork;
 
 /**
  *
+ * Provides the function to check whether method is executed every time execution event occurs.
+ * It is used when the user wants to check whether it is executed according to the situation.
+ *
+ * @see WorkSchedule
  *
  */
 public interface ExecuteEventChecker {
 
 
+    /**
+     * And judges whether or not it is executed.
+     *
+     * @param time
+     * @return
+     */
     boolean check(long time);
 }

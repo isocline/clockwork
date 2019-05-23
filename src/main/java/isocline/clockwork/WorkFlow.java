@@ -28,19 +28,57 @@ import java.util.function.Consumer;
 public interface WorkFlow {
 
 
+    /**
+     * If the input event occurs, proceed to the next operation.
+     *
+     * @param eventNames
+     * @return
+     */
     WorkFlow wait(String... eventNames);
 
+
+    /**
+     * Only if all the input events have occurred, execute the next definition method.
+     *
+     * @param eventNames
+     * @return
+     */
     WorkFlow waitAll(String... eventNames);
 
 
+    /**
+     * If the corresponding error event occurs, the subsequent method is executed.
+     *
+     * @param eventNames
+     * @return
+     */
     WorkFlow onError(String... eventNames);
 
 
+    /**
+     * If the input event occurs, proceed to the next operation.
+     *
+     * @param workFlows
+     * @return
+     */
     WorkFlow wait(WorkFlow... workFlows);
 
+
+    /**
+     * Only if all the input events have occurred, execute the next definition method.
+     *
+     * @param workFlows
+     * @return
+     */
     WorkFlow waitAll(WorkFlow... workFlows);
 
 
+    /**
+     *  If the corresponding error event occurs, the subsequent method is executed.
+     *
+     * @param workFlows
+     * @return
+     */
     WorkFlow onError(WorkFlow... workFlows);
 
 
@@ -122,7 +160,13 @@ public interface WorkFlow {
     WorkFlow next(Consumer<WorkEvent> execObject, String eventName);
 
 
-
+    /**
+     * And generates an event. Delayed events can also be generated through the delay time setting.
+     *
+     * @param eventName
+     * @param time
+     * @return
+     */
     WorkFlow fireEvent(String eventName, long time);
 
     /**
@@ -165,6 +209,11 @@ public interface WorkFlow {
     Queue<FunctionExecutor> getExecutorQueue(String eventName);
 
 
+    /**
+     * Returns UUID information related to the unique event of the last state so far.
+     *
+     * @return
+     */
     String cursor();
 
 

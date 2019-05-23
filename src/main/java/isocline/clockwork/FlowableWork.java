@@ -22,12 +22,17 @@ import isocline.clockwork.flow.FunctionExecutor;
 import java.util.Queue;
 
 /**
+ * It is an interface that enables flow control.
+ If you want to control flow with several methods in an object that implements this interface, you can inherit the interface.
+
  * @see isocline.clockwork.Work
  */
 public interface FlowableWork extends Work {
 
 
     /**
+     * It is a method that must be implemented in order to do flow control.
+     *
      * @param flow
      */
     default void defineWorkFlow(WorkFlow flow) {
@@ -37,6 +42,8 @@ public interface FlowableWork extends Work {
 
 
     /**
+     * It is not necessary to implement additional methods as extended methods implemented from the Work interface.
+     *
      * @return
      * @throws InterruptedException
      */
