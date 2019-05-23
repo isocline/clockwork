@@ -20,8 +20,11 @@ import java.util.Map;
 
 
 /**
+ * Creates and returns a default WorkProcessor implementation object.
+ * WorkProcessor is the core engine of work execution, and WorkProcessorFactory determines,
+ * manages and creates the characteristics of WorkProcessor.
  *
- *
+ * @author Richard D. Kim
  */
 public class WorkProcessorFactory {
 
@@ -31,7 +34,9 @@ public class WorkProcessorFactory {
 
 
     /**
-     * @return
+     * Returns the underlying WorkProcessor implementation object.
+     *
+     * @return WorkProcessor
      */
     public static WorkProcessor getDefaultProcessor() {
 
@@ -45,6 +50,9 @@ public class WorkProcessorFactory {
 
 
     /**
+     *
+     * Returns a customized WorkProcessor implementation object.
+     *
      * @param id
      * @param config
      * @return

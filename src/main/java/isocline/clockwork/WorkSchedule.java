@@ -26,7 +26,8 @@ import java.util.UUID;
 
 
 /**
- *
+ * Process various settings related to the execution of the job.
+ * You can set scheduling related to tasks such as start time, end time, and repeat time.
  *
  * @see isocline.clockwork.Work
  */
@@ -90,6 +91,11 @@ public class WorkSchedule {
     }
 
 
+    /**
+     * Returns a ID
+     *
+     * @return
+     */
     public String getId() {
         return this.workUUID;
     }
@@ -256,6 +262,7 @@ public class WorkSchedule {
     }
 
     /**
+     *
      * @param waitTime
      * @return
      */
