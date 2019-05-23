@@ -1,6 +1,9 @@
+
+
 # Clockwork
 ### Multi-purpose work processing engine for JVM and Android
 
+<img src="https://raw.github.com/isocline/clockwork/master/docs/img/logo.png">
 
 
 [![Build Status](https://travis-ci.org/isocline/clockwork.svg?branch=develop)](https://travis-ci.org/isocline/clockwork)
