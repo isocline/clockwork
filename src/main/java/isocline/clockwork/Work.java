@@ -55,9 +55,9 @@ public interface Work {
      * The response time unit is milliseconds, and its own method iteration time can be determined through coding.
      * Or if the loop time is set through an external event or API, the WAIT value is returned.
      *
-     * @param event
+     * @param event WorkEvent
      * @return DelayTime
-     * @throws InterruptedException
+     * @throws InterruptedException - If interrupt occurs
      */
     long execute(WorkEvent event) throws InterruptedException;
 

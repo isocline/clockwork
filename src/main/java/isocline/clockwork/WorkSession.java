@@ -26,10 +26,10 @@ public interface WorkSession {
     void onError(Work work, Throwable error);
 
 
-    void beforeExcute(Work work);
+    void beforeExecute(Work work);
 
 
-    void afterExcute(Work work);
+    void afterExecute(Work work);
 
 
     void setAttribute(String key, Object object);

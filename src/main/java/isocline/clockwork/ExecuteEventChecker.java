@@ -30,8 +30,8 @@ public interface ExecuteEventChecker {
     /**
      * And judges whether or not it is executed.
      *
-     * @param time
-     * @return
+     * @param time the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
+     * @return true/false
      */
     boolean check(long time);
 }
