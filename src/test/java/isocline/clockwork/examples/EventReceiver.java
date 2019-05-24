@@ -31,11 +31,11 @@ public class EventReceiver implements Work {
 
     public static void main(String[] args) throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
         EventReceiver checker = new EventReceiver();
-        WorkSchedule schedule = worker.createSchedule(checker).setFinishTimeFromNow(30 * Clock.SECOND).bindEvent("test").setSleepMode();
+        WorkSchedule schedule = processor.createSchedule(checker).setFinishTimeFromNow(30 * Clock.SECOND).bindEvent("test").setSleepMode();
         schedule.activate();
 
 
@@ -46,10 +46,10 @@ public class EventReceiver implements Work {
 
 
 
-        worker.createSchedule(gen).setFinishTimeFromNow(30 * Clock.SECOND).setStrictMode().setStartDateTime
+        processor.createSchedule(gen).setFinishTimeFromNow(30 * Clock.SECOND).setStrictMode().setStartDateTime
                 (startTime).activate();
 
 
-        worker.shutdown(20 * Clock.SECOND);
+        processor.shutdown(20 * Clock.SECOND);
     }
 }

@@ -25,16 +25,16 @@ public class SimpleRepeater implements Work {
     @Test
     public void case1() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
-        WorkSchedule schedule = worker.createSchedule(new SimpleRepeater()).setRepeatInterval(1 * Clock.SECOND)
+        WorkSchedule schedule = processor.createSchedule(new SimpleRepeater()).setRepeatInterval(1 * Clock.SECOND)
                 .setFinishTimeFromNow(5 * Clock.SECOND);
 
         schedule.activate();
 
-        worker.shutdown(TestConfiguration.TIMEOUT);
-        //worker.awaitShutdown();
+        processor.shutdown(TestConfiguration.TIMEOUT);
+        //processor.awaitShutdown();
 
 
     }
@@ -43,68 +43,68 @@ public class SimpleRepeater implements Work {
     @Test
     public void case2() throws Exception {
 
-        WorkProcessor manager = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
 
-        WorkSchedule schedule = manager.createSchedule(SimpleRepeater.class);
+        WorkSchedule schedule = processor.createSchedule(SimpleRepeater.class);
 
         schedule.setRepeatInterval(1 * Clock.SECOND);
         schedule.activate();
 
 
-        manager.shutdown(TestConfiguration.TIMEOUT);
+        processor.shutdown(TestConfiguration.TIMEOUT);
     }
 
     @Test
     public void caseStrictMode() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
 
-        WorkSchedule schedule = worker.createSchedule(SimpleRepeater.class);
+        WorkSchedule schedule = processor.createSchedule(SimpleRepeater.class);
 
         schedule.setRepeatInterval(1 * Clock.SECOND);
         schedule.setStrictMode();
         schedule.activate();
 
 
-        worker.shutdown(TestConfiguration.TIMEOUT);
+        processor.shutdown(TestConfiguration.TIMEOUT);
     }
 
     @Test
     public void delayStart1() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
 
-        WorkSchedule schedule = worker.createSchedule(SimpleRepeater.class);
+        WorkSchedule schedule = processor.createSchedule(SimpleRepeater.class);
 
         schedule.setRepeatInterval(1 * Clock.SECOND);
-        schedule.setStartDelayTime(Clock.fromNow(0,0,2));
+        schedule.setStartDelayTime(Clock.milliseconds(0,0,2));
         schedule.activate();
 
 
-        worker.shutdown(TestConfiguration.TIMEOUT);
+        processor.shutdown(TestConfiguration.TIMEOUT);
     }
 
 
     @Test
     public void delayStart2() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
 
-        WorkSchedule schedule = worker.createSchedule(SimpleRepeater.class);
+        WorkSchedule schedule = processor.createSchedule(SimpleRepeater.class);
 
         schedule.setRepeatInterval(1 * Clock.SECOND);
         schedule.setStartDateTime(Clock.nextSecond()+Clock.SECOND*2);
         schedule.activate();
 
 
-        worker.shutdown(TestConfiguration.TIMEOUT);
+        processor.shutdown(TestConfiguration.TIMEOUT);
     }
 }

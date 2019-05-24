@@ -30,7 +30,7 @@ public class ClockTest {
 
         long p = 2 * Clock.HOUR + 3 * Clock.MINUTE + 7 * Clock.SECOND;
 
-        long q = Clock.fromNow(2, 3, 7);
+        long q = Clock.milliseconds(2, 3, 7);
 
         assertEquals(p, q);
 
@@ -44,7 +44,7 @@ public class ClockTest {
         Date d = Clock.toDate(isoTime);
 
 
-        long p = Clock.fromNow(isoTime);
+        long p = Clock.milliseconds(isoTime);
 
 
         System.err.println(d);

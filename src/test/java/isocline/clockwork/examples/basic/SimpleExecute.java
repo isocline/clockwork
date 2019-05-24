@@ -23,15 +23,15 @@ public class SimpleExecute implements Work {
     @Test
     public void case1() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
 
         // execute async
-        worker.execute(new SimpleExecute());
+        processor.execute(new SimpleExecute());
 
 
-        worker.shutdown(TestConfiguration.TIMEOUT);
+        processor.shutdown(TestConfiguration.TIMEOUT);
 
     }
 

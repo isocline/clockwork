@@ -29,17 +29,17 @@ public class EndTimeSelfControl implements Work {
     @Test
     public void case1() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
 
 
         EndTimeSelfControl checker = new EndTimeSelfControl();
-        WorkSchedule schedule = worker.createSchedule(checker);
+        WorkSchedule schedule = processor.createSchedule(checker);
 
         schedule.activate();
 
-        worker.shutdown(TestConfiguration.TIMEOUT);
+        processor.shutdown(TestConfiguration.TIMEOUT);
 
     }
 

@@ -22,14 +22,14 @@ public class CrontSchedule implements Work {
     @Test
     public void case1() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
-        WorkSchedule schedule = worker.createSchedule(new CronDescriptor("* * * * *"), CrontSchedule.class);
+        WorkSchedule schedule = processor.createSchedule(new CronDescriptor("* * * * *"), CrontSchedule.class);
 
         schedule.activate();
 
-        worker.awaitShutdown();
+        processor.awaitShutdown();
 
 
     }

@@ -33,6 +33,27 @@ public interface FlowableWork extends Work {
     /**
      * It is a method that must be implemented in order to do flow control.
      *
+     * <p>
+     * <strong>Example:</strong>
+     * <blockquote>
+     * <pre>
+
+     *  public void defineWorkFlow(WorkFlow flow) {
+     *    // step1 : this.checkMemory() -> this.checkStorage()
+     *    WorkFlow p1 = flow.next(this::checkMemory).next(this::checkStorage);
+     *
+     *    // Until wait finish of step1, then this.sendSignal()
+     *    WorkFlow t1 = flow.wait(p1).next(this::sendSignal);
+     *
+     *    // Until wait finish of step1, then this.sendStatusMsg() and this.sendReportMsg()
+     *    WorkFlow t2 = flow.wait(p1).next(this::sendStatusMsg).next(this::sendReportMsg);
+     *
+     *    // Wait until both step1 and step2 are finished, then execute this.report()
+     *    flow.waitAll(t1, t2).next(this::report).finish();
+     *  }
+     * </pre>
+     * </blockquote>
+     *
      * @param flow WorkFlow instance
      */
     default void defineWorkFlow(WorkFlow flow) {
@@ -43,6 +64,7 @@ public interface FlowableWork extends Work {
 
     /**
      * It is not necessary to implement additional methods as extended methods implemented from the Work interface.
+     * DO NOT implement this method.
      *
      * @return delay time
      * @throws InterruptedException If interrupt occur
@@ -52,14 +74,13 @@ public interface FlowableWork extends Work {
 
         final WorkSchedule schedule = event.getWorkSchedule();
 
-        WorkFlow flow = schedule.getWorkFlow();
+        final WorkFlow flow = schedule.getWorkFlow();
 
         if (flow == null) {
             return TERMINATE;
         }
 
         final String eventName = event.getEventName();
-
 
         FunctionExecutor executor = null;
 
@@ -76,10 +97,8 @@ public interface FlowableWork extends Work {
                     if (nextFuncExector != null) {
                         schedule.raiseLocalEvent(event.createChild(eventName));
                     }
-
                 }
             }
-
         }
 
         if (executor == null) {
@@ -103,7 +122,9 @@ public interface FlowableWork extends Work {
                 isFireEvent = true;
 
             } catch (Throwable e) {
-                String eventNm = executor.getFireEventName();
+
+                final String eventNm = executor.getFireEventName();
+
                 if (eventNm != null) {
                     String errEventName = eventName + "::error";
 
@@ -115,27 +136,24 @@ public interface FlowableWork extends Work {
                 }
                 String errEventName = executor.getEventUUID() + "::error";
 
-                WorkEvent errEvent = WorkEventFactory.create(errEventName);
+                final WorkEvent errEvent = WorkEventFactory.create(errEventName);
                 errEvent.setThrowable(e);
 
 
                 schedule.raiseLocalEvent(errEvent);
 
 
-                errEventName = "*::error";
+                final WorkEvent errEvent2 = WorkEventFactory.create("*::error");
+                errEvent2.setThrowable(e);
 
-                errEvent = WorkEventFactory.create(errEventName);
-                errEvent.setThrowable(e);
-
-                schedule.raiseLocalEvent(errEvent);
+                schedule.raiseLocalEvent(errEvent2);
             } finally {
                 if(isFireEvent) {
-                    String eventNm = executor.getFireEventName();
+                    final String eventNm = executor.getFireEventName();
                     if (eventNm != null) {
                         long delayTime = executor.getDelayTimeFireEvent();
                         schedule.raiseLocalEvent(event.createChild(eventNm), delayTime);
                     }
-
                     schedule.raiseLocalEvent(event.createChild(executor.getEventUUID()));
                 }
             }
@@ -149,7 +167,6 @@ public interface FlowableWork extends Work {
                 return LOOP;
             }
         }
-
 
         return WAIT;
     }

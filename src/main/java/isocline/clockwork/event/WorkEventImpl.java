@@ -23,7 +23,7 @@ import java.util.Map;
 
 
 /**
- *
+ * A skeletal {@link WorkEvent} implementation.
  *
  */
 public class WorkEventImpl implements WorkEvent {
@@ -111,7 +111,18 @@ public class WorkEventImpl implements WorkEvent {
         event2.attributeMap = this.attributeMap;
     }
 
-    public WorkEventImpl createChild(String eventName) {
+
+    /**
+     * Creates a new {@link WorkEvent} that has parent property information.
+     *
+     * @param eventName the name of the event to create; may not be empty
+     * @return the newly created WorkEvent
+     */
+    public WorkEvent createChild(String eventName) {
+
+        if(eventName==null || eventName.trim().length()==0) {
+            throw new IllegalArgumentException("name is empty");
+        }
 
         WorkEventImpl newEvent = new WorkEventImpl(eventName);
         newEvent.attributeMap = this.attributeMap;

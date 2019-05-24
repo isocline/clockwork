@@ -15,17 +15,17 @@ public class MultiStepSchedule   {
     private static Logger logger = Logger.getLogger(MultiStepSchedule.class.getName());
 
     public static void main(String[] args) throws Exception {
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
-        WorkSchedule schedule = worker.createSchedule(Step1Schedule.class).setStrictMode();
+        WorkSchedule schedule = processor.createSchedule(Step1Schedule.class).setStrictMode();
         schedule.activate();
 
-        schedule = worker.createSchedule(Step2Schedule.class).bindEvent("fireEvent");
+        schedule = processor.createSchedule(Step2Schedule.class).bindEvent("fireEvent");
         schedule.activate();
 
 
-        worker.shutdown(20 * Clock.SECOND);
+        processor.shutdown(20 * Clock.SECOND);
     }
 
     public static class Step1Schedule implements Work {

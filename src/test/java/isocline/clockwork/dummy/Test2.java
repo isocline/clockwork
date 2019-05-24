@@ -7,7 +7,7 @@ public class Test2 {
     public static void main(String[] args) throws Exception {
 
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
 
@@ -33,14 +33,14 @@ public class Test2 {
 
         for(int i=0;i<30;i++) {
 
-            System.out.println(worker.getWorkQueueSize() +"  activate");
-            System.out.println(worker.getManagedWorkCount() +"  chk");
+            System.out.println(processor.getWorkQueueSize() +"  activate");
+            System.out.println(processor.getManagedWorkCount() +"  chk");
 
             Thread.sleep(1000);
         }
 
 
-        worker.shutdown();
+        processor.shutdown();
     }
 
 
