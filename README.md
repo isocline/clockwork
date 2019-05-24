@@ -100,9 +100,9 @@ public class SimpleRepeater  {
     @Test
     public void startMethod() throws Exception {
 
-        WorkProcessor workProcessor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
-        workProcessor.createSchedule((WorkEvent event) -> {
+        processor.createSchedule((WorkEvent event) -> {
                      // DO YOUR WORK
                     return 10 * Clock.SECOND;
                 }).activate();
