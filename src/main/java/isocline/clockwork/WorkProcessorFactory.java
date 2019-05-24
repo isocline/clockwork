@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class WorkProcessorFactory {
 
-    private static WorkProcessor worker;
+    private static WorkProcessor workProcessor;
 
     private static Map<String, WorkProcessor> processorMap = new HashMap<String, WorkProcessor>();
 
@@ -41,11 +41,11 @@ public class WorkProcessorFactory {
     public static WorkProcessor getDefaultProcessor() {
 
 
-        if (worker == null || !worker.isWorking()) {
-            worker = new WorkProcessor("default", Configuration.NOMAL);
+        if (workProcessor == null || !workProcessor.isWorking()) {
+            workProcessor = new WorkProcessor("default", Configuration.NOMAL);
         }
 
-        return worker;
+        return workProcessor;
     }
 
 

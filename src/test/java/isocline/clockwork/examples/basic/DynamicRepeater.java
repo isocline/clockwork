@@ -27,15 +27,15 @@ public class DynamicRepeater implements Work {
     @Test
     public void case1() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
 
-        WorkSchedule schedule = worker.createSchedule(new DynamicRepeater());
+        WorkSchedule schedule = processor.createSchedule(new DynamicRepeater());
 
         schedule.activate();
 
-        worker.shutdown(TestConfiguration.TIMEOUT);
+        processor.shutdown(TestConfiguration.TIMEOUT);
 
 
 

@@ -17,7 +17,30 @@ package isocline.clockwork;
 
 /**
  *
- * Configuration class for WorkProcessor
+ * Configuration class for {@link WorkProcessor}
+ *
+ * <p>
+ * <strong>Example:</strong>
+ * <blockquote>
+ * <pre>
+ * // for high-end environments
+ * WorkProcessor processor = WorkProcessorFactory.getProcessor("perform", Configuration.PERFORMANCE);
+ *
+ * // for low-end environments
+ * WorkProcessor processor = WorkProcessorFactory.getProcessor("echo", Configuration.ECHO);
+ *
+ *
+ * // user define
+ * Configuration config = Configuration.create()
+ *                          .setInitThreadWorkerSize(3)
+ *                          .setMaxThreadWorkerSize(12)
+ *                          .setThreadPriority(Thread.NORM_PRIORITY)
+ *                          .lock();
+ *
+ * WorkProcessor processor = WorkProcessorFactory.getProcessor("user", config);
+ *
+ * </pre>
+ * </blockquote>
  */
 public class Configuration {
 
@@ -57,7 +80,7 @@ public class Configuration {
 
     /**
      * Initialization settings related to thread settings for WorkProcessor initialization
-     * Preset for low-end environments, the initial thread count is 24, the maximum thread count is 36,
+     * Preset for high-end environments, the initial thread count is 24, the maximum thread count is 36,
      * and the thread priority setting is Thread.MAX_PRIORITY state.
      */
     public final static Configuration PERFORMANCE = create().setInitThreadWorkerSize(24).setMaxThreadWorkerSize(36).setThreadPriority(Thread.MAX_PRIORITY).lock();
@@ -83,8 +106,9 @@ public class Configuration {
     }
 
     /**
+     * Lock the configuration information from being modified.
      *
-     * @return
+     * @return Configuration self
      */
     public Configuration lock() {
         this.isPropertyLocking = true;
@@ -95,6 +119,7 @@ public class Configuration {
         this.isPropertyLocking = false;
         return this;
     }
+
     private void check() {
         if (isPropertyLocking) {
             throw new RuntimeException("property is locking");
@@ -115,7 +140,7 @@ public class Configuration {
      * Set a initial thread worker size
      *
      * @param initThreadWorkerSize
-     * @return Configuration
+     * @return Configuration instance itself
      */
     public Configuration setInitThreadWorkerSize(int initThreadWorkerSize) {
         this.check();
@@ -125,16 +150,17 @@ public class Configuration {
 
     /**
      *
-     * @return
+     * @return size of max worker thread
      */
     public int getMaxThreadWorkerSize() {
         return maxThreadWorkerSize;
     }
 
     /**
+     * Set a size for max thread worker
      *
      * @param maxThreadWorkerSize
-     * @return
+     * @return Configuration instance itself
      */
     public Configuration setMaxThreadWorkerSize(int maxThreadWorkerSize) {
         this.check();
@@ -143,6 +169,7 @@ public class Configuration {
     }
 
     /**
+     *
      * Returns a Thread priority
      * @return thread priority
      */
@@ -155,7 +182,7 @@ public class Configuration {
      * Set a priority of Thread
      *
      * @param threadPriority thread priority
-     * @return Configuration
+     * @return Configuration instance itself
      */
     public Configuration setThreadPriority(int threadPriority) {
         this.check();
@@ -164,6 +191,7 @@ public class Configuration {
     }
 
     /**
+     *
      * Returns a timeout for executing job.
      * @return timeout
      */

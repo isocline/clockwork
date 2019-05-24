@@ -58,11 +58,11 @@ public class Clock {
     /**
      * Obtains a time to the current system millisecond time using ISO 8601 in the specified time zone.
      *
-     * @param isoDateTime datetime
+     * @param isoDateTime this date-time as a String, such as 2019-06-16T10:15:30Z or 2019-06-16T10:15:30+01:00[Europe/Paris].
      * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
      * @throws java.text.ParseException If isoDateTime format is invalid
      */
-    public static long fromNow(String isoDateTime) throws java.text.ParseException {
+    public static long milliseconds(String isoDateTime) throws java.text.ParseException {
 
 
         Date date = toDate(isoDateTime);
@@ -85,9 +85,9 @@ public class Clock {
      * @param hour hour
      * @param minute minute
      * @param second second
-     * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
+     * @return the number of milliseconds.
      */
-    public static long fromNow(long hour, long minute, long second) {
+    public static long milliseconds(long hour, long minute, long second) {
         return hour * HOUR + minute * MINUTE + second * SECOND;
     }
 
@@ -140,7 +140,7 @@ public class Clock {
     /**
      * Obtains a DateTime set to the current system millisecond time using ISO 8601 in the specified time zone.
      *
-     * @param isoDateTime ISO8610 style datetime
+     * @param isoDateTime this date-time as a String, such as 2019-06-16T10:15:30Z or 2019-06-16T10:15:30+01:00[Europe/Paris].
      * @return Date java.util.Date
      * @throws java.text.ParseException If input datetime format is error
      */
@@ -172,7 +172,7 @@ public class Clock {
     /**
      * Convert a formatted string to the numeric type time information.
      *
-     * @param isoDateTime ISO 8601 style datetime
+     * @param isoDateTime ISO 8601 style datetime,this date-time as a String, such as 2019-06-16T10:15:30Z or 2019-06-16T10:15:30+01:00[Europe/Paris].
      * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
      * @throws java.text.ParseException If input data format is error
      */

@@ -88,15 +88,15 @@ public class OrderProcess3 implements FlowableWork {
 
     public static void main(String[] args) throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getProcessor("perform", Configuration.PERFORMANCE);
+        WorkProcessor processor = WorkProcessorFactory.getProcessor("perform", Configuration.PERFORMANCE);
 
 
         OrderProcess3 p = new OrderProcess3("AutoExpress");
 
-        worker.execute(p);
+        processor.execute(p);
 
 
-        worker.shutdown(1000000);
+        processor.shutdown(1000000);
 
     }
 

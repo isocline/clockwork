@@ -102,19 +102,19 @@ public class ServerUptimeChecker  implements Work {
    }
 
    public static void main(String[] args) throws Exception {
-       WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+       WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
        String[] urls = new String[] {"https://www.google.com","https://www.apple.com"};
        for(String url:urls) {
 
            ServerUptimeChecker checker = new ServerUptimeChecker( url);
-           WorkSchedule schedule = worker.createSchedule(checker).bindEvent("connectTypeChange").setJitter(200).setStrictMode();
+           WorkSchedule schedule = processor.createSchedule(checker).bindEvent("connectTypeChange").setJitter(200).setStrictMode();
            schedule.activate();
        }
 
 
 
-       worker.shutdown(20*Clock.SECOND);
+       processor.shutdown(20*Clock.SECOND);
    }
 }

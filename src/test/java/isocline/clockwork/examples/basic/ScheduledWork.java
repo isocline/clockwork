@@ -22,18 +22,18 @@ public class ScheduledWork implements Work {
     @Test
     public void case1() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
-        WorkSchedule schedule = worker.createSchedule(new ScheduledWork())
+        WorkSchedule schedule = processor.createSchedule(new ScheduledWork())
                 .setRepeatInterval(1 * Clock.HOUR)
                 .setStartDateTime("2020-04-24T09:00:00Z")
                 .setFinishDateTime("2020-06-16T16:00:00Z")
                 .activate();
 
 
-        worker.shutdown(TestConfiguration.TIMEOUT);
-        //worker.awaitShutdown();
+        processor.shutdown(TestConfiguration.TIMEOUT);
+        //processor.awaitShutdown();
 
 
     }
@@ -58,52 +58,52 @@ public class ScheduledWork implements Work {
     @Test
     public void caseStrictMode() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
 
-        WorkSchedule schedule = worker.createSchedule(ScheduledWork.class);
+        WorkSchedule schedule = processor.createSchedule(ScheduledWork.class);
 
         schedule.setRepeatInterval(1 * Clock.SECOND);
         schedule.setStrictMode();
         schedule.activate();
 
 
-        worker.shutdown(TestConfiguration.TIMEOUT);
+        processor.shutdown(TestConfiguration.TIMEOUT);
     }
 
     @Test
     public void delayStart1() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
 
-        WorkSchedule schedule = worker.createSchedule(ScheduledWork.class);
+        WorkSchedule schedule = processor.createSchedule(ScheduledWork.class);
 
         schedule.setRepeatInterval(1 * Clock.SECOND);
-        schedule.setStartDelayTime(Clock.fromNow(0,0,2));
+        schedule.setStartDelayTime(Clock.milliseconds(0,0,2));
         schedule.activate();
 
 
-        worker.shutdown(TestConfiguration.TIMEOUT);
+        processor.shutdown(TestConfiguration.TIMEOUT);
     }
 
 
     @Test
     public void delayStart2() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
 
 
-        WorkSchedule schedule = worker.createSchedule(ScheduledWork.class);
+        WorkSchedule schedule = processor.createSchedule(ScheduledWork.class);
 
         schedule.setRepeatInterval(1 * Clock.SECOND);
         schedule.setStartDateTime(Clock.nextSecond()+Clock.SECOND*2);
         schedule.activate();
 
 
-        worker.shutdown(TestConfiguration.TIMEOUT);
+        processor.shutdown(TestConfiguration.TIMEOUT);
     }
 }
