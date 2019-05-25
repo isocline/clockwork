@@ -109,21 +109,18 @@ public class WorkSchedule {
     }
 
 
-    synchronized void adjustWaiting() throws InterruptedException {
+    void adjustWaiting() throws InterruptedException {
         if (this.isStrictMode && needWaiting) {
 
-            //long gap = this.nextExecuteTime - System.currentTimeMillis();
+            synchronized (workUUID) {
+                for (int i = 0; i < 10000000; i++) {
 
-            for (int i = 0; i < 10000000; i++) {
-
-                if (nextExecuteTime <= System.currentTimeMillis()) {
-                    return;
+                    if (nextExecuteTime <= System.currentTimeMillis()) {
+                        return;
+                    }
                 }
-
             }
-
         }
-
     }
 
 
@@ -140,7 +137,8 @@ public class WorkSchedule {
         needWaiting = false;
 
         if (!isActivated) {
-            throw new RuntimeException("service end");
+            return 0;
+            //throw new RuntimeException("service end");
         }
         if (isUntilEndTime()) {
             return Long.MAX_VALUE;
@@ -589,17 +587,36 @@ public class WorkSchedule {
     }
 
     /**
+     * check activated
+     *
      * @return
      */
     public boolean isActivated() {
         return isActivated;
     }
 
-    public void finish() {
+
+    /**
+     * finish job
+     *
+     */
+    synchronized public void finish() {
         if (this.isActivated) {
             this.isActivated = false;
             this.workProcessor.managedWorkCount.decrementAndGet();
         }
+        notifyAll();
+    }
+
+
+    synchronized public void waitUntilFinish(long timeout) throws InterruptedException {
+        wait(timeout);
+    }
+
+
+
+    synchronized public void waitUntilFinish() throws InterruptedException{
+        wait();
     }
 
     @Override

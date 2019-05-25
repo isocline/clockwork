@@ -18,8 +18,7 @@ package isocline.clockwork;
 
 import isocline.clockwork.event.WorkEventFactory;
 import isocline.clockwork.flow.FunctionExecutor;
-
-import java.util.Queue;
+import isocline.clockwork.flow.FunctionExecutorList;
 
 /**
  * It is an interface that enables flow control.
@@ -82,21 +81,26 @@ public interface FlowableWork extends Work {
 
         final String eventName = event.getEventName();
 
+        //System.out.println(">>>>>>>> RECV : ["+eventName+"]");
+
         FunctionExecutor executor = null;
 
         boolean existNextExecutor = false;
 
         if (eventName != null) {
-            Queue<FunctionExecutor> q = flow.getExecutorQueue(eventName);
-            if (q != null) {
+            FunctionExecutorList functionExecutorList = flow.getFunctionExecutorList(eventName);
+            if (functionExecutorList != null) {
 
-                executor = q.poll();
-                if (executor != null) {
+                FunctionExecutorList.Wrapper wrapper = functionExecutorList.getNextstepFunctionExecutor();
 
-                    FunctionExecutor nextFuncExector = q.peek();
-                    if (nextFuncExector != null) {
+                if (wrapper != null) {
+
+                    executor = wrapper.getFunctionExecutor();
+
+                    if (wrapper.hasNext()) {
                         schedule.raiseLocalEvent(event.createChild(eventName));
                     }
+
                 }
             }
         }

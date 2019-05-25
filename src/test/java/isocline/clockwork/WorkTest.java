@@ -33,6 +33,7 @@ public class WorkTest  {
     public void executeSimple() throws Exception {
 
 
+        WorkSchedule schedule =
 
         workProcessor.execute((WorkEvent event) -> {
             seq++;
@@ -41,7 +42,7 @@ public class WorkTest  {
             return Work.TERMINATE;
         });
 
-        Thread.sleep(100);
+        schedule.waitUntilFinish(1000);
 
 
         assertEquals(1, seq);
@@ -51,6 +52,7 @@ public class WorkTest  {
     @Test
     public void executeByEvent() throws Exception {
 
+        WorkSchedule schedule =
 
         workProcessor.regist((WorkEvent event) -> {
             seq++;
@@ -67,7 +69,7 @@ public class WorkTest  {
             return Work.TERMINATE;
         });
 
-        Thread.sleep(100);
+        schedule.waitUntilFinish(1000);
 
 
         assertEquals(1, seq);
@@ -79,6 +81,7 @@ public class WorkTest  {
     public void executeOneTime() throws Exception {
 
 
+        WorkSchedule schedule =
 
         workProcessor.createSchedule((WorkEvent event) -> {
             seq++;
@@ -87,7 +90,7 @@ public class WorkTest  {
             return Work.TERMINATE;
         }).activate();
 
-        Thread.sleep(100);
+        schedule.waitUntilFinish(1000);
 
 
         assertEquals(1, seq);
@@ -97,7 +100,7 @@ public class WorkTest  {
     @Test
     public void executeSleep() throws Exception{
 
-
+        WorkSchedule schedule =
 
         workProcessor.createSchedule((WorkEvent event) -> {
             seq++;
@@ -106,7 +109,7 @@ public class WorkTest  {
             return Work.WAIT;
         }).activate();
 
-        Thread.sleep(100);
+        schedule.waitUntilFinish(100);
 
         assertEquals(1, seq);
 
@@ -115,7 +118,7 @@ public class WorkTest  {
     @Test
     public void executeLoop() throws Exception{
 
-
+        WorkSchedule schedule =
 
         workProcessor.createSchedule((WorkEvent event) -> {
             seq++;
@@ -129,7 +132,7 @@ public class WorkTest  {
         }).activate();
 
 
-        Thread.sleep(100);
+        schedule.waitUntilFinish(100);
         assertEquals(10, seq);
 
     }
