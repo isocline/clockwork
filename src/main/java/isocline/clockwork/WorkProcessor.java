@@ -275,10 +275,20 @@ public class WorkProcessor extends ThreadGroup {
 
     public void awaitShutdown() {
 
+        long t1 = 0;
 
         while (this.getManagedWorkCount() > 0) {
 
-            waiting(100);
+            waiting(200);
+
+            long t2 = System.currentTimeMillis();
+
+            long gap = t2 - t1;
+            if (gap > 1000 * 60 * 3) {
+                logger.debug("running work count:" + this.getManagedWorkCount());
+                t1 = System.currentTimeMillis();
+
+            }
 
         }
 

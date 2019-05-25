@@ -45,7 +45,7 @@ public class FunctionExecutor {
     private long delayTimeFireEvent = 0;
 
 
-    public FunctionExecutor(Object obj) {
+    FunctionExecutor(Object obj) {
 
         if (obj != null) {
             if (obj instanceof Runnable) {
@@ -59,8 +59,6 @@ public class FunctionExecutor {
 
 
         this.eventUUID = UUID.randomUUID().toString();
-
-        //System.out.println(this.eventUUID + "   regist ===== " + obj);
     }
 
 

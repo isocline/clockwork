@@ -19,12 +19,14 @@ import isocline.clockwork.WorkProcessor;
 import isocline.clockwork.WorkProcessorFactory;
 
 import javax.servlet.ServletContextEvent;
+import javax.servlet.annotation.WebListener;
 
 
 /**
  *
  *
  */
+@WebListener
 public class WorkProcessorServletContextListener implements
         javax.servlet.ServletContextListener {
 

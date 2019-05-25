@@ -41,7 +41,7 @@ public class WorkFlowImpl implements WorkFlow {
 
     private FunctionExecutor lastFuncExecutor = null;
 
-    private EventRepository<String, Queue<FunctionExecutor>> eventRepository = new EventRepository();
+    private EventRepository<String, FunctionExecutorList> eventRepository = new EventRepository();
 
     private List<FunctionExecutor> functionExecutorList = new ArrayList<FunctionExecutor>();
 
@@ -58,13 +58,13 @@ public class WorkFlowImpl implements WorkFlow {
 
 
 
-        Queue<FunctionExecutor> queue = this.eventRepository.get(eventName);
-        if(queue==null) {
-            queue = new ConcurrentLinkedQueue<FunctionExecutor>();
-            this.eventRepository.put(eventName, queue);
+        FunctionExecutorList functionExecutorList = this.eventRepository.get(eventName);
+        if(functionExecutorList==null) {
+            functionExecutorList = new FunctionExecutorList();
+            this.eventRepository.put(eventName, functionExecutorList);
         }
 
-        queue.add(functionExecutor);
+        functionExecutorList.add(functionExecutor);
 
     }
 
@@ -386,7 +386,7 @@ public class WorkFlowImpl implements WorkFlow {
     }
 
 
-    public Queue<FunctionExecutor> getExecutorQueue(String eventName) {
+    public FunctionExecutorList getFunctionExecutorList(String eventName) {
         if (eventName == null) return null;
 
 
@@ -394,10 +394,10 @@ public class WorkFlowImpl implements WorkFlow {
 
 
         if (eventSet == null || eventSet.isRaiseEventReady(eventName)) {
-            Queue<FunctionExecutor>  queue = this.eventRepository.get(eventName);
+            FunctionExecutorList functionExecutorList = this.eventRepository.get(eventName);
 
-            if (queue != null) {
-                return queue;
+            if (functionExecutorList != null) {
+                return functionExecutorList;
             }
 
         }

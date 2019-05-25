@@ -18,7 +18,6 @@ package isocline.clockwork.flow;
 import isocline.clockwork.WorkEvent;
 import isocline.clockwork.WorkFlow;
 
-import java.util.Queue;
 import java.util.function.Consumer;
 
 public class WorkFlowWrapper implements WorkFlow {
@@ -147,8 +146,8 @@ public class WorkFlowWrapper implements WorkFlow {
     }
 
     @Override
-    public Queue<FunctionExecutor> getExecutorQueue(String eventName) {
-        return this.workFlowInstance.getExecutorQueue(eventName);
+    public FunctionExecutorList getFunctionExecutorList(String eventName) {
+        return this.workFlowInstance.getFunctionExecutorList(eventName);
 
     }
 

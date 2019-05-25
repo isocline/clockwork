@@ -52,9 +52,9 @@ public class Configuration {
 
 
 
-    private int maxWorkQueueSize = 512 * 512 * 512;
+    private int maxWorkQueueSize = 512 * 512 * 512 * 8;
 
-    private long executeTimeout = 30 * Clock.SECOND;
+    private long executeTimeout = 60 * Clock.SECOND;
 
     private long executeCountdownMilliTime = 50;
 
