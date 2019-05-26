@@ -18,6 +18,7 @@ package isocline.clockwork.event;
 import isocline.clockwork.WorkEvent;
 import isocline.clockwork.WorkSchedule;
 
+
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -29,27 +30,46 @@ import java.util.Map;
 public class WorkEventImpl implements WorkEvent {
 
 
-    private String eventName;
-
-
-    protected Map attributeMap = new Hashtable();
-
-
-    protected WorkSchedule schedule;
+    private String eventName = null;
 
     private long fireTime = -1;
 
 
+    private Map attributeMap = new Hashtable();
+
+    private WorkSchedule schedule;
+
+    private WorkEvent rootWorkEvent;
+
+    private Throwable throwable;
+
+
+
+
+    WorkEventImpl() {
+        this.rootWorkEvent = this;
+    }
+
     /**
      *
+     * @param eventName
      */
-    WorkEventImpl() {
-
-    }
-
     WorkEventImpl(String eventName) {
         this.eventName = eventName;
+        this.rootWorkEvent = this;
     }
+
+    /**
+     *
+     * @param eventName
+     * @param rootWorkEvent
+     */
+    WorkEventImpl(String eventName, WorkEvent rootWorkEvent) {
+        this.eventName = eventName;
+        this.rootWorkEvent = rootWorkEvent;
+    }
+
+
 
     public WorkEventImpl setEventName(String eventName) {
         this.eventName = eventName;
@@ -124,9 +144,10 @@ public class WorkEventImpl implements WorkEvent {
             throw new IllegalArgumentException("name is empty");
         }
 
-        WorkEventImpl newEvent = new WorkEventImpl(eventName);
-        newEvent.attributeMap = this.attributeMap;
+        WorkEventImpl newEvent = new WorkEventImpl(eventName,this);
+        //newEvent.attributeMap = this.attributeMap;
         newEvent.schedule = this.schedule;
+
 
         return newEvent;
 
@@ -146,12 +167,17 @@ public class WorkEventImpl implements WorkEvent {
 
     @Override
     public void setThrowable(Throwable e) {
-        this.setAttribute(this.eventName +"_throwable", e);
+        this.throwable = e;
 
     }
 
     @Override
     public Throwable getThrowable() {
-        return (Throwable) this.getAttribute(this.eventName + "_throwable");
+        return this.throwable;
+    }
+
+    @Override
+    public WorkEvent root() {
+        return this.rootWorkEvent;
     }
 }

@@ -54,7 +54,7 @@ public interface WorkEvent {
     /**
      *
      * Set additional custom attribute values.
-     * The stored property value is also propagated to the derived child object.
+     *
      *
      * @param key
      * @param value
@@ -92,6 +92,9 @@ public interface WorkEvent {
      * @return
      */
     WorkEvent createChild(String eventName);
+
+
+    WorkEvent root();
 
 
     /**

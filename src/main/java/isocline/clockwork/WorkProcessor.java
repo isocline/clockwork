@@ -17,7 +17,7 @@ package isocline.clockwork;
 
 import isocline.clockwork.event.WorkEventFactory;
 import isocline.clockwork.flow.WorkInfo;
-import org.apache.log4j.Logger;
+import isocline.clockwork.log.XLogger;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class WorkProcessor extends ThreadGroup {
 
-    protected static Logger logger = Logger.getLogger(WorkProcessor.class.getName());
+    protected static XLogger logger = XLogger.getLogger(WorkProcessor.class);
 
 
     private String name;
@@ -455,6 +455,8 @@ public class WorkProcessor extends ThreadGroup {
      *
      */
     private synchronized void checkPoolThread() {
+
+        logger.debug("checkPoolThread");
 
         for (ThreadWorker t : this.threadWorkers) {
             if (t.isDelayExecute()) {
