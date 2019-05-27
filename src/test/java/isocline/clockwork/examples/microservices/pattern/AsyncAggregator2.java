@@ -72,9 +72,9 @@ public class AsyncAggregator2 implements FlowableWork {
     public void defineWorkFlow(WorkFlow flow) {
         WorkFlow s1 = flow.next(this::init);
 
-        flow.wait(s1).run(this::callService1, "p1")
-                .run(this::callService2, "p2")
-                .run(this::callService3, "p3");
+        flow.wait(flow).runAsync(this::callService1, "p1")
+                .runAsync(this::callService2, "p2")
+                .runAsync(this::callService3, "p3");
 
         flow.waitAll("p1", "p2", "p3").next(this::finish).finish();
 

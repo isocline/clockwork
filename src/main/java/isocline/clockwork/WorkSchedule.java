@@ -546,8 +546,9 @@ public class WorkSchedule {
 
                 FlowableWork fw = (FlowableWork) this.work;
 
+                WorkFlow wf = this.workFlow.next(fw::initialize);
 
-                fw.defineWorkFlow(this.workFlow);
+                fw.defineWorkFlow(wf);
 
                 if (!this.workFlow.isSetFinish()) {
                     this.workFlow.finish();

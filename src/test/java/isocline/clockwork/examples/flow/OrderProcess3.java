@@ -75,8 +75,8 @@ public class OrderProcess3 implements FlowableWork {
     public void defineWorkFlow(WorkFlow flow) {
 
         flow
-                //.run(this::writeLog)
-                .run(this::record)
+                //.runAsync(this::writeLog)
+                .runAsync(this::record)
                 .next(this::checkStock, "checkStock")
                 .next(this::checkSupplier, "checkSup");
 

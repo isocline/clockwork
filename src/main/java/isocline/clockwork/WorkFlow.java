@@ -88,7 +88,7 @@ public interface WorkFlow {
      * @param execObject executable object
      * @return an instance of WorkFlow
      */
-    WorkFlow run(Runnable execObject);
+    WorkFlow runAsync(Runnable execObject);
 
     /**
      *
@@ -97,7 +97,7 @@ public interface WorkFlow {
      * @param execObject executable object
      * @return an instance of WorkFlow
      */
-    WorkFlow run(Consumer<WorkEvent> execObject);
+    WorkFlow runAsync(Consumer<WorkEvent> execObject);
 
     /**
      *
@@ -108,7 +108,7 @@ public interface WorkFlow {
      * @param eventName name of event
      * @return an instance of WorkFlow
      */
-    WorkFlow run(Runnable execObject, String eventName);
+    WorkFlow runAsync(Runnable execObject, String eventName);
 
     /**
      *
@@ -119,7 +119,7 @@ public interface WorkFlow {
      * @param eventName name of event
      * @return an instance of WorkFlow
      */
-    WorkFlow run(Consumer<WorkEvent> execObject, String eventName);
+    WorkFlow runAsync(Consumer<WorkEvent> execObject, String eventName);
 
 
     /**
@@ -196,7 +196,7 @@ public interface WorkFlow {
      *
      * @return true/false
      */
-    boolean existNexExcutor();
+    boolean existNextFunctionExecutor();
 
 
     /**

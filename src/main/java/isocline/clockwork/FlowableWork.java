@@ -22,21 +22,28 @@ import isocline.clockwork.flow.FunctionExecutorList;
 
 /**
  * It is an interface that enables flow control.
- If you want to control flow with several methods in an object that implements this interface, you can inherit the interface.
-
+ * If you want to control flow with several methods in an object that implements this interface, you can inherit the interface.
+ *
  * @see isocline.clockwork.Work
  */
 public interface FlowableWork extends Work {
 
 
+    default void initialize(WorkEvent workEvent) {
+
+        System.out.println("test --- ");
+
+    }
+
+
     /**
      * It is a method that must be implemented in order to do flow control.
-     *
+     * <p>
      * <p>
      * <strong>Example:</strong>
      * <blockquote>
      * <pre>
-
+     *
      *  public void defineWorkFlow(WorkFlow flow) {
      *    // step1 : execute this.checkMemory() then execute this.checkStorage()
      *    WorkFlow p1 = flow.next(this::checkMemory).next(this::checkStorage);
@@ -108,7 +115,7 @@ public interface FlowableWork extends Work {
         if (executor == null) {
             executor = flow.getNextExecutor();
             if (executor != null) {
-                existNextExecutor = flow.existNexExcutor();
+                existNextExecutor = flow.existNextFunctionExecutor();
             }
         }
 
@@ -118,7 +125,7 @@ public interface FlowableWork extends Work {
             boolean isFireEvent = false;
 
             try {
-                if(event.getThrowable()!=null) {
+                if (event.getThrowable() != null) {
                     isFireEvent = true;
                 }
                 executor.execute(event);
@@ -138,7 +145,7 @@ public interface FlowableWork extends Work {
                     schedule.raiseLocalEvent(errEvent);
 
                 }
-                String errEventName = executor.getEventUUID() + "::error";
+                String errEventName = executor.getFireEventUUID() + "::error";
 
                 final WorkEvent errEvent = WorkEventFactory.create(errEventName);
                 errEvent.setThrowable(e);
@@ -152,13 +159,13 @@ public interface FlowableWork extends Work {
 
                 schedule.raiseLocalEvent(errEvent2);
             } finally {
-                if(isFireEvent) {
+                if (isFireEvent) {
                     final String eventNm = executor.getFireEventName();
                     if (eventNm != null) {
                         long delayTime = executor.getDelayTimeFireEvent();
                         schedule.raiseLocalEvent(event.createChild(eventNm), delayTime);
                     }
-                    schedule.raiseLocalEvent(event.createChild(executor.getEventUUID()));
+                    schedule.raiseLocalEvent(event.createChild(executor.getFireEventUUID()));
                 }
             }
 
@@ -175,5 +182,12 @@ public interface FlowableWork extends Work {
         return WAIT;
     }
 
+
+    default WorkSchedule start() {
+
+        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        return processor.execute(this);
+
+    }
 
 }

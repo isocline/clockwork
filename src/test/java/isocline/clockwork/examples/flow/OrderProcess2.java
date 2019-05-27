@@ -88,13 +88,13 @@ public class OrderProcess2 implements FlowableWork {
         String z = "1234";
 
         flow
-                .run(this::writeLog)
+                .runAsync(this::writeLog)
 
 
                 .next(this::record)
 
-                .run(this::checkStock, "checkStock")
-                .run(this::checkSupplier, "checkSup")
+                .runAsync(this::checkStock, "checkStock")
+                .runAsync(this::checkSupplier, "checkSup")
 
 
                 .wait("checkStock&checkSup").next(this::makeMessage).next(this::test).finish();

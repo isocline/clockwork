@@ -70,25 +70,25 @@ public class WorkFlowWrapper implements WorkFlow {
     }
 
     @Override
-    public WorkFlow run(Runnable execObject) {
-        this.workFlowInstance.run(execObject);
+    public WorkFlow runAsync(Runnable execObject) {
+        this.workFlowInstance.runAsync(execObject);
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 
     @Override
-    public WorkFlow run(Consumer<WorkEvent> execObject) {
+    public WorkFlow runAsync(Consumer<WorkEvent> execObject) {
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 
     @Override
-    public WorkFlow run(Runnable execObject, String eventName) {
-        this.workFlowInstance.run(execObject, eventName);
+    public WorkFlow runAsync(Runnable execObject, String eventName) {
+        this.workFlowInstance.runAsync(execObject, eventName);
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 
     @Override
-    public WorkFlow run(Consumer<WorkEvent> execObject, String eventName) {
-        this.workFlowInstance.run(execObject, eventName);
+    public WorkFlow runAsync(Consumer<WorkEvent> execObject, String eventName) {
+        this.workFlowInstance.runAsync(execObject, eventName);
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 
@@ -141,8 +141,8 @@ public class WorkFlowWrapper implements WorkFlow {
     }
 
     @Override
-    public boolean existNexExcutor() {
-        return this.workFlowInstance.existNexExcutor();
+    public boolean existNextFunctionExecutor() {
+        return this.workFlowInstance.existNextFunctionExecutor();
     }
 
     @Override

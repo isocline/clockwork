@@ -34,15 +34,23 @@ public class FunctionExecutor {
 
     private String recvEventName;
 
-    private String eventUUID;
-
-
-    private Runnable runnable;
-
-    private Consumer cusumer;
-
+    private String fireEventUUID;
 
     private long delayTimeFireEvent = 0;
+
+
+
+    private Runnable runnable = null;
+
+    private Consumer consumer = null;
+
+
+
+
+
+    FunctionExecutor() {
+        this.fireEventUUID = UUID.randomUUID().toString();
+    }
 
 
     FunctionExecutor(Object obj) {
@@ -51,19 +59,20 @@ public class FunctionExecutor {
             if (obj instanceof Runnable) {
                 this.runnable = (Runnable) obj;
             } else if (obj instanceof Consumer) {
-                this.cusumer = (Consumer) obj;
+                this.runnable = null;
+                this.consumer = (Consumer) obj;
             } else {
                 throw new IllegalArgumentException("Not Support type");
             }
         }
 
 
-        this.eventUUID = UUID.randomUUID().toString();
+        this.fireEventUUID = UUID.randomUUID().toString();
     }
 
 
-    public String getEventUUID() {
-        return this.eventUUID;
+    public String getFireEventUUID() {
+        return this.fireEventUUID;
     }
 
     public void setLastExecutor(boolean isEnd) {
@@ -107,9 +116,9 @@ public class FunctionExecutor {
             return;
         }
 
-        if (cusumer != null) {
+        if (consumer != null) {
 
-            cusumer.accept(event);
+            consumer.accept(event);
         }
     }
 }

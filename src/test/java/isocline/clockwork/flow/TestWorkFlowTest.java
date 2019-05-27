@@ -49,7 +49,7 @@ public class TestWorkFlowTest implements FlowableWork {
 
         WorkFlow p1 = flow.next(this::checkMemory).next(this::checkStorage);
 
-        flow.run(this::sendSignal);
+        flow.runAsync(this::sendSignal);
 
         WorkFlow t2 = flow.wait(p1).next(this::sendStatusMsg).next(this::sendReportMsg);
 

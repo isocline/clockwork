@@ -284,7 +284,7 @@ public class WorkProcessor extends ThreadGroup {
 
     public void awaitShutdown() {
 
-        long t1 = 0;
+        long t1 = System.currentTimeMillis();
 
         while (this.getManagedWorkCount() > 0) {
 

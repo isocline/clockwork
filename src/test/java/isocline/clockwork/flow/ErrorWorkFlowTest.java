@@ -64,7 +64,7 @@ public class ErrorWorkFlowTest implements FlowableWork {
 
     public void defineWorkFlow(WorkFlow flow) {
 
-        WorkFlow p1 = flow.run(this::checkMemory).next(this::checkStorage);
+        WorkFlow p1 = flow.runAsync(this::checkMemory).next(this::checkStorage);
 
         WorkFlow t1 = flow.wait(p1).next(this::sendSignal);
 
