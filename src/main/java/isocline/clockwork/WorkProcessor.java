@@ -17,7 +17,7 @@ package isocline.clockwork;
 
 import isocline.clockwork.event.WorkEventFactory;
 import isocline.clockwork.flow.WorkInfo;
-import org.apache.log4j.Logger;
+import isocline.clockwork.log.XLogger;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class WorkProcessor extends ThreadGroup {
 
-    protected static Logger logger = Logger.getLogger(WorkProcessor.class.getName());
+    protected static XLogger logger = XLogger.getLogger(WorkProcessor.class);
 
 
     private String name;
@@ -90,9 +90,6 @@ public class WorkProcessor extends ThreadGroup {
     }
 
 
-    /**
-     * @param isWorking
-     */
     private void init(boolean isWorking) {
 
         this.isWorking = isWorking;
@@ -107,9 +104,12 @@ public class WorkProcessor extends ThreadGroup {
     }
 
     /**
-     * @param work
-     * @param eventNames
-     * @return
+     *
+     * Register the task to be bound to the input events.
+     *
+     * @param work an instance of Work
+     * @param eventNames an event names
+     * @return an new instance of WorkSchedule
      */
     public WorkSchedule regist(Work work, String... eventNames) {
         WorkSchedule workSchedule = new WorkSchedule(this, work);
@@ -172,16 +172,25 @@ public class WorkProcessor extends ThreadGroup {
      *
      * @param workClass class of implement for Work
      * @return new instance of WorkSchedule
-     * @throws InstantiationException
-     * @throws IllegalAccessException
+     * @throws InstantiationException InstantiationException
+     * @throws IllegalAccessException IllegalAccessException
      */
     public WorkSchedule createSchedule(Class workClass) throws InstantiationException, IllegalAccessException {
         return createSchedule((Work) workClass.newInstance());
     }
 
 
-    public WorkSchedule createSchedule(ScheduleDescriptor config, Class workClass) throws InstantiationException, IllegalAccessException {
-        return createSchedule(config, (Work) workClass.newInstance());
+    /**
+     * Create a WorkSchedule instance by work class
+     *
+     * @param descriptor an description for scheduling
+     * @param workClass class of implement for Work
+     * @return new instance of WorkSchedule
+     * @throws InstantiationException InstantiationException
+     * @throws IllegalAccessException IllegalAccessException
+     */
+    public WorkSchedule createSchedule(ScheduleDescriptor descriptor, Class workClass) throws InstantiationException, IllegalAccessException {
+        return createSchedule(descriptor, (Work) workClass.newInstance());
     }
 
 
@@ -455,6 +464,8 @@ public class WorkProcessor extends ThreadGroup {
      *
      */
     private synchronized void checkPoolThread() {
+
+        logger.debug("checkPoolThread");
 
         for (ThreadWorker t : this.threadWorkers) {
             if (t.isDelayExecute()) {
@@ -780,7 +791,7 @@ public class WorkProcessor extends ThreadGroup {
 
                                 workSchedule.adjustDelayTime(delaytime);
 
-                                if (delaytime > this.workProcessor.configuration.getExecuteCountdownMilliTime()) {
+                                if (delaytime > this.workProcessor.configuration.getThresholdWaitTimeToReady()) {
                                     this.workProcessor.workChecker
                                             .addWorkStatusWrapper(workSchedule);
                                 } else {
@@ -798,7 +809,7 @@ public class WorkProcessor extends ThreadGroup {
                             timeoutCount++;
                             stoplessCount = 0;
 
-                            if (remainMilliTime > this.workProcessor.configuration.getExecuteCountdownMilliTime()) {
+                            if (remainMilliTime > this.workProcessor.configuration.getThresholdWaitTimeToReady()) {
                                 this.workProcessor.workChecker
                                         .addWorkStatusWrapper(workSchedule);
                             } else {
@@ -879,7 +890,7 @@ public class WorkProcessor extends ThreadGroup {
      *
      * Thread class for checking work status.
      */
-    private static class WorkChecker extends Thread {
+    static final class WorkChecker extends Thread {
 
         private WorkProcessor workProcessor;
 
@@ -901,7 +912,7 @@ public class WorkProcessor extends ThreadGroup {
         @Override
         public void run() {
 
-            long countdown = this.workProcessor.configuration.getExecuteCountdownMilliTime();
+            long thresholdWaitTimeToReady = this.workProcessor.configuration.getThresholdWaitTimeToReady();
             while (workProcessor.isWorking) {
 
                 try {
@@ -922,7 +933,7 @@ public class WorkProcessor extends ThreadGroup {
                             nextExecuteTime = workSchedule.getNextExecuteTime();
                         }
 
-                        long gap = (System.currentTimeMillis() + countdown) - nextExecuteTime;
+                        long gap = (System.currentTimeMillis() + thresholdWaitTimeToReady) - nextExecuteTime;
                         if (gap >= 0) {
 
                             if (event != null) {
@@ -968,11 +979,11 @@ public class WorkProcessor extends ThreadGroup {
     }
 
     /**
-     * 매개변수로 받은 클래스의 객체를 반환합니다.
+     * Returns a object
      *
-     * @param clazz
-     * @param <T>
-     * @return
+     * @param clazz class
+     * @param <T> Type
+     * @return instance
      * @throws IllegalAccessException
      * @throws InstantiationException
      */

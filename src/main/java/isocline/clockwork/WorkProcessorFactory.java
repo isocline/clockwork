@@ -42,15 +42,28 @@ public class WorkProcessorFactory {
 
 
         if (workProcessor == null || !workProcessor.isWorking()) {
-            workProcessor = new WorkProcessor("default", Configuration.NOMAL);
+            workProcessor = new WorkProcessor("default", getDefaultConfiguration());
         }
 
         return workProcessor;
     }
 
+    private static Configuration getDefaultConfiguration() {
+        String processorType = System.getProperty("isocline.clockwork.processor.type");
+
+        if ("performance".equals(processorType)) {
+            return Configuration.PERFORMANCE;
+        } else if ("echo".equals(processorType)) {
+            return Configuration.ECHO;
+        } else if ("hyper".equals(processorType)) {
+            return Configuration.HYPER;
+        }
+
+        return Configuration.NOMAL;
+    }
+
 
     /**
-     *
      * Returns a customized WorkProcessor implementation object.
      *
      * @param id

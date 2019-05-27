@@ -38,7 +38,7 @@ public interface FlowableWork extends Work {
      * <pre>
 
      *  public void defineWorkFlow(WorkFlow flow) {
-     *    // step1 : this.checkMemory() -> this.checkStorage()
+     *    // step1 : execute this.checkMemory() then execute this.checkStorage()
      *    WorkFlow p1 = flow.next(this::checkMemory).next(this::checkStorage);
      *
      *    // Until wait finish of step1, then this.sendSignal()
