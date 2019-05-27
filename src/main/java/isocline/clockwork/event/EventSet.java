@@ -25,6 +25,8 @@ public class EventSet extends HashSet<String> {
 
     private String eventSetName;
 
+    private boolean isFinish = false;
+
     /**
      * EventSet is bundle of event names.
      * ex)  event1&event2
@@ -52,9 +54,16 @@ public class EventSet extends HashSet<String> {
      * @return
      */
     public boolean isRaiseEventReady(String eventName) {
+
         this.remove(eventName);
         if(this.size()==0) {
-            return true;
+            if(isFinish) {
+                return false;
+            }else {
+                isFinish = true;
+                return true;
+            }
+
         }
 
         return false;

@@ -22,8 +22,6 @@ import isocline.clockwork.event.EventSet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 /**
@@ -34,7 +32,7 @@ public class WorkFlowImpl implements WorkFlow {
 
     private int sequence = 0;
 
-    private String[] eventNameArray;
+    private String[] registReadyEventNameArray;
 
     private boolean isSetFinish = false;
 
@@ -87,17 +85,17 @@ public class WorkFlowImpl implements WorkFlow {
 
 
         String[] newEventNameArray = null;
-        if (eventNameArray != null) {
-            newEventNameArray = new String[eventNameArray.length + inputEventNameArray.length];
+        if (registReadyEventNameArray != null) {
+            newEventNameArray = new String[registReadyEventNameArray.length + inputEventNameArray.length];
 
-            System.arraycopy(eventNameArray, 0, newEventNameArray, 0, eventNameArray.length);
-            System.arraycopy(inputEventNameArray, 0, newEventNameArray, eventNameArray.length, inputEventNameArray.length);
+            System.arraycopy(registReadyEventNameArray, 0, newEventNameArray, 0, registReadyEventNameArray.length);
+            System.arraycopy(inputEventNameArray, 0, newEventNameArray, registReadyEventNameArray.length, inputEventNameArray.length);
 
         } else {
             newEventNameArray = inputEventNameArray;
         }
 
-        eventNameArray = newEventNameArray;
+        registReadyEventNameArray = newEventNameArray;
 
         return this;
     }
@@ -117,19 +115,24 @@ public class WorkFlowImpl implements WorkFlow {
             }
         }
 
+        /*
         String[] newEventNameArray = null;
-        if (eventNameArray != null) {
-            newEventNameArray = new String[eventNameArray.length + 1];
+        if (registReadyEventNameArray != null) {
+            newEventNameArray = new String[registReadyEventNameArray.length + 1];
 
-            System.arraycopy(eventNameArray, 0, newEventNameArray, 0, eventNameArray.length);
+            System.arraycopy(registReadyEventNameArray, 0, newEventNameArray, 0, registReadyEventNameArray.length);
 
         } else {
             newEventNameArray = new String[1];
         }
+        */
+
+        String[] newEventNameArray = new String[1];
+        newEventNameArray[0] = fullEventName;
 
         newEventNameArray[newEventNameArray.length - 1] = fullEventName;
 
-        eventNameArray = newEventNameArray;
+        registReadyEventNameArray = newEventNameArray;
 
         return this;
     }
@@ -174,10 +177,10 @@ public class WorkFlowImpl implements WorkFlow {
      */
     private boolean bindEvent(FunctionExecutor funcExecutor , boolean reset) {
 
-        if (eventNameArray == null) {
+        if (registReadyEventNameArray == null) {
             return false;
         }
-        for (String eventName : eventNameArray) {
+        for (String eventName : registReadyEventNameArray) {
 
             String[] subEventNames = eventRepository.setBindEventNames(eventName);
 
@@ -201,7 +204,7 @@ public class WorkFlowImpl implements WorkFlow {
         }
 
         if (reset) {
-            eventNameArray = null;
+            registReadyEventNameArray = null;
         }
 
         return true;
@@ -209,10 +212,10 @@ public class WorkFlowImpl implements WorkFlow {
 
     private boolean processBindEvent2(Object runnable, String fireEvent, boolean reset) {
 
-        if (eventNameArray == null) {
+        if (registReadyEventNameArray == null) {
             return false;
         }
-        for (String eventName : eventNameArray) {
+        for (String eventName : registReadyEventNameArray) {
 
             String[] subEventNames = eventRepository.setBindEventNames(eventName);
 
@@ -233,7 +236,7 @@ public class WorkFlowImpl implements WorkFlow {
         }
 
         if (reset) {
-            eventNameArray = null;
+            registReadyEventNameArray = null;
         }
 
         return true;
@@ -265,10 +268,8 @@ public class WorkFlowImpl implements WorkFlow {
             lastFuncExecutor.setFireEventName(eventName);
         }
 
-
-        bindEventRepository(eventName, lastFuncExecutor);
+        //bindEventRepository(eventName, lastFuncExecutor);
         //eventRepository.put(eventName, lastFuncExecutor);
-
 
         boolean isRegist = bindEvent(lastFuncExecutor,false);
 
@@ -324,6 +325,7 @@ public class WorkFlowImpl implements WorkFlow {
             newFuncExecutor.setDelayTimeFireEvent(delayTime);
         }
 
+
         boolean isInitialExecutor = false;
         if (lastFuncExecutor != null) {
             newFuncExecutor.setRecvEventName(lastFuncExecutor.getEventUUID());
@@ -366,7 +368,7 @@ public class WorkFlowImpl implements WorkFlow {
         FunctionExecutor exec = null;
         try {
             exec = functionExecutorList.get(this.sequence);
-            //System.err.println("getNextExecutor:"+sequence );
+            //System.out.println("getNextExecutor:"+sequence );
         } catch (IndexOutOfBoundsException ie) {
             return null;
         }
@@ -390,8 +392,8 @@ public class WorkFlowImpl implements WorkFlow {
         if (eventName == null) return null;
 
 
-        EventSet eventSet = eventRepository.getEventSet(eventName);
 
+        EventSet eventSet = eventRepository.getEventSet(eventName);
 
         if (eventSet == null || eventSet.isRaiseEventReady(eventName)) {
             FunctionExecutorList functionExecutorList = this.eventRepository.get(eventName);
