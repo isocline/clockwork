@@ -550,8 +550,8 @@ public class WorkSchedule {
 
                 fw.defineWorkFlow(wf);
 
-                if (!this.workFlow.isSetFinish()) {
-                    this.workFlow.finish();
+                if (!wf.isSetFinish()) {
+                    wf.finish();
                 }
             }
 

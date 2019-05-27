@@ -39,6 +39,8 @@ public class WorkFlowImpl implements WorkFlow {
 
     private FunctionExecutor lastFuncExecutor = null;
 
+    private FunctionExecutor lastSyncFuncExecutor = null;
+
     private EventRepository<String, FunctionExecutorList> eventRepository = new EventRepository();
 
     private List<FunctionExecutor> functionExecutorList = new ArrayList<FunctionExecutor>();
@@ -50,6 +52,7 @@ public class WorkFlowImpl implements WorkFlow {
 
     private void clearLastFunctionExecutor() {
         this.lastFuncExecutor = null;
+        this.lastSyncFuncExecutor = null;
     }
 
     private void bindEventRepository(String eventName, FunctionExecutor functionExecutor) {
@@ -201,38 +204,46 @@ public class WorkFlowImpl implements WorkFlow {
 
 
     public WorkFlowImpl runAsync(Runnable execObject) {
-        return processRun(execObject, null);
+        return processRunAsync(execObject, null);
     }
 
     public WorkFlowImpl runAsync(Consumer<WorkEvent> execObject) {
-        return processRun(execObject, null);
+        return processRunAsync(execObject, null);
     }
 
     public WorkFlowImpl runAsync(Runnable execObject, String eventName) {
-        return processRun(execObject, eventName);
+        return processRunAsync(execObject, eventName);
     }
 
     public WorkFlowImpl runAsync(Consumer<WorkEvent> execObject, String eventName) {
-        return processRun(execObject, eventName);
+        return processRunAsync(execObject, eventName);
     }
 
     /**
      * @param execObject
      * @return
      */
-    private WorkFlowImpl processRun(Object execObject, String eventName) {
-        lastFuncExecutor = new FunctionExecutor(execObject);
+    private WorkFlowImpl processRunAsync(Object execObject, String eventName) {
+
+        final FunctionExecutor asyncFunc = new FunctionExecutor(execObject);;
+        this.lastFuncExecutor = asyncFunc;
         if (eventName != null) {
-            lastFuncExecutor.setFireEventName(eventName);
+            this.lastFuncExecutor.setFireEventName(eventName);
         }
 
-        //bindEventRepository(eventName, lastFuncExecutor);
-        //eventRepository.put(eventName, lastFuncExecutor);
+        if(this.lastSyncFuncExecutor!=null) {
+            String eventNm = this.lastSyncFuncExecutor.getFireEventUUID();
+            bindEventRepository(eventNm, asyncFunc);
+        }
 
-        boolean isRegist = bindEvent(lastFuncExecutor,false);
+        //bindEventRepository(eventName, this.lastFuncExecutor);
+        //eventRepository.put(eventName, this.lastFuncExecutor);
 
-        if (!isRegist) {
-            functionExecutorList.add(lastFuncExecutor);
+        boolean isRegist = bindEvent(asyncFunc,false);
+
+
+        if (!isRegist && this.lastSyncFuncExecutor==null) {
+            functionExecutorList.add(asyncFunc);
         }
 
         return this;
@@ -285,22 +296,23 @@ public class WorkFlowImpl implements WorkFlow {
 
 
         boolean isInitialExecutor = false;
-        if (lastFuncExecutor != null) {
-            newFuncExecutor.setRecvEventName(lastFuncExecutor.getFireEventUUID());
+        if (this.lastFuncExecutor != null) {
+            newFuncExecutor.setRecvEventName(this.lastFuncExecutor.getFireEventUUID());
 
-            bindEventRepository(lastFuncExecutor.getFireEventUUID(), newFuncExecutor);
-            //eventRepository.put(lastFuncExecutor.getFireEventUUID(), newFuncExecutor);
+            bindEventRepository(this.lastFuncExecutor.getFireEventUUID(), newFuncExecutor);
+            //eventRepository.put(this.lastFuncExecutor.getFireEventUUID(), newFuncExecutor);
         } else {
             isInitialExecutor = true;
         }
 
-        lastFuncExecutor = newFuncExecutor;
+        this.lastFuncExecutor = newFuncExecutor;
+        this.lastSyncFuncExecutor = newFuncExecutor;
 
 
-        boolean isRegist = bindEvent(lastFuncExecutor,true);
+        boolean isRegist = bindEvent(this.lastFuncExecutor,true);
 
         if (!isRegist && isInitialExecutor) {
-            functionExecutorList.add(lastFuncExecutor);
+            functionExecutorList.add(this.lastFuncExecutor);
         }
 
         return this;
@@ -323,7 +335,6 @@ public class WorkFlowImpl implements WorkFlow {
         FunctionExecutor exec = null;
         try {
             exec = functionExecutorList.get(this.funcExecSequence);
-            //System.out.println("getNextExecutor:"+funcExecSequence );
         } catch (IndexOutOfBoundsException ie) {
             return null;
         }
@@ -366,8 +377,8 @@ public class WorkFlowImpl implements WorkFlow {
 
     @Override
     public String cursor() {
-        if(lastFuncExecutor!=null) {
-            return lastFuncExecutor.getFireEventUUID();
+        if(this.lastFuncExecutor!=null) {
+            return this.lastFuncExecutor.getFireEventUUID();
         }
 
         return null;

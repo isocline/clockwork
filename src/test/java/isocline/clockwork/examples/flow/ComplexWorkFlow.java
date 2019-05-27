@@ -61,12 +61,12 @@ public class ComplexWorkFlow implements FlowableWork {
 
 
     @Test
-    public void test() {
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+    public void test() throws InterruptedException {
+        WorkSchedule schedule = start();
 
-        processor.execute(this);
+        schedule.waitUntilFinish();
 
-        processor.awaitShutdown();
+        WorkProcessorFactory.getDefaultProcessor().awaitShutdown();
 
 
     }

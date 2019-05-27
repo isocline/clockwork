@@ -29,9 +29,12 @@ import isocline.clockwork.flow.FunctionExecutorList;
 public interface FlowableWork extends Work {
 
 
+    /**
+     * initialize
+     *
+     * @param workEvent an instance of WorkEvent
+     */
     default void initialize(WorkEvent workEvent) {
-
-        System.out.println("test --- ");
 
     }
 
