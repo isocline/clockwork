@@ -144,7 +144,8 @@ public class WorkEventImpl implements WorkEvent {
             throw new IllegalArgumentException("name is empty");
         }
 
-        WorkEventImpl newEvent = new WorkEventImpl(eventName,this);
+
+        WorkEventImpl newEvent = new WorkEventImpl(eventName,this.rootWorkEvent);
         //newEvent.attributeMap = this.attributeMap;
         newEvent.schedule = this.schedule;
 

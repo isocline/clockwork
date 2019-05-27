@@ -56,7 +56,7 @@ public class Configuration {
 
     private long executeTimeout = 60 * Clock.SECOND;
 
-    private long executeCountdownMilliTime = 50;
+    private long thresholdWaitTimeToReady = 50;
 
 
 
@@ -96,6 +96,8 @@ public class Configuration {
 
     /**
      * Create new instance of Configuration
+     *
+     * @return new instance of Configuration
      */
     public static Configuration create() {
         return new Configuration();
@@ -139,7 +141,7 @@ public class Configuration {
     /**
      * Set a initial thread worker size
      *
-     * @param initThreadWorkerSize
+     * @param initThreadWorkerSize initial size of worker thread
      * @return Configuration instance itself
      */
     public Configuration setInitThreadWorkerSize(int initThreadWorkerSize) {
@@ -159,7 +161,7 @@ public class Configuration {
     /**
      * Set a size for max thread worker
      *
-     * @param maxThreadWorkerSize
+     * @param maxThreadWorkerSize max size of worker thread
      * @return Configuration instance itself
      */
     public Configuration setMaxThreadWorkerSize(int maxThreadWorkerSize) {
@@ -225,7 +227,7 @@ public class Configuration {
      *
      * Set a queue size for max
      *
-     * @param maxWorkQueueSize
+     * @param maxWorkQueueSize max size for work queue
      * @return Configuration instance
      */
     public Configuration setMaxWorkQueueSize(int maxWorkQueueSize) {
@@ -235,23 +237,30 @@ public class Configuration {
     }
 
     /**
-     * Returns a milliseconds of execute countdown
-     * @return mulliseconds
+     *
+     * Returns the remaining waiting time setting value to enter the ready state.
+     * If the remaining time until the next execution remains below this set time,
+     * it enters the execution wait queue and enters the job wait state.
+     *
+     *
+     * @return Returns a milliseconds of execute countdown
      */
-    public long getExecuteCountdownMilliTime() {
-        return executeCountdownMilliTime;
+    public long getThresholdWaitTimeToReady() {
+        return thresholdWaitTimeToReady;
     }
 
 
     /**
-     * Set a a milliseconds of execute countdown
+     * If the remaining waiting time to enter the ready state and the time remaining
+     * until the next execution remain below this set time,
+     * the system enters the waiting queue and enters the waiting state.
      *
-     * @param countdownTime
+     * @param thresholdWaitTimeToReady threshold wait time to ready
      * @return Configuration instance
      */
-    public Configuration setExecuteCountdownMilliTime(long countdownTime) {
+    public Configuration setThresholdWaitTimeToReady(long thresholdWaitTimeToReady) {
         this.check();
-        this.executeCountdownMilliTime =countdownTime;
+        this.thresholdWaitTimeToReady =thresholdWaitTimeToReady;
 
         return this;
     }

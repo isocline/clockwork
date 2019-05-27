@@ -29,7 +29,7 @@ public interface ScheduleDescriptor {
     /**
      * Pass the configuration information to the WorkSchedule.
      *
-     * @param workSchedule
+     * @param workSchedule WorkSchedule
      */
     void build(WorkSchedule workSchedule);
 

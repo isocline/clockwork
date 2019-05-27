@@ -2,5 +2,6 @@ isocline.clockwork
 isocline.clockwork.web
 isocline.clockwork.module
 isocline.clockwork.descriptor
+isocline.clockwork.log
 isocline.clockwork.event
 isocline.clockwork.flow

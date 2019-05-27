@@ -32,7 +32,7 @@ public interface WorkFlow {
      * If the input event occurs, proceed to the next operation.
      *
      * @param eventNames event names
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow wait(String... eventNames);
 
@@ -41,7 +41,7 @@ public interface WorkFlow {
      * Only if all the input events have occurred, execute the next definition method.
      *
      * @param eventNames event names
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow waitAll(String... eventNames);
 
@@ -50,7 +50,7 @@ public interface WorkFlow {
      * If the corresponding error event occurs, the subsequent method is executed.
      *
      * @param eventNames event names
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow onError(String... eventNames);
 
@@ -59,7 +59,7 @@ public interface WorkFlow {
      * If the input event occurs, proceed to the next operation.
      *
      * @param workFlows  WorkFlows
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow wait(WorkFlow... workFlows);
 
@@ -68,7 +68,7 @@ public interface WorkFlow {
      * Only if all the input events have occurred, execute the next definition method.
      *
      * @param workFlows Array of WorkFlow
-     * @return
+     * @return an instance of WorkFlow
      */
     WorkFlow waitAll(WorkFlow... workFlows);
 
@@ -77,7 +77,7 @@ public interface WorkFlow {
      *  If the corresponding error event occurs, the subsequent method is executed.
      *
      * @param workFlows executable object
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow onError(WorkFlow... workFlows);
 
@@ -86,16 +86,16 @@ public interface WorkFlow {
      * Asynchronously execute method of Runnable implement object
      *
      * @param execObject executable object
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow run(Runnable execObject);
 
     /**
      *
-     * Asynchronously execute method of Consumer<WorkEvent>  implement object
+     * Asynchronously execute method of Consumer implement object
      *
      * @param execObject executable object
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow run(Consumer<WorkEvent> execObject);
 
@@ -106,18 +106,18 @@ public interface WorkFlow {
      *
      * @param execObject executable object
      * @param eventName name of event
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow run(Runnable execObject, String eventName);
 
     /**
      *
-     * Asynchronously execute method of Consumer<WorkEvent> implement object
+     * Asynchronously execute method of Consumer implement object
      * Raises an event after completion of method execution.
      *
      * @param execObject executable object
      * @param eventName name of event
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow run(Consumer<WorkEvent> execObject, String eventName);
 
@@ -126,7 +126,7 @@ public interface WorkFlow {
      * Execute the corresponding method at completion of the previous step method execution.
      *
      * @param execObject executable object
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow next(Runnable execObject);
 
@@ -135,7 +135,7 @@ public interface WorkFlow {
      * Execute the corresponding method at completion of the previous step method execution.
      *
      * @param execObject executable object
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow next(Consumer<WorkEvent> execObject);
 
@@ -145,7 +145,7 @@ public interface WorkFlow {
      *
      * @param execObject executable object
      * @param eventName name of event
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow next(Runnable execObject, String eventName);
 
@@ -155,7 +155,7 @@ public interface WorkFlow {
      *
      * @param execObject executable object
      * @param eventName name of event
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow next(Consumer<WorkEvent> execObject, String eventName);
 
@@ -163,9 +163,9 @@ public interface WorkFlow {
     /**
      * And generates an event. Delayed events can also be generated through the delay time setting.
      *
-     * @param eventName
-     * @param time
-     * @return WorkFlow instance
+     * @param eventName an name of event
+     * @param time delay time
+     * @return an instance of WorkFlow
      */
     WorkFlow fireEvent(String eventName, long time);
 
@@ -173,7 +173,7 @@ public interface WorkFlow {
      *
      * finish workflow.
      *
-     * @return WorkFlow instance
+     * @return an instance of WorkFlow
      */
     WorkFlow finish();
 

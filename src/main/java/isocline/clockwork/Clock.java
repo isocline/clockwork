@@ -95,6 +95,7 @@ public class Clock {
     /**
      * Returns a fireEvent second from now
      *
+     * @param maximumWait the number of milliseconds for waiting
      * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
      */
     public static long nextSecond(long maximumWait) {

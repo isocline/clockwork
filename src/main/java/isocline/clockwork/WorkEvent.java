@@ -29,7 +29,7 @@ public interface WorkEvent {
     /**
      * Returns the event name.
      *
-     * @return
+     * @return name of event
      */
     public String getEventName();
 
@@ -38,7 +38,7 @@ public interface WorkEvent {
      *
      * Set the WorkSchedule object.
      *
-     * @param sechedule
+     * @param sechedule instance of WorkSchedule
      */
     void setWorkSechedule(WorkSchedule sechedule);
 
@@ -46,7 +46,7 @@ public interface WorkEvent {
     /**
      * Returns the WorkSchedule object.
      *
-     * @return
+     * @return instance of WorkSchedule
      */
     WorkSchedule getWorkSchedule();
 
@@ -56,22 +56,25 @@ public interface WorkEvent {
      * Set additional custom attribute values.
      *
      *
-     * @param key
-     * @param value
+     * @param key the key name to which the object is bound; cannot be null
+     * @param value the object to be bound
      */
     void setAttribute(String key, Object value);
 
     /**
-     * @param key
-     * @return
+     * Returns the object bound with the specified name in this session,
+     * or null if no object is bound under the name.
+     *
+     * @param key  a string specifying the name of the object
+     * @return the object with the specified name
      */
     Object getAttribute(String key);
 
     /**
      * Delete the attribute value.
      *
-     * @param key
-     * @return
+     * @param key the name of the object to remove from this session
+     * @return the name of the object to remove from this session
      */
     Object removeAttribute(String key);
 
@@ -79,7 +82,7 @@ public interface WorkEvent {
     /**
      * Copy internal information to another Event object.
      *
-     * @param event
+     * @param event an instance of WorkEvent that want to copy
      */
     void copyTo(WorkEvent event);
 
@@ -88,19 +91,24 @@ public interface WorkEvent {
      * Creates a child object of the object.
      * The child object shares the property value information of the parent object.
      *
-     * @param eventName
-     * @return
+     * @param eventName name of event
+     * @return an new instance of WorkEvent
      */
     WorkEvent createChild(String eventName);
 
 
+    /**
+     * Returns the earliest event among the events associated with the current event.
+     *
+     * @return first root of WorkEvent
+     */
     WorkEvent root();
 
 
     /**
      * Set error information.
      *
-     * @param e
+     * @param e Throwable error
      */
     void setThrowable(Throwable e) ;
 
@@ -108,6 +116,7 @@ public interface WorkEvent {
     /**
      * Returns error information. Null is returned in normal state.
      *
+     *@return an instance of Throwable
      */
     Throwable getThrowable();
 
@@ -115,7 +124,7 @@ public interface WorkEvent {
     /**
      * Defines the valid time at which the event occurs.
      *
-     * @param time
+     * @param time the milliseconds since January 1, 1970, 00:00:00 GMT.
      */
     void setFireTime(long time);
 
@@ -124,7 +133,7 @@ public interface WorkEvent {
      *
      *  Returns the valid time at which the event occurs.
      *
-     * @return
+     * @return time the milliseconds since January 1, 1970, 00:00:00 GMT.
      */
     long getFireTime();
 
