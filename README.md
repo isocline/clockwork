@@ -52,7 +52,7 @@ Download [https://github.com/isocline/mvn-repo/raw/master/isocline/clockwork/1.0
 
 Modern Clockwork versions have the following Java requirements:
 
- - Java 8 or above runtime environments, both 32-bit and 64-bit versions are supported
+ - Java v1.8 or higher, both 32-bit and 64-bit versions are supported
  - Older versions of Java are not supported
 
 
