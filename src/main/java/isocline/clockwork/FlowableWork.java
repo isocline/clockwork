@@ -41,8 +41,7 @@ public interface FlowableWork extends Work {
 
     /**
      * It is a method that must be implemented in order to do flow control.
-     * <p>
-     * <p>
+     * 
      * <strong>Example:</strong>
      * <blockquote>
      * <pre>

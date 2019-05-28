@@ -66,9 +66,9 @@ public class WorkProcessorFactory {
     /**
      * Returns a customized WorkProcessor implementation object.
      *
-     * @param id
-     * @param config
-     * @return
+     * @param id a unique ID for WorkProcessor
+     * @param config an instance of Configuration
+     * @return a new instance of WorkProcessor
      */
     public static synchronized WorkProcessor getProcessor(String id, Configuration config) {
         WorkProcessor processor = processorMap.get(id);
