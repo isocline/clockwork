@@ -34,6 +34,8 @@ public class WorkFlowImpl implements WorkFlow {
 
     private String[] regReadyEventNameArray;
 
+    private StringBuilder regRunAsyncId = new StringBuilder();
+
     private boolean isSetFinish = false;
 
 
@@ -102,6 +104,19 @@ public class WorkFlowImpl implements WorkFlow {
 
         return this;
     }
+
+    public WorkFlow waitAll() {
+
+        clearLastFunctionExecutor();
+
+        if(this.regRunAsyncId.length()>0) {
+            this.waitAll(this.regRunAsyncId.toString());
+            this.regRunAsyncId = new StringBuilder();
+        }
+
+        return this;
+    }
+
 
     public WorkFlow waitAll(String... eventNames) {
 
@@ -203,20 +218,40 @@ public class WorkFlowImpl implements WorkFlow {
     }
 
 
-    public WorkFlowImpl runAsync(Runnable execObject) {
+    public WorkFlow runAsync(Runnable execObject) {
         return processRunAsync(execObject, null);
     }
 
-    public WorkFlowImpl runAsync(Consumer<WorkEvent> execObject) {
+    public WorkFlow runAsync(Consumer<WorkEvent> execObject) {
         return processRunAsync(execObject, null);
     }
 
-    public WorkFlowImpl runAsync(Runnable execObject, String eventName) {
+    public WorkFlow runAsync(Runnable execObject, String eventName) {
         return processRunAsync(execObject, eventName);
     }
 
-    public WorkFlowImpl runAsync(Consumer<WorkEvent> execObject, String eventName) {
+    public WorkFlow runAsync(Consumer<WorkEvent> execObject, String eventName) {
         return processRunAsync(execObject, eventName);
+    }
+
+
+    public WorkFlow runAsync(Runnable execObject, int count) {
+        WorkFlow workFlow = null;
+        for(int i=0;i<count;i++) {
+            workFlow = processRunAsync(execObject, null);
+        }
+
+        return workFlow;
+    }
+
+
+    public WorkFlow runAsync(Consumer<WorkEvent> execObject, int count) {
+        WorkFlow workFlow = null;
+        for(int i=0;i<count;i++) {
+            workFlow = processRunAsync(execObject, null);
+        }
+
+        return workFlow;
     }
 
     /**
@@ -230,6 +265,11 @@ public class WorkFlowImpl implements WorkFlow {
         if (eventName != null) {
             this.lastFuncExecutor.setFireEventName(eventName);
         }
+
+        if(this.regRunAsyncId.length()>0) {
+            this.regRunAsyncId.append("&");
+        }
+        this.regRunAsyncId.append(asyncFunc.getFireEventUUID());
 
         if(this.lastSyncFuncExecutor!=null) {
             String eventNm = this.lastSyncFuncExecutor.getFireEventUUID();

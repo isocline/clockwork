@@ -9,12 +9,14 @@ public class CrontSchedule implements Work {
 
     private static Logger logger = Logger.getLogger(CrontSchedule.class.getName());
 
-    private int seq = 0;
+    private int count = 0;
 
     public long execute(WorkEvent event) throws InterruptedException {
 
-        logger.debug("execute:" + seq++);
+        logger.debug("execute:" + count++);
 
+
+        if(count==2) return TERMINATE;
 
         return WAIT;
     }

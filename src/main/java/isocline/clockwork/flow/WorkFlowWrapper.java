@@ -40,6 +40,12 @@ public class WorkFlowWrapper implements WorkFlow {
     }
 
     @Override
+    public WorkFlow waitAll() {
+        this.workFlowInstance.waitAll();
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
     public WorkFlow waitAll(String... eventNames) {
         this.workFlowInstance.waitAll(eventNames);
         return new WorkFlowWrapper(this.workFlowInstance);
@@ -83,6 +89,18 @@ public class WorkFlowWrapper implements WorkFlow {
     @Override
     public WorkFlow runAsync(Runnable execObject, String eventName) {
         this.workFlowInstance.runAsync(execObject, eventName);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
+    public WorkFlow runAsync(Runnable execObject, int count) {
+        this.workFlowInstance.runAsync(execObject, count);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
+    public WorkFlow runAsync(Consumer<WorkEvent> execObject, int count) {
+        this.workFlowInstance.runAsync(execObject, count);
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 

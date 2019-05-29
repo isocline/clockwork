@@ -67,6 +67,14 @@ public interface WorkFlow {
     /**
      * Only if all the input events have occurred, execute the next definition method.
      *
+     *
+     * @return an instance of WorkFlow
+     */
+    WorkFlow waitAll();
+
+    /**
+     * Only if all the input events have occurred, execute the next definition method.
+     *
      * @param workFlows Array of WorkFlow
      * @return an instance of WorkFlow
      */
@@ -120,6 +128,30 @@ public interface WorkFlow {
      * @return an instance of WorkFlow
      */
     WorkFlow runAsync(Consumer<WorkEvent> execObject, String fireEventName);
+
+
+
+    /**
+     *
+     * Asynchronously execute method of Runnable implement object.
+     * Raises an event after completion of method execution.
+     *
+     * @param execObject executable object
+     * @param count name of event
+     * @return an instance of WorkFlow
+     */
+    WorkFlow runAsync(Runnable execObject, int count);
+
+    /**
+     *
+     * Asynchronously execute method of Consumer implement object
+     * Raises an event after completion of method execution.
+     *
+     * @param execObject executable object
+     * @param count name of event
+     * @return an instance of WorkFlow
+     */
+    WorkFlow runAsync(Consumer<WorkEvent> execObject, int count);
 
 
     /**

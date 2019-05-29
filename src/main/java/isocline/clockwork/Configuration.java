@@ -66,10 +66,10 @@ public class Configuration {
 
     /**
      * Initialization settings related to thread settings for WorkProcessor initialization.
-     * By default, the initial thread count is 3, the maximum thread count is 12, and the thread priority setting is Thread.NORM_PRIORITY state.
+     * By default, the initial thread count is 6, the maximum thread count is 12, and the thread priority setting is Thread.NORM_PRIORITY state.
      *
      */
-    public final static Configuration NOMAL = create().setInitThreadWorkerSize(3).setMaxThreadWorkerSize(12).setThreadPriority(Thread.NORM_PRIORITY).lock();
+    public final static Configuration NOMAL = create().setInitThreadWorkerSize(6).setMaxThreadWorkerSize(12).setThreadPriority(Thread.NORM_PRIORITY).lock();
 
     /**
      * Initialization settings related to thread settings for WorkProcessor initialization

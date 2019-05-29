@@ -33,7 +33,9 @@ public class WorkProcessorServletContextListener implements
     private WorkProcessor processor;
 
     /**
-     * @param sce
+     * Initialize a Context of Servlet
+     *
+     * @param sce an instance of ServletContextEvent
      */
     public void contextInitialized(ServletContextEvent sce) {
         processor = WorkProcessorFactory.getDefaultProcessor();
@@ -41,6 +43,9 @@ public class WorkProcessorServletContextListener implements
     }
 
     /**
+     * Destroyed context of Servlet
+     *
+     * @param sce an instance of ServletContextEvent
      * @see javax.servlet.ServletContextListener#contextDestroyed(ServletContextEvent)
      */
     public void contextDestroyed(ServletContextEvent sce) {

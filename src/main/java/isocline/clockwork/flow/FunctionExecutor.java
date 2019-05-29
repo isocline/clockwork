@@ -17,7 +17,6 @@ package isocline.clockwork.flow;
 
 import isocline.clockwork.WorkEvent;
 
-import java.util.UUID;
 import java.util.function.Consumer;
 
 
@@ -27,6 +26,7 @@ import java.util.function.Consumer;
  */
 public class FunctionExecutor {
 
+    private static short nonce = -1;
 
     private boolean isLastExecutor = false;
 
@@ -48,8 +48,9 @@ public class FunctionExecutor {
 
 
 
+
     FunctionExecutor() {
-        this.fireEventUUID = UUID.randomUUID().toString();
+        this.fireEventUUID = getUUID();
     }
 
 
@@ -67,9 +68,14 @@ public class FunctionExecutor {
         }
 
 
-        this.fireEventUUID = UUID.randomUUID().toString();
+        this.fireEventUUID = getUUID();
     }
 
+    private String getUUID() {
+        nonce++;
+        String uuid = nonce+"#h"+String.valueOf(this.hashCode());
+        return uuid;
+    }
 
     public String getFireEventUUID() {
         return this.fireEventUUID;

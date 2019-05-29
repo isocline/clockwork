@@ -201,7 +201,7 @@ public class WorkProcessor extends ThreadGroup {
      * @return new instance of WorkSchedule
      * @throws ClassNotFoundException if the class cannot be located
      * @throws InstantiationException if this Class represents an abstract class, an interface, an array class, a primitive type, or void; or if the class has no nullary constructor; or if the instantiation fails for some other reason.
-     * @throws IllegalAccessException  if the class or its nullary constructor is not accessible.
+     * @throws IllegalAccessException if the class or its nullary constructor is not accessible.
      */
     public WorkSchedule createSchedule(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         return new WorkSchedule(this, (Work) Class.forName(className).newInstance());
