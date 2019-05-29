@@ -62,7 +62,7 @@ public class WorkFlowTest implements FlowableWork {
 
     public void defineWorkFlow2(WorkFlow flow) {
 
-        flow.next(this::order).run(this::sendMail,"mail").run(this::sendSMS,"x1");
+        flow.next(this::order).runAsync(this::sendMail,"mail").runAsync(this::sendSMS,"x1");
 
         flow.wait("mail").next(this::report,"x2");
 
@@ -76,7 +76,7 @@ public class WorkFlowTest implements FlowableWork {
 
     public void defineWorkFlow3(WorkFlow flow) {
 
-        flow.run(this::order).next(this::sendMail,"mail").next(this::sendSMS,"x1");
+        flow.runAsync(this::order).next(this::sendMail,"mail").next(this::sendSMS,"x1");
 
         flow.wait("mail").next(this::report,"x2");
 
@@ -87,7 +87,7 @@ public class WorkFlowTest implements FlowableWork {
 
     public void defineWorkFlow_XX(WorkFlow flow) {
 
-        flow.run(this::order).next(this::sendMail,"mail").next(this::sendSMS,"x1");
+        flow.runAsync(this::order).next(this::sendMail,"mail").next(this::sendSMS,"x1");
 
         flow.wait("mail").next(this::report).fireEvent("qq",2000);
 
@@ -100,7 +100,7 @@ public class WorkFlowTest implements FlowableWork {
 
     public void defineWorkFlow(WorkFlow flow) {
 
-        flow.fireEvent("timeout",3000).run(this::order).next(this::sendMail,"mail").next(this::sendSMS,"x1");
+        flow.fireEvent("timeout",3000).runAsync(this::order).next(this::sendMail,"mail").next(this::sendSMS,"x1");
 
         flow.wait("mail").next(this::sendMail).fireEvent("qq",2000);
 

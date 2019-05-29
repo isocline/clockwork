@@ -5,23 +5,25 @@ import isocline.clockwork.examples.TestConfiguration;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class EndTimeSelfControl implements Work {
 
     private static Logger logger = Logger.getLogger(EndTimeSelfControl.class.getName());
 
-    private int seq = 0;
+    private int count = 0;
 
     public long execute(WorkEvent event) throws InterruptedException {
 
-        seq++;
+        count++;
 
-        logger.debug("execute:" + seq);
+        logger.debug("execute:" + count);
 
-        if(seq==1) {
-            event.getWorkSchedule().setFinishTimeFromNow(Clock.SECOND*3);
+        if(count ==1) {
+            event.getWorkSchedule().setFinishTimeFromNow(Clock.SECOND*2);
         }
 
-        return Clock.SECOND/10;
+        return Clock.SECOND/2;
 
     }
 
@@ -31,13 +33,14 @@ public class EndTimeSelfControl implements Work {
 
         WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
 
-
-
-
         EndTimeSelfControl checker = new EndTimeSelfControl();
-        WorkSchedule schedule = processor.createSchedule(checker);
 
+        WorkSchedule schedule = processor.createSchedule(checker);
         schedule.activate();
+
+        schedule.waitUntilFinish();
+
+        assertEquals(4, checker.count);
 
         processor.shutdown(TestConfiguration.TIMEOUT);
 

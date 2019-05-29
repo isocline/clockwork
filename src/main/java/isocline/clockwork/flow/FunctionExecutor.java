@@ -17,7 +17,6 @@ package isocline.clockwork.flow;
 
 import isocline.clockwork.WorkEvent;
 
-import java.util.UUID;
 import java.util.function.Consumer;
 
 
@@ -27,6 +26,7 @@ import java.util.function.Consumer;
  */
 public class FunctionExecutor {
 
+    private static short nonce = -1;
 
     private boolean isLastExecutor = false;
 
@@ -34,15 +34,24 @@ public class FunctionExecutor {
 
     private String recvEventName;
 
-    private String eventUUID;
-
-
-    private Runnable runnable;
-
-    private Consumer cusumer;
-
+    private String fireEventUUID;
 
     private long delayTimeFireEvent = 0;
+
+
+
+    private Runnable runnable = null;
+
+    private Consumer consumer = null;
+
+
+
+
+
+
+    FunctionExecutor() {
+        this.fireEventUUID = getUUID();
+    }
 
 
     FunctionExecutor(Object obj) {
@@ -51,19 +60,25 @@ public class FunctionExecutor {
             if (obj instanceof Runnable) {
                 this.runnable = (Runnable) obj;
             } else if (obj instanceof Consumer) {
-                this.cusumer = (Consumer) obj;
+                this.runnable = null;
+                this.consumer = (Consumer) obj;
             } else {
                 throw new IllegalArgumentException("Not Support type");
             }
         }
 
 
-        this.eventUUID = UUID.randomUUID().toString();
+        this.fireEventUUID = getUUID();
     }
 
+    private String getUUID() {
+        nonce++;
+        String uuid = nonce+"#h"+String.valueOf(this.hashCode());
+        return uuid;
+    }
 
-    public String getEventUUID() {
-        return this.eventUUID;
+    public String getFireEventUUID() {
+        return this.fireEventUUID;
     }
 
     public void setLastExecutor(boolean isEnd) {
@@ -107,9 +122,9 @@ public class FunctionExecutor {
             return;
         }
 
-        if (cusumer != null) {
+        if (consumer != null) {
 
-            cusumer.accept(event);
+            consumer.accept(event);
         }
     }
 }

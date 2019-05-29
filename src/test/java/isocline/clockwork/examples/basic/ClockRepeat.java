@@ -22,7 +22,8 @@ public class ClockRepeat implements Work {
         WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
         processor.createSchedule(new CronDescriptor("49 1 * * *"), this).activate();
 
-        processor.awaitShutdown();
+        processor.shutdown(3000);
+        //processor.awaitShutdown();
     }
 
 

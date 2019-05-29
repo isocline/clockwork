@@ -31,7 +31,7 @@ public interface ExecuteEventChecker {
      * And judges whether or not it is executed.
      *
      * @param time the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
-     * @return true if it can be run at input time, otherwise false
+     * @return true if it can be runAsync at input time, otherwise false
      */
     boolean check(long time);
 }

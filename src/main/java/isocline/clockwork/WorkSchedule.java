@@ -92,9 +92,9 @@ public class WorkSchedule {
 
 
     /**
-     * Returns a ID
+     * Returns a ID of WorkSchedule
      *
-     * @return
+     * @return a ID of WorkSchedule
      */
     public String getId() {
         return this.workUUID;
@@ -203,8 +203,10 @@ public class WorkSchedule {
 
 
     /**
-     * @param lockOwner
-     * @throws IllegalAccessException
+     * Unlock
+     *
+     * @param lockOwner The object that performed the lock
+     * @throws IllegalAccessException If the Lock object and the input object are not the same
      */
     public void unlock(Object lockOwner) throws IllegalAccessException {
         if (lockOwner == this.lockOwner) {
@@ -217,14 +219,17 @@ public class WorkSchedule {
 
 
     /**
-     * @param workObject
+     * Sets a {@link Work} implement object.
+     *
+     * @param workObject an instance of WorkObject
      */
     public void setWorkObject(Work workObject) {
         this.work = workObject;
     }
 
     /**
-     * @return
+     *
+     * @return a instance of Work
      */
     public Work getWorkObject() {
         return this.work;
@@ -238,8 +243,10 @@ public class WorkSchedule {
     }
 
     /**
-     * @param nextExecuteTime
-     * @return
+     * Sets a start time for this schedule
+     *
+     * @param nextExecuteTime the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
+     * @return an instance of WorkSchedule
      */
     private WorkSchedule setStartTime(long nextExecuteTime) {
 
@@ -260,9 +267,10 @@ public class WorkSchedule {
     }
 
     /**
+     * Adjust a delay time
      *
-     * @param waitTime
-     * @return
+     * @param waitTime a milliseconds for timeout
+     * @return an instance of WorkSchedule
      */
     WorkSchedule adjustDelayTime(long waitTime) {
 
@@ -326,7 +334,9 @@ public class WorkSchedule {
 
 
     /**
-     * @return
+     * Returns an interval time
+     *
+     * @return a milliseconds time for interval
      */
     public long getIntervalTime() {
         return this.intervalTime;
@@ -334,8 +344,10 @@ public class WorkSchedule {
 
 
     /**
-     * @param intervalTime
-     * @return
+     * Sets an interval time
+     *
+     * @param intervalTime a milliseconds time for interval
+     * @return an instance of WorkSchedule
      */
     public WorkSchedule setRepeatInterval(long intervalTime) {
 
@@ -348,6 +360,7 @@ public class WorkSchedule {
 
 
     /**
+     *
      * @param intervalTime
      * @return
      */
@@ -364,7 +377,9 @@ public class WorkSchedule {
     /**
      * ISO 8601 Data elements and interchange formats (https://en.wikipedia.org/wiki/ISO_8601)
      *
-     * @param isoDateTime
+     * @param isoDateTime this date-time as a String, such as 2019-06-16T10:15:30Z or 2019-06-16T10:15:30+01:00[Europe/Paris].
+     * @return an instance of WorkSchedule
+     * @throws java.text.ParseException if date time format is not valid.
      */
     public WorkSchedule setStartDateTime(String isoDateTime) throws java.text.ParseException {
 
@@ -374,6 +389,12 @@ public class WorkSchedule {
     }
 
 
+    /**
+     * Sets a start date time
+     *
+     * @param startDateTime Date of start
+     * @return an instance of WorkSchedule
+     */
     public WorkSchedule setStartDateTime(Date startDateTime) {
 
         this.isDefinedStartTime = true;
@@ -386,7 +407,9 @@ public class WorkSchedule {
     /**
      * ISO 8601 Data elements and interchange formats (https://en.wikipedia.org/wiki/ISO_8601)
      *
-     * @param isoDateTime
+     * @param isoDateTime this date-time as a String, such as 2019-06-16T10:15:30Z or 2019-06-16T10:15:30+01:00[Europe/Paris].
+     * @return an instance of WorkSchedule
+     * @throws java.text.ParseException if date time format is not valid.
      */
     public WorkSchedule setFinishDateTime(String isoDateTime) throws java.text.ParseException {
 
@@ -395,8 +418,10 @@ public class WorkSchedule {
 
 
     /**
-     * @param endDateTime
-     * @return
+     * Sets finish date time
+     *
+     * @param endDateTime Date of end
+     * @return an instance of WorkSchedule
      */
     public WorkSchedule setFinishDateTime(Date endDateTime) {
 
@@ -405,8 +430,10 @@ public class WorkSchedule {
     }
 
     /**
-     * @param milliSeconds
-     * @return
+     * Sets a finish time from now
+     *
+     * @param milliSeconds milliseconds
+     * @return an instance of WorkSchedule
      */
     public WorkSchedule setFinishTimeFromNow(long milliSeconds) {
         this.workEndTime = System.currentTimeMillis() + milliSeconds;
@@ -415,11 +442,11 @@ public class WorkSchedule {
 
 
     /**
-     * @param className
-     * @return
-     * @throws ClassNotFoundException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
+     * @param className name of class
+     * @return an instance of WorkSchedule
+     * @throws ClassNotFoundException if the class cannot be located
+     * @throws InstantiationException if this Class represents an abstract class, an interface, an array class, a primitive type, or void; or if the class has no nullary constructor; or if the instantiation fails for some other reason.
+     * @throws IllegalAccessException if the class or its nullary constructor is not accessible.
      */
     public WorkSchedule setWorkSession(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         checkLocking();
@@ -428,8 +455,10 @@ public class WorkSchedule {
     }
 
     /**
-     * @param workSession
-     * @return
+     * Sets a {@link WorkSession}
+     *
+     * @param workSession an instance of WorkSession
+     * @return an instance of WorkSchedule
      */
     public WorkSchedule setWorkSession(WorkSession workSession) {
         checkLocking();
@@ -439,6 +468,11 @@ public class WorkSchedule {
     }
 
 
+    /**
+     * Returns a {@link WorkSession}
+     *
+     * @return an instance of WorkSession
+     */
     public WorkSession getWorkSession() {
 
         if (this.workSession == null) {
@@ -526,8 +560,9 @@ public class WorkSchedule {
 
 
     /**
-     * @param checkActivated
-     * @return
+     * Actives a {@link WorkSchedule}
+     * @param checkActivated  Check whether it is activated
+     * @return an instance of WorkSchedule
      */
     public WorkSchedule activate(boolean checkActivated) {
         if (isActivated) {
@@ -546,11 +581,12 @@ public class WorkSchedule {
 
                 FlowableWork fw = (FlowableWork) this.work;
 
+                WorkFlow wf = this.workFlow.next(fw::initialize);
 
-                fw.defineWorkFlow(this.workFlow);
+                fw.defineWorkFlow(wf);
 
-                if (!this.workFlow.isSetFinish()) {
-                    this.workFlow.finish();
+                if (!wf.isSetFinish()) {
+                    wf.finish();
                 }
             }
 
@@ -589,7 +625,7 @@ public class WorkSchedule {
     /**
      * check activated
      *
-     * @return
+     * @return True if WorkSchedule is activated
      */
     public boolean isActivated() {
         return isActivated;
@@ -677,8 +713,8 @@ public class WorkSchedule {
     /**
      *
      *
-     * @param eventName
-     * @return
+     * @param eventName name of event
+     * @return name of event
      */
     String getDeliverableEventName(String eventName) {
 

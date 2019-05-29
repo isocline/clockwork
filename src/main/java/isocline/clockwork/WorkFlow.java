@@ -67,6 +67,14 @@ public interface WorkFlow {
     /**
      * Only if all the input events have occurred, execute the next definition method.
      *
+     *
+     * @return an instance of WorkFlow
+     */
+    WorkFlow waitAll();
+
+    /**
+     * Only if all the input events have occurred, execute the next definition method.
+     *
      * @param workFlows Array of WorkFlow
      * @return an instance of WorkFlow
      */
@@ -88,7 +96,7 @@ public interface WorkFlow {
      * @param execObject executable object
      * @return an instance of WorkFlow
      */
-    WorkFlow run(Runnable execObject);
+    WorkFlow runAsync(Runnable execObject);
 
     /**
      *
@@ -97,7 +105,7 @@ public interface WorkFlow {
      * @param execObject executable object
      * @return an instance of WorkFlow
      */
-    WorkFlow run(Consumer<WorkEvent> execObject);
+    WorkFlow runAsync(Consumer<WorkEvent> execObject);
 
     /**
      *
@@ -105,10 +113,10 @@ public interface WorkFlow {
      * Raises an event after completion of method execution.
      *
      * @param execObject executable object
-     * @param eventName name of event
+     * @param fireEventName name of event
      * @return an instance of WorkFlow
      */
-    WorkFlow run(Runnable execObject, String eventName);
+    WorkFlow runAsync(Runnable execObject, String fireEventName);
 
     /**
      *
@@ -116,10 +124,34 @@ public interface WorkFlow {
      * Raises an event after completion of method execution.
      *
      * @param execObject executable object
-     * @param eventName name of event
+     * @param fireEventName name of event
      * @return an instance of WorkFlow
      */
-    WorkFlow run(Consumer<WorkEvent> execObject, String eventName);
+    WorkFlow runAsync(Consumer<WorkEvent> execObject, String fireEventName);
+
+
+
+    /**
+     *
+     * Asynchronously execute method of Runnable implement object.
+     * Raises an event after completion of method execution.
+     *
+     * @param execObject executable object
+     * @param count name of event
+     * @return an instance of WorkFlow
+     */
+    WorkFlow runAsync(Runnable execObject, int count);
+
+    /**
+     *
+     * Asynchronously execute method of Consumer implement object
+     * Raises an event after completion of method execution.
+     *
+     * @param execObject executable object
+     * @param count name of event
+     * @return an instance of WorkFlow
+     */
+    WorkFlow runAsync(Consumer<WorkEvent> execObject, int count);
 
 
     /**
@@ -144,20 +176,20 @@ public interface WorkFlow {
      * Raises an event after completion of method execution.
      *
      * @param execObject executable object
-     * @param eventName name of event
+     * @param fireEventName name of event
      * @return an instance of WorkFlow
      */
-    WorkFlow next(Runnable execObject, String eventName);
+    WorkFlow next(Runnable execObject, String fireEventName);
 
     /**
      * Execute the corresponding method at completion of the previous step method execution.
      * Raises an event after completion of method execution.
      *
      * @param execObject executable object
-     * @param eventName name of event
+     * @param fireEventName name of event
      * @return an instance of WorkFlow
      */
-    WorkFlow next(Consumer<WorkEvent> execObject, String eventName);
+    WorkFlow next(Consumer<WorkEvent> execObject, String fireEventName);
 
 
     /**
@@ -196,7 +228,7 @@ public interface WorkFlow {
      *
      * @return true/false
      */
-    boolean existNexExcutor();
+    boolean existNextFunctionExecutor();
 
 
     /**

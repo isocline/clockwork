@@ -52,7 +52,7 @@ public class WorkProcessor extends ThreadGroup {
 
     private List<ThreadWorker> threadWorkers = new ArrayList<ThreadWorker>();
 
-    private AtomicInteger threadWorkerCount = new AtomicInteger(0);
+    private AtomicInteger currentThreadWorkerCount = new AtomicInteger(0);
 
     private BlockingQueue<WorkSchedule.ExecuteContext> workQueue;
 
@@ -99,7 +99,7 @@ public class WorkProcessor extends ThreadGroup {
 
         do {
             addThreadWorker();
-        } while (this.threadWorkerCount.get() < this.configuration.getInitThreadWorkerSize());
+        } while (this.currentThreadWorkerCount.get() < this.configuration.getInitThreadWorkerSize());
 
     }
 
@@ -139,7 +139,7 @@ public class WorkProcessor extends ThreadGroup {
     /**
      * Create a empty WorkSchedule instance
      *
-     * @return
+     * @return a new instance of WorkSchedule
      */
     public WorkSchedule createSchedule() {
         return new WorkSchedule(this, null);
@@ -199,9 +199,9 @@ public class WorkProcessor extends ThreadGroup {
      *
      * @param className classname of implement for Work
      * @return new instance of WorkSchedule
-     * @throws ClassNotFoundException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
+     * @throws ClassNotFoundException if the class cannot be located
+     * @throws InstantiationException if this Class represents an abstract class, an interface, an array class, a primitive type, or void; or if the class has no nullary constructor; or if the instantiation fails for some other reason.
+     * @throws IllegalAccessException if the class or its nullary constructor is not accessible.
      */
     public WorkSchedule createSchedule(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         return new WorkSchedule(this, (Work) Class.forName(className).newInstance());
@@ -220,13 +220,17 @@ public class WorkProcessor extends ThreadGroup {
 
     /**
      * Returns a count of running Thread for processing Work object.
+     *
+     * @return a current count of thread worker
      */
-    public int getThreadWorkerCount() {
-        return this.threadWorkerCount.get();
+    public int getCurrentThreadWorkerCount() {
+        return this.currentThreadWorkerCount.get();
     }
 
     /**
      * Returns a current queue size for processing Work object.
+     *
+     * @return a current size of work queue
      */
     public int getWorkQueueSize() {
         return this.workQueue.size();
@@ -284,7 +288,7 @@ public class WorkProcessor extends ThreadGroup {
 
     public void awaitShutdown() {
 
-        long t1 = 0;
+        long t1 = System.currentTimeMillis();
 
         while (this.getManagedWorkCount() > 0) {
 
@@ -340,7 +344,7 @@ public class WorkProcessor extends ThreadGroup {
     /**
      * Shutdown all process for these services. but wait for process complete until timeout
      *
-     * @param timeout
+     * @param timeout a milliseconds for timeout
      */
     public void shutdown(long timeout) {
 
@@ -415,14 +419,14 @@ public class WorkProcessor extends ThreadGroup {
 
     private synchronized boolean addThreadWorker() {
 
-        int i = threadWorkerCount.get();
+        int i = currentThreadWorkerCount.get();
         if (i < this.configuration.getMaxThreadWorkerSize()) {
             ThreadWorker mon = new ThreadWorker(this, this.configuration.getThreadPriority());
             threadWorkers.add(mon);
             mon.setDaemon(true);
             mon.start();
 
-            threadWorkerCount.addAndGet(1);
+            currentThreadWorkerCount.addAndGet(1);
             return true;
         }
 
@@ -437,7 +441,7 @@ public class WorkProcessor extends ThreadGroup {
      */
     private synchronized boolean removeThreadWorker(ThreadWorker t) {
 
-        threadWorkerCount.addAndGet(-1);
+        currentThreadWorkerCount.addAndGet(-1);
         return threadWorkers.remove(t);
 
     }
@@ -447,7 +451,7 @@ public class WorkProcessor extends ThreadGroup {
      */
     private synchronized boolean removeThreadWorker() {
 
-        if (threadWorkerCount.get() > this.configuration.getInitThreadWorkerSize()) {
+        if (currentThreadWorkerCount.get() > this.configuration.getInitThreadWorkerSize()) {
             try {
                 ThreadWorker mon = threadWorkers.get(0);
                 mon.stopWorking();
@@ -652,7 +656,7 @@ public class WorkProcessor extends ThreadGroup {
         private int maxWaitTime = 2000;
 
         public ThreadWorker(WorkProcessor parent, int threadPriority) {
-            super(parent, "Clockwork:ThreadWorker-" + parent.threadWorkerCount);
+            super(parent, "Clockwork:ThreadWorker-" + parent.currentThreadWorkerCount);
             this.workProcessor = parent;
             this.setPriority(threadPriority);
 
@@ -984,8 +988,8 @@ public class WorkProcessor extends ThreadGroup {
      * @param clazz class
      * @param <T> Type
      * @return instance
-     * @throws IllegalAccessException
-     * @throws InstantiationException
+     * @throws IllegalAccessException if the class or its nullary constructor is not accessible.
+     * @throws InstantiationException if this Class represents an abstract class, an interface, an array class, a primitive type, or void; or if the class has no nullary constructor; or if the instantiation fails for some other reason.
      */
     public <T> T get(Class clazz) throws IllegalAccessException, InstantiationException {
         T instance = (T) clazz.newInstance();
