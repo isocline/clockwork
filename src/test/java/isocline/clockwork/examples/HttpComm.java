@@ -70,7 +70,7 @@ public class HttpComm implements Work {
     }
 
     public static void main(String[] args) throws Exception {
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
         long startTime = Clock.nextSecond();
 

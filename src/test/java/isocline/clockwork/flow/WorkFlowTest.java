@@ -113,7 +113,7 @@ public class WorkFlowTest implements FlowableWork {
 
     @Test
     public void testSimple() {
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
         //processor.createSchedule(this).setStartDelayTime(1000).activate();
@@ -127,7 +127,7 @@ public class WorkFlowTest implements FlowableWork {
 
     @Test
     public void testStartByEvent() {
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
         processor.createSchedule(this).bindEvent("start").activate();

@@ -38,7 +38,7 @@ public class WorkProcessorServletContextListener implements
      * @param sce an instance of ServletContextEvent
      */
     public void contextInitialized(ServletContextEvent sce) {
-        processor = WorkProcessorFactory.getDefaultProcessor();
+        processor = WorkProcessorFactory.getProcessor();
 
     }
 

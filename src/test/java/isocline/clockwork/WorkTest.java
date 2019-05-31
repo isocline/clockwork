@@ -20,7 +20,7 @@ public class WorkTest  {
     public void before() {
         seq=0;
 
-        workProcessor = WorkProcessorFactory.getDefaultProcessor();
+        workProcessor = WorkProcessorFactory.getProcessor();
     }
 
     @After

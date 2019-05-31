@@ -55,7 +55,7 @@ public class BasicWorkFlow implements FlowableWork {
 
     @Test
     public void test() {
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
         processor.createSchedule(this).setStartDelayTime(2000).activate();
 

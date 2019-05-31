@@ -33,7 +33,7 @@ public class MaxCountTermination implements Work {
     @Test
     public void case1() throws Exception {
 
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
         MaxCountTermination checker = new MaxCountTermination();

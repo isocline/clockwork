@@ -4,35 +4,40 @@ import isocline.clockwork.*;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 
 public class MultiAsync implements FlowableWork {
 
 
     private static Logger logger = Logger.getLogger(MultiAsync.class.getName());
 
+    private List<Long> list = Collections.synchronizedList(new ArrayList());
+
+
     public void asyncMulti() {
-        logger.debug("** invoke - async1");
-        TestUtil.waiting(500);
-        logger.debug("** invoke - async1 - END");
+        logger.debug("** invoke - asyncMulti");
+        long calc = 100 + (long)(1000*Math.random());
+        TestUtil.waiting(calc);
+        list.add(calc);
+        logger.debug("** invoke - async1 - END "+calc);
     }
 
-    public void sum1() {
-        logger.debug("** invoke - sum1");
-        TestUtil.waiting(300);
-        logger.debug("** invoke - sum1 - END");
+
+    public void sum(WorkEvent event) {
+        long sum = list.stream().mapToLong(x->x).sum();
+        logger.debug("** invoke - sum - result:"+sum);
     }
 
 
 
 
     public void defineWorkFlow(WorkFlow flow) {
-
-        flow.runAsync(this::asyncMulti,5);
-
-        flow.waitAll().next(this::sum1);
-
-
-
+        flow.runAsync(this::asyncMulti,5)
+                .waitAll()
+                .next(this::sum);
     }
 
 
@@ -42,7 +47,7 @@ public class MultiAsync implements FlowableWork {
 
         schedule.waitUntilFinish();
 
-        WorkProcessorFactory.getDefaultProcessor().awaitShutdown();
+        WorkProcessorFactory.getProcessor().awaitShutdown();
 
 
     }

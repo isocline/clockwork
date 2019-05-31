@@ -187,7 +187,7 @@ public interface FlowableWork extends Work {
 
     default WorkSchedule start() {
 
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
         return processor.execute(this);
 
     }

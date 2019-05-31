@@ -48,7 +48,7 @@ public class WorkEventGenerator implements Work {
         event.getWorkSchedule().getWorkProcessor().raiseEvent(eventName, newEvent);
 
         //event.getWorkSchedule().getWorkProcessor().raiseEvent(eventName, event);
-        //WorkProcessorFactory.getDefaultProcessor().raiseEvent(eventName, newEvent);
+        //WorkProcessorFactory.getProcessor().raiseEvent(eventName, newEvent);
 
         System.out.println("fire event [" + eventName+"]");
 

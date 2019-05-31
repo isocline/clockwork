@@ -22,7 +22,7 @@ public class ScheduledWork implements Work {
     @Test
     public void case1() throws Exception {
 
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
         WorkSchedule schedule = processor.createSchedule(new ScheduledWork())
@@ -42,7 +42,7 @@ public class ScheduledWork implements Work {
     @Test
     public void case2() throws Exception {
 
-        WorkProcessor manager = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor manager = WorkProcessorFactory.getProcessor();
 
 
 
@@ -58,7 +58,7 @@ public class ScheduledWork implements Work {
     @Test
     public void caseStrictMode() throws Exception {
 
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
 
@@ -75,7 +75,7 @@ public class ScheduledWork implements Work {
     @Test
     public void delayStart1() throws Exception {
 
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
 
@@ -93,7 +93,7 @@ public class ScheduledWork implements Work {
     @Test
     public void delayStart2() throws Exception {
 
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
 

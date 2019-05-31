@@ -31,7 +31,7 @@ public class EndTimeSelfControl implements Work {
     @Test
     public void case1() throws Exception {
 
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
         EndTimeSelfControl checker = new EndTimeSelfControl();
 

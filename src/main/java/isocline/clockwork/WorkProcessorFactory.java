@@ -38,7 +38,7 @@ public class WorkProcessorFactory {
      *
      * @return WorkProcessor
      */
-    public static WorkProcessor getDefaultProcessor() {
+    public static WorkProcessor getProcessor() {
 
 
         if (workProcessor == null || !workProcessor.isWorking()) {
@@ -46,6 +46,15 @@ public class WorkProcessorFactory {
         }
 
         return workProcessor;
+    }
+
+    /**
+     *
+     * @deprecated
+     * @return an instance of WorkProcessor
+     */
+    public static WorkProcessor getDefaultProcessor() {
+        return getProcessor();
     }
 
     private static Configuration getDefaultConfiguration() {

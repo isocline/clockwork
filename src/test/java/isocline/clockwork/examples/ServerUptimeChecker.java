@@ -102,7 +102,7 @@ public class ServerUptimeChecker  implements Work {
    }
 
    public static void main(String[] args) throws Exception {
-       WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+       WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
        String[] urls = new String[] {"https://www.google.com","https://www.apple.com"};

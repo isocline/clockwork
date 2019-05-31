@@ -129,7 +129,7 @@ public class WorkFlowWrapper implements WorkFlow {
     }
 
     @Override
-    public WorkFlow next(Consumer<WorkEvent> execObject, String eventName) {
+    public WorkFlow next(Consumer execObject, String eventName) {
         this.workFlowInstance.next(execObject, eventName);
         return new WorkFlowWrapper(this.workFlowInstance);
     }

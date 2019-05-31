@@ -85,7 +85,7 @@ public class OrderProcess implements FlowableWork {
         OrderProcess process = new OrderProcess();
         process.start();
 
-        WorkProcessorFactory.getDefaultProcessor().shutdown(10000);
+        WorkProcessorFactory.getProcessor().shutdown(10000);
 
 
     }

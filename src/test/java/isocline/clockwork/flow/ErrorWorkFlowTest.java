@@ -78,7 +78,7 @@ public class ErrorWorkFlowTest implements FlowableWork {
 
     @Test
     public void testStartByEvent() {
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
         processor.createSchedule(this).activate();
 

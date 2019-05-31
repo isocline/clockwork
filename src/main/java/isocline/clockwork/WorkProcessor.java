@@ -121,6 +121,22 @@ public class WorkProcessor extends ThreadGroup {
         return workSchedule;
     }
 
+    public WorkSchedule execute(AbstractFlowableWork workFlow) throws InterruptedException {
+
+        return execute(workFlow, true);
+    }
+
+    public WorkSchedule execute(AbstractFlowableWork workFlow, boolean isSync) throws InterruptedException{
+
+        WorkSchedule schedule = execute(workFlow, 0);
+
+        if(isSync) {
+            schedule.waitUntilFinish();
+        }
+
+        return schedule;
+    }
+
     public WorkSchedule execute(Work work) {
         return execute(work, 0);
     }

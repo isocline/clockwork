@@ -61,7 +61,7 @@ public class MailSender implements Work {
    }
 
    public static void main(String[] args) throws Exception {
-       WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+       WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
        String[] emails = new String[] {"test@test.com","test2@test.com"};

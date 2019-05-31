@@ -5,10 +5,10 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 
 
-public class SumAndSumFlow implements FlowableWork {
+public class MultiAndSumFlow implements FlowableWork {
 
 
-    private static Logger logger = Logger.getLogger(SumAndSumFlow.class.getName());
+    private static Logger logger = Logger.getLogger(MultiAndSumFlow.class.getName());
 
     public void async1() {
         logger.debug("** invoke - async1");
@@ -69,7 +69,7 @@ public class SumAndSumFlow implements FlowableWork {
 
         schedule.waitUntilFinish();
 
-        WorkProcessorFactory.getDefaultProcessor().awaitShutdown();
+        WorkProcessorFactory.getProcessor().awaitShutdown();
 
 
     }

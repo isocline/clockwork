@@ -15,7 +15,7 @@ public class MultiStepSchedule   {
     private static Logger logger = Logger.getLogger(MultiStepSchedule.class.getName());
 
     public static void main(String[] args) throws Exception {
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
         WorkSchedule schedule = processor.createSchedule(Step1Schedule.class).setStrictMode();

@@ -64,7 +64,7 @@ public class WaterLevelIndicator implements Work {
     }
 
     public static void main(String[] args) throws Exception {
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
         WorkSchedule schedule = processor.createSchedule(WaterLevelIndicator.class).setStrictMode();

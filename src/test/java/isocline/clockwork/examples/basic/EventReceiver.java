@@ -35,7 +35,7 @@ public class EventReceiver implements Work {
     @Test
     public void basicStyle() throws Exception {
 
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
         WorkSchedule schedule = processor.createSchedule(new EventReceiver()).bindEvent("example-event");
@@ -57,7 +57,7 @@ public class EventReceiver implements Work {
     @Test
     public void simpleStyle() throws Exception {
 
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
 

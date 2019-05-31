@@ -18,6 +18,8 @@ package isocline.clockwork.flow;
 import isocline.clockwork.WorkEvent;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 /**
@@ -39,14 +41,13 @@ public class FunctionExecutor {
     private long delayTimeFireEvent = 0;
 
 
-
     private Runnable runnable = null;
 
-    private Consumer consumer = null;
+    private Consumer<WorkEvent> consumer = null;
 
+    private Supplier supplier = null;
 
-
-
+    private Function function = null;
 
 
     FunctionExecutor() {
@@ -60,8 +61,13 @@ public class FunctionExecutor {
             if (obj instanceof Runnable) {
                 this.runnable = (Runnable) obj;
             } else if (obj instanceof Consumer) {
-                this.runnable = null;
+
+
                 this.consumer = (Consumer) obj;
+            } else if (obj instanceof Supplier) {
+                this.supplier = (Supplier) obj;
+            } else if (obj instanceof Function) {
+                this.function = (Function) obj;
             } else {
                 throw new IllegalArgumentException("Not Support type");
             }
@@ -73,7 +79,7 @@ public class FunctionExecutor {
 
     private String getUUID() {
         nonce++;
-        String uuid = nonce+"#h"+String.valueOf(this.hashCode());
+        String uuid = nonce + "#h" + String.valueOf(this.hashCode());
         return uuid;
     }
 
@@ -117,13 +123,11 @@ public class FunctionExecutor {
     public void execute(WorkEvent event) {
 
         if (runnable != null) {
-
             runnable.run();
             return;
         }
 
         if (consumer != null) {
-
             consumer.accept(event);
         }
     }
