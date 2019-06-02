@@ -25,7 +25,7 @@ public interface WorkEvent {
     public String getEventName();
 
 
-    void setWorkSechedule(WorkSchedule sechedule);
+     void setWorkSechedule(WorkSchedule sechedule);
 
 
     /**
