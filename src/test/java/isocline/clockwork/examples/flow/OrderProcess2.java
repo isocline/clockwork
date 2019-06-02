@@ -88,13 +88,13 @@ public class OrderProcess2 implements FlowableWork {
         String z = "1234";
 
         flow
-                .run(this::writeLog)
+                .runAsync(this::writeLog)
 
 
                 .next(this::record)
 
-                .run(this::checkStock, "checkStock")
-                .run(this::checkSupplier, "checkSup")
+                .runAsync(this::checkStock, "checkStock")
+                .runAsync(this::checkSupplier, "checkSup")
 
 
                 .wait("checkStock&checkSup").next(this::makeMessage).next(this::test).finish();
@@ -105,15 +105,15 @@ public class OrderProcess2 implements FlowableWork {
 
     public static void main(String[] args) throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getProcessor("perform", Configuration.PERFORMANCE);
+        WorkProcessor processor = WorkProcessorFactory.getProcessor("perform", Configuration.PERFORMANCE);
 
 
         OrderProcess2 p = new OrderProcess2("AutoExpress2");
 
-        worker.execute(p);
+        processor.execute(p);
 
 
-        worker.shutdown(1000000);
+        processor.shutdown(1000000);
 
     }
 

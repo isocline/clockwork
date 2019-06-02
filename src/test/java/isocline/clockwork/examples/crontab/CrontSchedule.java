@@ -9,12 +9,14 @@ public class CrontSchedule implements Work {
 
     private static Logger logger = Logger.getLogger(CrontSchedule.class.getName());
 
-    private int seq = 0;
+    private int count = 0;
 
     public long execute(WorkEvent event) throws InterruptedException {
 
-        logger.debug("execute:" + seq++);
+        logger.debug("execute:" + count++);
 
+
+        if(count==2) return TERMINATE;
 
         return WAIT;
     }
@@ -22,14 +24,14 @@ public class CrontSchedule implements Work {
     @Test
     public void case1() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-        WorkSchedule schedule = worker.createSchedule(new CronDescriptor("* * * * *"), CrontSchedule.class);
+        WorkSchedule schedule = processor.createSchedule(new CronDescriptor("* * * * *"), CrontSchedule.class);
 
         schedule.activate();
 
-        worker.awaitShutdown();
+        processor.awaitShutdown();
 
 
     }

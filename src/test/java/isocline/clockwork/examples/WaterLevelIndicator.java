@@ -64,13 +64,13 @@ public class WaterLevelIndicator implements Work {
     }
 
     public static void main(String[] args) throws Exception {
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-        WorkSchedule schedule = worker.createSchedule(WaterLevelIndicator.class).setStrictMode();
+        WorkSchedule schedule = processor.createSchedule(WaterLevelIndicator.class).setStrictMode();
         schedule.activate();
 
 
-        worker.shutdown(20 * Clock.SECOND);
+        processor.shutdown(20 * Clock.SECOND);
     }
 }

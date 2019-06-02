@@ -8,7 +8,7 @@ public class Test {
     public static void main(String[] args) throws Exception {
 
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
 
@@ -16,10 +16,10 @@ public class Test {
         for (int i = 0; i < 1; i++) {
 
             TestJob work = new TestJob(i);
-            //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStartDelay(1000);
-            //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStartDelay(Clock.fromNow("2019-01-17T13:32:30+09:00"));
-            WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire").setStrictMode();
-            //WorkSchedule schedule = worker.createSchedule(work).bindEvent("fire");
+            //WorkSchedule schedule = processor.createSchedule(work).bindEvent("fire").setStartDelay(1000);
+            //WorkSchedule schedule = processor.createSchedule(work).bindEvent("fire").setStartDelay(Clock.milliseconds("2019-01-17T13:32:30+09:00"));
+            WorkSchedule schedule = processor.createSchedule(work).bindEvent("fire").setStrictMode();
+            //WorkSchedule schedule = processor.createSchedule(work).bindEvent("fire");
 
             schedule.activate();
 
@@ -47,7 +47,7 @@ public class Test {
         */
 
 
-        worker.shutdown(10000);
+        processor.shutdown(10000);
     }
 
 

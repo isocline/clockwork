@@ -5,19 +5,21 @@ import isocline.clockwork.examples.TestConfiguration;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class MaxCountTermination implements Work {
 
     private static Logger logger = Logger.getLogger(MaxCountTermination.class.getName());
 
-    private int seq = 0;
+    private int count = 0;
 
     public long execute(WorkEvent event) throws InterruptedException {
 
-        seq++;
+        count++;
 
-        logger.debug("execute:" + seq);
+        logger.debug("execute:" + count);
 
-        if(seq==3) {
+        if(count==3) {
             return TERMINATE;
         }
 
@@ -26,20 +28,26 @@ public class MaxCountTermination implements Work {
     }
 
 
+
+
     @Test
     public void case1() throws Exception {
 
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
-
-
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
         MaxCountTermination checker = new MaxCountTermination();
-        WorkSchedule schedule = worker.createSchedule(checker);
 
+        WorkSchedule schedule = processor.createSchedule(checker);
         schedule.activate();
 
-        worker.shutdown(TestConfiguration.TIMEOUT);
+        //wait until finish
+        schedule.waitUntilFinish();
+
+        assertEquals(3, checker.count);
+
+
+        processor.shutdown(TestConfiguration.TIMEOUT);
 
     }
 

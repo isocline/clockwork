@@ -17,7 +17,7 @@ package isocline.clockwork;
 
 import isocline.clockwork.event.WorkEventFactory;
 import isocline.clockwork.flow.WorkInfo;
-import org.apache.log4j.Logger;
+import isocline.clockwork.log.XLogger;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -31,13 +31,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Base class for WorkSchedule management and thread management
  *
+ * @author Richard D. Kim
  * @see isocline.clockwork.Work
  * @see isocline.clockwork.FlowableWork
  * @see isocline.clockwork.WorkSchedule
  */
 public class WorkProcessor extends ThreadGroup {
 
-    protected static Logger logger = Logger.getLogger(WorkProcessor.class.getName());
+    protected static XLogger logger = XLogger.getLogger(WorkProcessor.class);
 
 
     private String name;
@@ -51,7 +52,7 @@ public class WorkProcessor extends ThreadGroup {
 
     private List<ThreadWorker> threadWorkers = new ArrayList<ThreadWorker>();
 
-    private AtomicInteger threadWorkerCount = new AtomicInteger(0);
+    private AtomicInteger currentThreadWorkerCount = new AtomicInteger(0);
 
     private BlockingQueue<WorkSchedule.ExecuteContext> workQueue;
 
@@ -61,6 +62,36 @@ public class WorkProcessor extends ThreadGroup {
 
 
     AtomicInteger managedWorkCount = new AtomicInteger(0);
+
+
+    private static WorkProcessor defaultWorkProcessor;
+
+    private static Map<String, WorkProcessor> processorMap = new HashMap<String, WorkProcessor>();
+
+
+    public static WorkProcessor main() {
+
+
+        if (defaultWorkProcessor == null || !defaultWorkProcessor.isWorking()) {
+            defaultWorkProcessor = new WorkProcessor("default", getDefaultConfiguration());
+        }
+
+        return defaultWorkProcessor;
+    }
+
+    private static Configuration getDefaultConfiguration() {
+        String processorType = System.getProperty("isocline.clockwork.processor.type");
+
+        if ("performance".equals(processorType)) {
+            return Configuration.PERFORMANCE;
+        } else if ("echo".equals(processorType)) {
+            return Configuration.ECHO;
+        } else if ("hyper".equals(processorType)) {
+            return Configuration.HYPER;
+        }
+
+        return Configuration.NOMAL;
+    }
 
 
     /**
@@ -89,9 +120,6 @@ public class WorkProcessor extends ThreadGroup {
     }
 
 
-    /**
-     * @param isWorking
-     */
     private void init(boolean isWorking) {
 
         this.isWorking = isWorking;
@@ -101,14 +129,16 @@ public class WorkProcessor extends ThreadGroup {
 
         do {
             addThreadWorker();
-        } while (this.threadWorkerCount.get() < this.configuration.getInitThreadWorkerSize());
+        } while (this.currentThreadWorkerCount.get() < this.configuration.getInitThreadWorkerSize());
 
     }
 
     /**
-     * @param work
-     * @param eventNames
-     * @return
+     * Register the task to be bound to the input events.
+     *
+     * @param work       an instance of Work
+     * @param eventNames an event names
+     * @return an new instance of WorkSchedule
      */
     public WorkSchedule regist(Work work, String... eventNames) {
         WorkSchedule workSchedule = new WorkSchedule(this, work);
@@ -116,6 +146,15 @@ public class WorkProcessor extends ThreadGroup {
         workSchedule.bindEvent(eventNames);
 
         workSchedule.activate();
+
+        return workSchedule;
+    }
+
+
+    public WorkSchedule define(AbstractFlowableWork workFlow) {
+
+        WorkSchedule workSchedule = new WorkSchedule(this, workFlow);
+
 
         return workSchedule;
     }
@@ -138,7 +177,7 @@ public class WorkProcessor extends ThreadGroup {
     /**
      * Create a empty WorkSchedule instance
      *
-     * @return
+     * @return a new instance of WorkSchedule
      */
     public WorkSchedule createSchedule() {
         return new WorkSchedule(this, null);
@@ -171,16 +210,25 @@ public class WorkProcessor extends ThreadGroup {
      *
      * @param workClass class of implement for Work
      * @return new instance of WorkSchedule
-     * @throws InstantiationException
-     * @throws IllegalAccessException
+     * @throws InstantiationException InstantiationException
+     * @throws IllegalAccessException IllegalAccessException
      */
     public WorkSchedule createSchedule(Class workClass) throws InstantiationException, IllegalAccessException {
         return createSchedule((Work) workClass.newInstance());
     }
 
 
-    public WorkSchedule createSchedule(ScheduleDescriptor config, Class workClass) throws InstantiationException, IllegalAccessException {
-        return createSchedule(config, (Work) workClass.newInstance());
+    /**
+     * Create a WorkSchedule instance by work class
+     *
+     * @param descriptor an description for scheduling
+     * @param workClass  class of implement for Work
+     * @return new instance of WorkSchedule
+     * @throws InstantiationException InstantiationException
+     * @throws IllegalAccessException IllegalAccessException
+     */
+    public WorkSchedule createSchedule(ScheduleDescriptor descriptor, Class workClass) throws InstantiationException, IllegalAccessException {
+        return createSchedule(descriptor, (Work) workClass.newInstance());
     }
 
 
@@ -189,9 +237,9 @@ public class WorkProcessor extends ThreadGroup {
      *
      * @param className classname of implement for Work
      * @return new instance of WorkSchedule
-     * @throws ClassNotFoundException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
+     * @throws ClassNotFoundException if the class cannot be located
+     * @throws InstantiationException if this Class represents an abstract class, an interface, an array class, a primitive type, or void; or if the class has no nullary constructor; or if the instantiation fails for some other reason.
+     * @throws IllegalAccessException if the class or its nullary constructor is not accessible.
      */
     public WorkSchedule createSchedule(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         return new WorkSchedule(this, (Work) Class.forName(className).newInstance());
@@ -210,13 +258,17 @@ public class WorkProcessor extends ThreadGroup {
 
     /**
      * Returns a count of running Thread for processing Work object.
+     *
+     * @return a current count of thread worker
      */
-    public int getThreadWorkerCount() {
-        return this.threadWorkerCount.get();
+    public int getCurrentThreadWorkerCount() {
+        return this.currentThreadWorkerCount.get();
     }
 
     /**
      * Returns a current queue size for processing Work object.
+     *
+     * @return a current size of work queue
      */
     public int getWorkQueueSize() {
         return this.workQueue.size();
@@ -267,17 +319,27 @@ public class WorkProcessor extends ThreadGroup {
 
         long gap = (tt2 - tt1);
         if (gap > 0) {
-            logger.warn(this.name + " wait time(milisecond) for async job : " + gap);
+            logger.warn(this.name + " wait time(milliseconds) for async job : " + gap);
         }
     }
 
 
     public void awaitShutdown() {
 
+        long t1 = System.currentTimeMillis();
 
         while (this.getManagedWorkCount() > 0) {
 
-            waiting(100);
+            waiting(200);
+
+            long t2 = System.currentTimeMillis();
+
+            long gap = t2 - t1;
+            if (gap > 1000 * 60 * 3) {
+                logger.debug("running work count:" + this.getManagedWorkCount());
+                t1 = System.currentTimeMillis();
+
+            }
 
         }
 
@@ -320,7 +382,7 @@ public class WorkProcessor extends ThreadGroup {
     /**
      * Shutdown all process for these services. but wait for process complete until timeout
      *
-     * @param timeout
+     * @param timeout a milliseconds for timeout
      */
     public void shutdown(long timeout) {
 
@@ -395,14 +457,14 @@ public class WorkProcessor extends ThreadGroup {
 
     private synchronized boolean addThreadWorker() {
 
-        int i = threadWorkerCount.get();
+        int i = currentThreadWorkerCount.get();
         if (i < this.configuration.getMaxThreadWorkerSize()) {
             ThreadWorker mon = new ThreadWorker(this, this.configuration.getThreadPriority());
             threadWorkers.add(mon);
             mon.setDaemon(true);
             mon.start();
 
-            threadWorkerCount.addAndGet(1);
+            currentThreadWorkerCount.addAndGet(1);
             return true;
         }
 
@@ -417,7 +479,7 @@ public class WorkProcessor extends ThreadGroup {
      */
     private synchronized boolean removeThreadWorker(ThreadWorker t) {
 
-        threadWorkerCount.addAndGet(-1);
+        currentThreadWorkerCount.addAndGet(-1);
         return threadWorkers.remove(t);
 
     }
@@ -427,7 +489,7 @@ public class WorkProcessor extends ThreadGroup {
      */
     private synchronized boolean removeThreadWorker() {
 
-        if (threadWorkerCount.get() > this.configuration.getInitThreadWorkerSize()) {
+        if (currentThreadWorkerCount.get() > this.configuration.getInitThreadWorkerSize()) {
             try {
                 ThreadWorker mon = threadWorkers.get(0);
                 mon.stopWorking();
@@ -444,6 +506,8 @@ public class WorkProcessor extends ThreadGroup {
      *
      */
     private synchronized void checkPoolThread() {
+
+        logger.debug("checkPoolThread");
 
         for (ThreadWorker t : this.threadWorkers) {
             if (t.isDelayExecute()) {
@@ -531,10 +595,10 @@ public class WorkProcessor extends ThreadGroup {
                     WorkEvent newWorkEvent = workEvent;
                     if (!newEventName.equals(eventName)) {
                         /*
-                        newWorkEvent = WorkEventFactory.create(newEventName);
+                        newWorkEvent = WorkEventFactory.createChild(newEventName);
                         workEvent.copyTo(newWorkEvent);
                         */
-                        newWorkEvent = workEvent.create(newEventName);
+                        newWorkEvent = workEvent.createChild(newEventName);
 
                     }
                     //schedule.raiseEvent(newWorkEvent);
@@ -557,8 +621,8 @@ public class WorkProcessor extends ThreadGroup {
      *
      * Sub class for WorkSchedule information
      *
-     */
-    private static class WorkScheduleList extends HashSet<WorkSchedule> {
+     ****************************************/
+    static final class WorkScheduleList extends HashSet<WorkSchedule> {
 
         private WorkSchedule[] array = null;
 
@@ -606,8 +670,9 @@ public class WorkProcessor extends ThreadGroup {
     /****************************************
      *
      * Thread for Worker
-     */
-    private static class ThreadWorker extends Thread {
+     *
+     ****************************************/
+    static final class ThreadWorker extends Thread {
 
         private WorkProcessor workProcessor;
 
@@ -629,7 +694,7 @@ public class WorkProcessor extends ThreadGroup {
         private int maxWaitTime = 2000;
 
         public ThreadWorker(WorkProcessor parent, int threadPriority) {
-            super(parent, "Clockwork:ThreadWorker-" + parent.threadWorkerCount);
+            super(parent, "Clockwork:ThreadWorker-" + parent.currentThreadWorkerCount);
             this.workProcessor = parent;
             this.setPriority(threadPriority);
 
@@ -675,7 +740,6 @@ public class WorkProcessor extends ThreadGroup {
             long t1 = System.currentTimeMillis() - this.lastWorkTime;
 
             if (t1 > executeTimeout) {
-                //sSystem.err.println(this.id + " delay " + t1 + " "+ executeTimeout + " " + this.lastWorkTime);
                 return true;
             }
 
@@ -687,26 +751,21 @@ public class WorkProcessor extends ThreadGroup {
             isThreadRunning = true;
 
 
-            //long chkeckNanoTime =  3*1000000;
             int count = 0;
 
             while (isWorking()) {
 
-
                 WorkSchedule workSchedule = null;
+
                 try {
 
-                    //System.err.print(">"+maxWaitTime+"< ");
-
-                    WorkSchedule.ExecuteContext ctx = this.workProcessor.workQueue.poll(maxWaitTime,
+                    final WorkSchedule.ExecuteContext ctx = this.workProcessor.workQueue.poll(maxWaitTime,
                             TimeUnit.MILLISECONDS);
-
 
                     if (ctx == null) {
                         continue;
                     } else if (count == 5000) {
                         Thread.sleep(0, 1);
-
                     } else if (count == 10000) {
                         Thread.sleep(10);
                         count = 0;
@@ -714,33 +773,20 @@ public class WorkProcessor extends ThreadGroup {
                         count++;
                     }
 
-
                     workSchedule = ctx.getWorkSchedule();
                     if (workSchedule == null) continue;
-                    //debug(workSchedule.getWorkObject() + " SS");
 
                     this.lastWorkTime = System.currentTimeMillis();
 
+                    timeoutCount = 0;
+                    stoplessCount++;
 
-                    /*
-                    if (workSchedule == null) {
-                        timeoutCount++;
-                        stoplessCount = 0;
-                    } else
-                    */
-
-                    {
-                        timeoutCount = 0;
-                        stoplessCount++;
-                        Work workObject = workSchedule.getWorkObject();
+                    Work workObject = workSchedule.getWorkObject();
 
 
-                        if (check(workSchedule, this.lastWorkTime)) {
+                    if (check(workSchedule, this.lastWorkTime)) {
 
-                            long remainMilliTime = workSchedule.checkRemainMilliTime();
-                            //System.err.println("["+remainMilliTime+"] " + workSchedule.getPreemptiveMilliTime() +"
-                            // " + ""+ctx.isExecuteImmediately());
-
+                        long remainMilliTime = workSchedule.checkRemainMilliTime();
 
                             /*
                             boolean chk1 = ctx.isExecuteImmediately();
@@ -748,104 +794,79 @@ public class WorkProcessor extends ThreadGroup {
                             System.err.println(chk1 +" "+ chk2);
                             if (chk1 || chk2) {
                             */
+                        if (ctx.isExecuteImmediately() || remainMilliTime < workSchedule.getPreemptiveMilliTime()) {
+
+                            WorkEvent workEvent = ctx.getWorkEvent();
+                            if (workEvent == null) {
+                                workEvent = workSchedule.getDefaultEventInfo();
+
+                            } else {
+                                workEvent.setWorkSechedule(workSchedule);
+                            }
 
 
-                            //System.err.println("1-- "+Math.random());
-                            if (ctx.isExecuteImmediately() || remainMilliTime < workSchedule.getPreemptiveMilliTime()) {
-                                //System.err.println("2-- "+Math.random());
+                            workSchedule.adjustWaiting();
 
-                                WorkEvent workEvent = ctx.getWorkEvent();
-                                if (workEvent == null) {
-                                    workEvent = workSchedule.getDefaultEventInfo();
+                            long delaytime = workObject.execute(workEvent);
 
-                                } else {
-                                    workEvent.setWorkSechedule(workSchedule);
+                            int loopCount = 0;
+                            while (delaytime == Work.LOOP && loopCount < 1000) {
+                                delaytime = workObject.execute(workEvent);
+                                loopCount++;
+                            }
+
+                            if (delaytime == Work.LOOP) {
+                                delaytime = 1 * Clock.SECOND;
+                            }
+
+
+                            if (delaytime == Work.WAIT) {
+
+                                long repeatInterval = workSchedule.getIntervalTime();
+
+                                if (repeatInterval > 0) {
+                                    delaytime = repeatInterval;
                                 }
+                            }
 
-                                /**
-                                 *
-                                 *
-                                 */
+                            if (delaytime > 0) {
 
-                                workSchedule.adjustWaiting();
+                                workSchedule.adjustDelayTime(delaytime);
 
-
-                                long delaytime = workObject.execute(workEvent);
-
-
-                                int loopCount = 0;
-                                while (delaytime == Work.LOOP && loopCount < 1000) {
-                                    delaytime = workObject.execute(workEvent);
-                                    loopCount++;
-                                }
-
-                                if (delaytime == Work.LOOP) {
-                                    delaytime = 1 * Clock.SECOND;
-                                }
-
-
-                                if (delaytime == Work.WAIT) {
-
-                                    long repeatInterval = workSchedule.getIntervalTime();
-
-                                    if (repeatInterval > 0) {
-                                        delaytime = repeatInterval;
-                                    }
-                                }
-
-                                if (delaytime > 0) {
-
-                                    //TODO
-                                    //workSchedule.adjustRepeatInterval(delaytime);
-                                    workSchedule.adjustDelayTime(delaytime);
-
-                                    if (delaytime > this.workProcessor.configuration.getExecuteCountdownMilliTime()) {
-                                        this.workProcessor.workChecker
-                                                .addWorkStatusWrapper(workSchedule);
-                                        //System.err.println("z1");
-                                    } else {
-                                        this.workProcessor.addWorkSchedule(workSchedule);
-                                    }
-                                } else if (delaytime == Work.WAIT) {
-
-                                    workSchedule.adjustRepeatInterval(-1);
-
-
-                                    //v2
-                                    //this.workProcessor.addWorkSchedule(workSchedule);
-                                } else {
-
-                                    workSchedule.finish();
-                                }
-
-                                //Thread.sleep(10);
-
-                            } else if (!workSchedule.isUntilEndTime()) {
-                                timeoutCount++;
-                                stoplessCount = 0;
-
-
-                                if (remainMilliTime > this.workProcessor.configuration.getExecuteCountdownMilliTime()) {
-                                    //System.err.print("|"+remainNanoTime+"| ");
+                                if (delaytime > this.workProcessor.configuration.getThresholdWaitTimeToReady()) {
                                     this.workProcessor.workChecker
                                             .addWorkStatusWrapper(workSchedule);
-
                                 } else {
-                                    this.workProcessor
-                                            .addWorkSchedule(workSchedule);
-
-
+                                    this.workProcessor.addWorkSchedule(workSchedule);
                                 }
 
+                            } else if (delaytime == Work.WAIT) {
+                                workSchedule.adjustRepeatInterval(Work.WAIT);
                             } else {
                                 workSchedule.finish();
                             }
 
+
+                        } else if (!workSchedule.isUntilEndTime()) {
+                            timeoutCount++;
+                            stoplessCount = 0;
+
+                            if (remainMilliTime > this.workProcessor.configuration.getThresholdWaitTimeToReady()) {
+                                this.workProcessor.workChecker
+                                        .addWorkStatusWrapper(workSchedule);
+                            } else {
+                                this.workProcessor
+                                        .addWorkSchedule(workSchedule);
+                            }
+
                         } else {
-                            this.workProcessor.workQueue.put(workSchedule.enterQueue(false));
+                            workSchedule.finish();
                         }
 
+                    } else {
+                        this.workProcessor.workQueue.put(workSchedule.enterQueue(false));
                     }
+
 
                     if (timeoutCount > 10) {
                         this.workProcessor.removeThreadWorker();
@@ -865,7 +886,6 @@ public class WorkProcessor extends ThreadGroup {
                     e.printStackTrace();
 
                 }
-
             }
 
             this.workProcessor.removeThreadWorker(this);
@@ -912,7 +932,7 @@ public class WorkProcessor extends ThreadGroup {
      *
      * Thread class for checking work status.
      */
-    private static class WorkChecker extends Thread {
+    static final class WorkChecker extends Thread {
 
         private WorkProcessor workProcessor;
 
@@ -920,27 +940,8 @@ public class WorkProcessor extends ThreadGroup {
 
         WorkChecker(WorkProcessor workProcessor) {
             this.workProcessor = workProcessor;
-
-            checkPerm();
-
         }
 
-        private long adjTimeout = 0;
-
-        private void checkPerm() {
-            try {
-                long t1 = System.currentTimeMillis();
-                for (int i = 0; i < 1000; i++) {
-                    Thread.sleep(1);
-                }
-                long t2 = System.currentTimeMillis();
-                long adjTimeout = (t2 - t1 - 1000) * 2;
-
-
-            } catch (Exception e) {
-
-            }
-        }
 
         void addWorkStatusWrapper(WorkSchedule sb) {
             statusWrappers.add(new WorkScheduleWrapper(sb));
@@ -953,7 +954,7 @@ public class WorkProcessor extends ThreadGroup {
         @Override
         public void run() {
 
-            long countdown = this.workProcessor.configuration.getExecuteCountdownMilliTime();
+            long thresholdWaitTimeToReady = this.workProcessor.configuration.getThresholdWaitTimeToReady();
             while (workProcessor.isWorking) {
 
                 try {
@@ -968,23 +969,19 @@ public class WorkProcessor extends ThreadGroup {
                         WorkEvent event = workScheduleWrapper.getWorkEvent();
                         if (event != null) {
                             nextExecuteTime = event.getFireTime();
-
-                            //System.err.println( nextExecuteTime +" <<< ");
                         }
 
                         if (nextExecuteTime < 0) {
                             nextExecuteTime = workSchedule.getNextExecuteTime();
-
                         }
 
-                        long gap = (System.currentTimeMillis() + countdown) - nextExecuteTime;
+                        long gap = (System.currentTimeMillis() + thresholdWaitTimeToReady) - nextExecuteTime;
                         if (gap >= 0) {
 
                             if (event != null) {
                                 workProcessor.addWorkSchedule(workSchedule, event);
                             } else {
                                 workProcessor.addWorkSchedule(workSchedule);
-
                             }
 
 
@@ -1024,13 +1021,13 @@ public class WorkProcessor extends ThreadGroup {
     }
 
     /**
-     * 매개변수로 받은 클래스의 객체를 반환합니다.
+     * Returns a object
      *
-     * @param clazz
-     * @param <T>
-     * @return
-     * @throws IllegalAccessException
-     * @throws InstantiationException
+     * @param clazz class
+     * @param <T>   Type
+     * @return instance
+     * @throws IllegalAccessException if the class or its nullary constructor is not accessible.
+     * @throws InstantiationException if this Class represents an abstract class, an interface, an array class, a primitive type, or void; or if the class has no nullary constructor; or if the instantiation fails for some other reason.
      */
     public <T> T get(Class clazz) throws IllegalAccessException, InstantiationException {
         T instance = (T) clazz.newInstance();

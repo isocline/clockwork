@@ -1,0 +1,24 @@
+-classpath
+'/Users/sungkwonkim/.m2/repository/javax/javaee-api/6.0/javaee-api-6.0.jar:/Users/sungkwonkim/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'/Users/sungkwonkim/Project/isocline/clockwork/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2018&#x2013;2019. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'/Users/sungkwonkim/Project/isocline/clockwork/docs/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'Isocline Clockwork 1.0 API'
+-linkoffline
+'https://docs.oracle.com/javase/8/docs/api' '/Users/sungkwonkim/Project/isocline/clockwork/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'Isocline Clockwork 1.0 API'

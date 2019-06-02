@@ -15,47 +15,73 @@
  */
 package isocline.clockwork;
 
-import javax.servlet.ServletContextEvent;
 import java.util.HashMap;
 import java.util.Map;
 
 
 /**
+ * Creates and returns a default WorkProcessor implementation object.
+ * WorkProcessor is the core engine of work execution, and WorkProcessorFactory determines,
+ * manages and creates the characteristics of WorkProcessor.
  *
- *
+ * @author Richard D. Kim
  */
-public class WorkProcessorFactory implements
-        javax.servlet.ServletContextListener {
+public class WorkProcessorFactory {
 
-    private static WorkProcessor worker;
+    private static WorkProcessor workProcessor;
 
     private static Map<String, WorkProcessor> processorMap = new HashMap<String, WorkProcessor>();
 
 
     /**
+     * Returns the underlying WorkProcessor implementation object.
      *
-     * @return
+     * @return WorkProcessor
      */
-    public static WorkProcessor getDefaultProcessor() {
+    public static WorkProcessor getProcessor() {
 
 
-        if (worker == null || ! worker.isWorking()) {
-            worker = new WorkProcessor("default", Configuration.NOMAL);
+        if (workProcessor == null || !workProcessor.isWorking()) {
+            workProcessor = new WorkProcessor("default", getDefaultConfiguration());
         }
 
-        return worker;
+        return workProcessor;
+    }
+
+    /**
+     *
+     * @deprecated
+     * @return an instance of WorkProcessor
+     */
+    public static WorkProcessor getDefaultProcessor() {
+        return getProcessor();
+    }
+
+    private static Configuration getDefaultConfiguration() {
+        String processorType = System.getProperty("isocline.clockwork.processor.type");
+
+        if ("performance".equals(processorType)) {
+            return Configuration.PERFORMANCE;
+        } else if ("echo".equals(processorType)) {
+            return Configuration.ECHO;
+        } else if ("hyper".equals(processorType)) {
+            return Configuration.HYPER;
+        }
+
+        return Configuration.NOMAL;
     }
 
 
     /**
+     * Returns a customized WorkProcessor implementation object.
      *
-     * @param id
-     * @param config
-     * @return
+     * @param id a unique ID for WorkProcessor
+     * @param config an instance of Configuration
+     * @return a new instance of WorkProcessor
      */
     public static synchronized WorkProcessor getProcessor(String id, Configuration config) {
         WorkProcessor processor = processorMap.get(id);
-        if (processor == null || ! processor.isWorking()) {
+        if (processor == null || !processor.isWorking()) {
             processor = new WorkProcessor(id, config);
             processorMap.put(id, processor);
         }
@@ -64,20 +90,5 @@ public class WorkProcessorFactory implements
 
     }
 
-    /**
-     * @param sce
-     */
-    public void contextInitialized(ServletContextEvent sce) {
-        getDefaultProcessor();
-
-    }
-
-    /**
-     * @see javax.servlet.ServletContextListener#contextDestroyed(javax.servlet.ServletContextEvent)
-     */
-    public void contextDestroyed(ServletContextEvent sce) {
-        worker.shutdown();
-
-    }
 
 }

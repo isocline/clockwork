@@ -2,16 +2,18 @@ package isocline.clockwork.examples.flow;
 
 import isocline.clockwork.*;
 import org.apache.log4j.Logger;
+import org.junit.Test;
 
-public class OrderProcess3 implements FlowableWork {
+public class OrderProcess implements FlowableWork {
 
-    private static Logger logger = Logger.getLogger(OrderProcess3.class.getName());
+    private static Logger logger = Logger.getLogger(OrderProcess.class.getName());
 
 
-    private String id;
+    private String id = "autoExpress";
 
-    public OrderProcess3(String id) {
-        this.id = id;
+
+    public OrderProcess() {
+
     }
 
 
@@ -30,11 +32,7 @@ public class OrderProcess3 implements FlowableWork {
     public void checkStock() {
         logger.debug(id + " checkStock");
 
-        try {
-            Thread.sleep(2000);
-        } catch (Exception e) {
-
-        }
+        TestUtil.waiting(2000);
 
         logger.debug(id + " checkStock end");
 
@@ -45,11 +43,7 @@ public class OrderProcess3 implements FlowableWork {
 
         logger.debug(id + " checkSupplier");
 
-        try {
-            Thread.sleep(3000);
-        } catch (Exception e) {
-
-        }
+        TestUtil.waiting(3000);
 
         logger.debug(id + " checkSupplier end");
 
@@ -75,8 +69,8 @@ public class OrderProcess3 implements FlowableWork {
     public void defineWorkFlow(WorkFlow flow) {
 
         flow
-                //.run(this::writeLog)
-                .run(this::record)
+                .runAsync(this::writeLog)
+                .runAsync(this::record)
                 .next(this::checkStock, "checkStock")
                 .next(this::checkSupplier, "checkSup");
 
@@ -86,17 +80,13 @@ public class OrderProcess3 implements FlowableWork {
 
     }
 
-    public static void main(String[] args) throws Exception {
+    @Test
+    public void startTest() {
+        OrderProcess process = new OrderProcess();
+        process.start();
 
-        WorkProcessor worker = WorkProcessorFactory.getProcessor("perform", Configuration.PERFORMANCE);
+        WorkProcessorFactory.getProcessor().shutdown(10000);
 
-
-        OrderProcess3 p = new OrderProcess3("AutoExpress");
-
-        worker.execute(p);
-
-
-        worker.shutdown(1000000);
 
     }
 

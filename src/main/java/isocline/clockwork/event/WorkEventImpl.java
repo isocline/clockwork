@@ -18,37 +18,67 @@ package isocline.clockwork.event;
 import isocline.clockwork.WorkEvent;
 import isocline.clockwork.WorkSchedule;
 
+
 import java.util.Hashtable;
 import java.util.Map;
 
 
 /**
- *
+ * A skeletal {@link WorkEvent} implementation.
  *
  */
 public class WorkEventImpl implements WorkEvent {
 
 
-    private String eventName;
-
-
-    protected Map attributeMap = new Hashtable();
-
-
-    protected WorkSchedule schedule;
+    private String eventName = null;
 
     private long fireTime = -1;
 
 
-    /**
-     *
-     */
-    WorkEventImpl() {
+    private Map attributeMap = new Hashtable();
 
+    private WorkSchedule schedule;
+
+    private WorkEvent rootWorkEvent;
+
+    private Throwable throwable;
+
+    private int count = 0;
+
+
+
+
+    WorkEventImpl() {
+        this.rootWorkEvent = this;
     }
 
+    /**
+     *
+     * @param eventName
+     */
     WorkEventImpl(String eventName) {
         this.eventName = eventName;
+        this.rootWorkEvent = this;
+    }
+
+    /**
+     *
+     * @param eventName
+     * @param rootWorkEvent
+     */
+    WorkEventImpl(String eventName, WorkEvent rootWorkEvent) {
+        this.eventName = eventName;
+        this.rootWorkEvent = rootWorkEvent;
+    }
+
+
+    @Override
+    public int count() {
+        return this.count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
     }
 
     public WorkEventImpl setEventName(String eventName) {
@@ -111,11 +141,24 @@ public class WorkEventImpl implements WorkEvent {
         event2.attributeMap = this.attributeMap;
     }
 
-    public WorkEventImpl create(String eventName) {
 
-        WorkEventImpl newEvent = new WorkEventImpl(eventName);
-        newEvent.attributeMap = this.attributeMap;
+    /**
+     * Creates a new {@link WorkEvent} that has parent property information.
+     *
+     * @param eventName the name of the event to create; may not be empty
+     * @return the newly created WorkEvent
+     */
+    public WorkEvent createChild(String eventName) {
+
+        if(eventName==null || eventName.trim().length()==0) {
+            throw new IllegalArgumentException("name is empty");
+        }
+
+
+        WorkEventImpl newEvent = new WorkEventImpl(eventName,this.rootWorkEvent);
+        //newEvent.attributeMap = this.attributeMap;
         newEvent.schedule = this.schedule;
+
 
         return newEvent;
 
@@ -131,5 +174,21 @@ public class WorkEventImpl implements WorkEvent {
     @Override
     public long getFireTime() {
         return this.fireTime;
+    }
+
+    @Override
+    public void setThrowable(Throwable e) {
+        this.throwable = e;
+
+    }
+
+    @Override
+    public Throwable getThrowable() {
+        return this.throwable;
+    }
+
+    @Override
+    public WorkEvent root() {
+        return this.rootWorkEvent;
     }
 }

@@ -16,6 +16,9 @@
 package isocline.clockwork;
 
 import isocline.clockwork.flow.FunctionExecutor;
+import isocline.clockwork.flow.FunctionExecutorList;
+import isocline.clockwork.flow.func.CheckFunction;
+import isocline.clockwork.flow.func.ReturnEventFunction;
 
 import java.util.function.Consumer;
 
@@ -27,56 +30,146 @@ import java.util.function.Consumer;
 public interface WorkFlow {
 
 
+    /**
+     * If the input event occurs, proceed to the next operation.
+     *
+     * @param eventNames event names
+     * @return an instance of WorkFlow
+     */
     WorkFlow wait(String... eventNames);
 
+
+    /**
+     * Only if all the input events have occurred, execute the next definition method.
+     *
+     * @param eventNames event names
+     * @return an instance of WorkFlow
+     */
     WorkFlow waitAll(String... eventNames);
+
+
+    /**
+     * If the corresponding error event occurs, the subsequent method is executed.
+     *
+     * @param eventNames event names
+     * @return an instance of WorkFlow
+     */
+    WorkFlow onError(String... eventNames);
+
+
+    WorkFlow onError();
+
+
+    /**
+     * If the input event occurs, proceed to the next operation.
+     *
+     * @param workFlows  WorkFlows
+     * @return an instance of WorkFlow
+     */
+    WorkFlow wait(WorkFlow... workFlows);
+
+
+    /**
+     * Only if all the input events have occurred, execute the next definition method.
+     *
+     *
+     * @return an instance of WorkFlow
+     */
+    WorkFlow waitAll();
+
+    /**
+     * Only if all the input events have occurred, execute the next definition method.
+     *
+     * @param workFlows Array of WorkFlow
+     * @return an instance of WorkFlow
+     */
+    WorkFlow waitAll(WorkFlow... workFlows);
+
+
+    /**
+     *  If the corresponding error event occurs, the subsequent method is executed.
+     *
+     * @param workFlows executable object
+     * @return an instance of WorkFlow
+     */
+    WorkFlow onError(WorkFlow... workFlows);
 
 
     /**
      * Asynchronously execute method of Runnable implement object
      *
-     * @param execObject
-     * @return
+     * @param execObject executable object
+     * @return an instance of WorkFlow
      */
-    WorkFlow run(Runnable execObject);
+    WorkFlow runAsync(Runnable execObject);
 
     /**
      *
-     * Asynchronously execute method of Consumer<WorkEvent>  implement object
+     * Asynchronously execute method of Consumer implement object
      *
-     * @param execObject
-     * @return
+     * @param execObject executable object
+     * @return an instance of WorkFlow
      */
-    WorkFlow run(Consumer<WorkEvent> execObject);
+    WorkFlow runAsync(Consumer<WorkEvent> execObject);
 
     /**
      *
      * Asynchronously execute method of Runnable implement object.
      * Raises an event after completion of method execution.
      *
-     * @param execObject
-     * @param eventName
-     * @return
+     * @param execObject executable object
+     * @param fireEventName name of event
+     * @return an instance of WorkFlow
      */
-    WorkFlow run(Runnable execObject, String eventName);
+    WorkFlow runAsync(Runnable execObject, String fireEventName);
 
     /**
      *
-     * Asynchronously execute method of Consumer<WorkEvent> implement object
+     * Asynchronously execute method of Consumer implement object
      * Raises an event after completion of method execution.
      *
-     * @param execObject
-     * @param eventName
-     * @return
+     * @param execObject executable object
+     * @param fireEventName name of event
+     * @return an instance of WorkFlow
      */
-    WorkFlow run(Consumer<WorkEvent> execObject, String eventName);
+    WorkFlow runAsync(Consumer<WorkEvent> execObject, String fireEventName);
+
+
+
+    /**
+     *
+     * Asynchronously execute method of Runnable implement object.
+     * Raises an event after completion of method execution.
+     *
+     * @param execObject executable object
+     * @param count name of event
+     * @return an instance of WorkFlow
+     */
+    WorkFlow runAsync(Runnable execObject, int count);
+
+    /**
+     *
+     * Asynchronously execute method of Consumer implement object
+     * Raises an event after completion of method execution.
+     *
+     * @param execObject executable object
+     * @param count name of event
+     * @return an instance of WorkFlow
+     */
+    WorkFlow runAsync(Consumer<WorkEvent> execObject, int count);
+
+
+    WorkFlow branch(ReturnEventFunction execObject);
+
+
+    WorkFlow check(CheckFunction execObject);
 
 
     /**
      * Execute the corresponding method at completion of the previous step method execution.
      *
-     * @param execObject
-     * @return
+     * @param execObject executable object
+     * @return an instance of WorkFlow
      */
     WorkFlow next(Runnable execObject);
 
@@ -84,8 +177,8 @@ public interface WorkFlow {
     /**
      * Execute the corresponding method at completion of the previous step method execution.
      *
-     * @param execObject
-     * @return
+     * @param execObject executable object
+     * @return an instance of WorkFlow
      */
     WorkFlow next(Consumer<WorkEvent> execObject);
 
@@ -93,44 +186,57 @@ public interface WorkFlow {
      * Execute the corresponding method at completion of the previous step method execution.
      * Raises an event after completion of method execution.
      *
-     * @param execObject
-     * @param eventName
-     * @return
+     * @param execObject executable object
+     * @param fireEventName name of event
+     * @return an instance of WorkFlow
      */
-    WorkFlow next(Runnable execObject, String eventName);
+    WorkFlow next(Runnable execObject, String fireEventName);
 
     /**
      * Execute the corresponding method at completion of the previous step method execution.
      * Raises an event after completion of method execution.
      *
-     * @param execObject
-     * @param eventName
-     * @return
+     * @param execObject executable object
+     * @param fireEventName name of event
+     * @return an instance of WorkFlow
      */
-    WorkFlow next(Consumer<WorkEvent> execObject, String eventName);
+    WorkFlow next(Consumer<WorkEvent> execObject, String fireEventName);
 
 
-
+    /**
+     * And generates an event. Delayed events can also be generated through the delay time setting.
+     *
+     * @param eventName an name of event
+     * @param time delay time
+     * @return an instance of WorkFlow
+     */
     WorkFlow fireEvent(String eventName, long time);
+
+
+
+    WorkFlow fireEventOnError(String eventName, long time);
+
+
+    WorkFlow count(int maxCount);
 
     /**
      *
      * finish workflow.
      *
-     * @return
+     * @return an instance of WorkFlow
      */
     WorkFlow finish();
 
     /**
      * Check whether the execution completion status is set.
-     * @return
+     * @return true/false
      */
     boolean isSetFinish();
 
     /**
      * Returns a fireEvent FunctionExecutor object.
      *
-     * @return
+     * @return FunctionExecutor
      */
     FunctionExecutor getNextExecutor();
 
@@ -138,19 +244,30 @@ public interface WorkFlow {
     /**
      * Check whether there is an executor for the fireEvent processing.
      *
-     * @return
+     * @return true/false
      */
-    boolean existNexExcutor();
+    boolean existNextFunctionExecutor();
 
 
     /**
      *
-     * Returns an executor for handling this event.
+     * Returns an executor list for handling this event.
      *
-     * @param eventName
-     * @return
+     * @param eventName name of event
+     * @return FunctionExecutorList instance
      */
-    FunctionExecutor getExecutor(String eventName);
+    FunctionExecutorList getFunctionExecutorList(String eventName);
+
+
+    /**
+     * Returns UUID information related to the unique event of the last state so far.
+     *
+     * @return UUID
+     */
+    String cursor();
+
+
+
 
 
 }

@@ -70,16 +70,16 @@ public class HttpComm implements Work {
     }
 
     public static void main(String[] args) throws Exception {
-        WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
         long startTime = Clock.nextSecond();
 
         for(int i=0;i<20;i++) {
             HttpComm work = new HttpComm("https://www.google.com");
-            //worker.createSchedule(work).setStartTime(startTime+i*50).activate();
-            worker.createSchedule(work).setStrictMode().activate();
+            //processor.createSchedule(work).setStartTime(startTime+i*50).activate();
+            processor.createSchedule(work).setStrictMode().activate();
 
         }
-        worker.awaitShutdown();
+        processor.awaitShutdown();
     }
 }

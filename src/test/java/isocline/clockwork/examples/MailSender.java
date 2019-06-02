@@ -61,19 +61,19 @@ public class MailSender implements Work {
    }
 
    public static void main(String[] args) throws Exception {
-       WorkProcessor worker = WorkProcessorFactory.getDefaultProcessor();
+       WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
        String[] emails = new String[] {"test@test.com","test2@test.com"};
        for(String email:emails) {
 
            MailSender checker = new MailSender( email, "Test", "test");
-           WorkSchedule schedule = worker.createSchedule(checker);
+           WorkSchedule schedule = processor.createSchedule(checker);
            schedule.activate();
        }
 
 
 
-       worker.shutdown(20*Clock.SECOND);
+       processor.shutdown(20*Clock.SECOND);
    }
 }

@@ -17,16 +17,19 @@ package isocline.clockwork;
 
 
 /**
+ * An interface to implement the function to pass schedule setting status information to WorkScheduler
+ *
  *
  * @see isocline.clockwork.WorkSchedule
+ * @see isocline.clockwork.descriptor.CronDescriptor
  */
 public interface ScheduleDescriptor {
 
 
     /**
+     * Pass the configuration information to the WorkSchedule.
      *
-     *
-     * @param workSchedule
+     * @param workSchedule WorkSchedule
      */
     void build(WorkSchedule workSchedule);
 

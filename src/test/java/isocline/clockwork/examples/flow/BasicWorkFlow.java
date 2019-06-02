@@ -47,7 +47,7 @@ public class BasicWorkFlow implements FlowableWork {
 
     public void defineWorkFlow(WorkFlow flow) {
 
-        flow.run(this::order).next(this::sendMail).next(this::sendSMS).next(this::report).finish();
+        flow.runAsync(this::order).next(this::sendMail).next(this::sendSMS).next(this::report).finish();
 
 
     }
@@ -55,7 +55,7 @@ public class BasicWorkFlow implements FlowableWork {
 
     @Test
     public void test() {
-        WorkProcessor processor = WorkProcessorFactory.getDefaultProcessor();
+        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
         processor.createSchedule(this).setStartDelayTime(2000).activate();
 

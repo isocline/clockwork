@@ -14,26 +14,26 @@ public class WorkScheduleTest {
 
     private int seq;
 
-    private WorkProcessor worker;
+    private WorkProcessor processor;
 
     @Before
     public void before() {
         seq = 0;
 
-        worker = WorkProcessorFactory.getDefaultProcessor();
+        processor = WorkProcessorFactory.getProcessor();
     }
 
     @After
     public void after() {
 
-        worker.shutdown(1000);
+        processor.shutdown(1000);
     }
 
     @Test
     public void executeOneTime() throws Exception {
 
 
-        worker.createSchedule((WorkEvent event) -> {
+        processor.createSchedule((WorkEvent event) -> {
             seq++;
             logger.debug("exec " + seq);
 
@@ -51,7 +51,7 @@ public class WorkScheduleTest {
     public void executeSleep() throws Exception {
 
 
-        worker.createSchedule((WorkEvent event) -> {
+        processor.createSchedule((WorkEvent event) -> {
             seq++;
             logger.debug("exec " + seq);
 
@@ -68,7 +68,7 @@ public class WorkScheduleTest {
     public void executeLoop() throws Exception {
 
 
-        worker.createSchedule((WorkEvent event) -> {
+        processor.createSchedule((WorkEvent event) -> {
             seq++;
             logger.debug("exec " + seq);
 
