@@ -16,6 +16,9 @@
 package isocline.clockwork.flow;
 
 import isocline.clockwork.WorkEvent;
+import isocline.clockwork.event.WorkEventImpl;
+import isocline.clockwork.flow.func.CheckFunction;
+import isocline.clockwork.flow.func.ReturnEventFunction;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -40,6 +43,7 @@ public class FunctionExecutor {
 
     private long delayTimeFireEvent = 0;
 
+    private int callCount=0;
 
     private Runnable runnable = null;
 
@@ -48,6 +52,11 @@ public class FunctionExecutor {
     private Supplier supplier = null;
 
     private Function function = null;
+
+    private CheckFunction checkFunction = null;
+
+    private ReturnEventFunction returnEventFunction = null;
+
 
 
     FunctionExecutor() {
@@ -68,7 +77,12 @@ public class FunctionExecutor {
                 this.supplier = (Supplier) obj;
             } else if (obj instanceof Function) {
                 this.function = (Function) obj;
-            } else {
+            }else if (obj instanceof CheckFunction) {
+                this.checkFunction = (CheckFunction) obj;
+            }else if (obj instanceof ReturnEventFunction) {
+                this.returnEventFunction = (ReturnEventFunction) obj;
+            }
+            else {
                 throw new IllegalArgumentException("Not Support type");
             }
         }
@@ -120,15 +134,39 @@ public class FunctionExecutor {
         this.delayTimeFireEvent = delayTimeFireEvent;
     }
 
-    public void execute(WorkEvent event) {
+    public boolean execute(WorkEvent event) {
+
+        callCount++;
+
+        WorkEventImpl e = (WorkEventImpl)event;
+        e.setCount(callCount);
 
         if (runnable != null) {
             runnable.run();
-            return;
         }
 
-        if (consumer != null) {
+        else if (consumer != null) {
             consumer.accept(event);
         }
+
+        else if (checkFunction != null) {
+            boolean runNext = checkFunction.check(event);
+            if(!runNext) {
+                isLastExecutor = true;
+            }
+
+            return runNext;
+        }
+        else if (returnEventFunction != null) {
+            String newEventName = returnEventFunction.checkFlow(event);
+            if(newEventName !=null) {
+                fireEventName = null;
+                fireEventUUID =newEventName;
+            }
+
+
+        }
+
+        return true;
     }
 }

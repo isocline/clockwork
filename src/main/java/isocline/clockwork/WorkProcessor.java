@@ -64,6 +64,36 @@ public class WorkProcessor extends ThreadGroup {
     AtomicInteger managedWorkCount = new AtomicInteger(0);
 
 
+    private static WorkProcessor defaultWorkProcessor;
+
+    private static Map<String, WorkProcessor> processorMap = new HashMap<String, WorkProcessor>();
+
+
+    public static WorkProcessor main() {
+
+
+        if (defaultWorkProcessor == null || !defaultWorkProcessor.isWorking()) {
+            defaultWorkProcessor = new WorkProcessor("default", getDefaultConfiguration());
+        }
+
+        return defaultWorkProcessor;
+    }
+
+    private static Configuration getDefaultConfiguration() {
+        String processorType = System.getProperty("isocline.clockwork.processor.type");
+
+        if ("performance".equals(processorType)) {
+            return Configuration.PERFORMANCE;
+        } else if ("echo".equals(processorType)) {
+            return Configuration.ECHO;
+        } else if ("hyper".equals(processorType)) {
+            return Configuration.HYPER;
+        }
+
+        return Configuration.NOMAL;
+    }
+
+
     /**
      * Create a WorkProcessor object which provice services for WorkSchedule
      *
@@ -104,10 +134,9 @@ public class WorkProcessor extends ThreadGroup {
     }
 
     /**
-     *
      * Register the task to be bound to the input events.
      *
-     * @param work an instance of Work
+     * @param work       an instance of Work
      * @param eventNames an event names
      * @return an new instance of WorkSchedule
      */
@@ -121,20 +150,13 @@ public class WorkProcessor extends ThreadGroup {
         return workSchedule;
     }
 
-    public WorkSchedule execute(AbstractFlowableWork workFlow) throws InterruptedException {
 
-        return execute(workFlow, true);
-    }
+    public WorkSchedule define(AbstractFlowableWork workFlow) {
 
-    public WorkSchedule execute(AbstractFlowableWork workFlow, boolean isSync) throws InterruptedException{
+        WorkSchedule workSchedule = new WorkSchedule(this, workFlow);
 
-        WorkSchedule schedule = execute(workFlow, 0);
 
-        if(isSync) {
-            schedule.waitUntilFinish();
-        }
-
-        return schedule;
+        return workSchedule;
     }
 
     public WorkSchedule execute(Work work) {
@@ -200,7 +222,7 @@ public class WorkProcessor extends ThreadGroup {
      * Create a WorkSchedule instance by work class
      *
      * @param descriptor an description for scheduling
-     * @param workClass class of implement for Work
+     * @param workClass  class of implement for Work
      * @return new instance of WorkSchedule
      * @throws InstantiationException InstantiationException
      * @throws IllegalAccessException IllegalAccessException
@@ -1002,7 +1024,7 @@ public class WorkProcessor extends ThreadGroup {
      * Returns a object
      *
      * @param clazz class
-     * @param <T> Type
+     * @param <T>   Type
      * @return instance
      * @throws IllegalAccessException if the class or its nullary constructor is not accessible.
      * @throws InstantiationException if this Class represents an abstract class, an interface, an array class, a primitive type, or void; or if the class has no nullary constructor; or if the instantiation fails for some other reason.

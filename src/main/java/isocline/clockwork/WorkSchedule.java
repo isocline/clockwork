@@ -554,6 +554,20 @@ public class WorkSchedule {
         return this;
     }
 
+
+    public WorkSchedule run() {
+        WorkSchedule schedule = activate(false);
+
+        try {
+            schedule.waitUntilFinish();
+        }catch (InterruptedException ie) {
+
+        }
+
+        return schedule;
+    }
+
+
     public WorkSchedule activate() {
         return activate(false);
     }

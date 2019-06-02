@@ -19,6 +19,8 @@ import isocline.clockwork.WorkEvent;
 import isocline.clockwork.WorkFlow;
 import isocline.clockwork.event.EventRepository;
 import isocline.clockwork.event.EventSet;
+import isocline.clockwork.flow.func.CheckFunction;
+import isocline.clockwork.flow.func.ReturnEventFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -176,6 +178,11 @@ public class WorkFlowImpl implements WorkFlow {
         return onError(eventNameArray);
     }
 
+    @Override
+    public WorkFlow onError() {
+        return onError(this);
+    }
+
     /**
      *
      * @param funcExecutor
@@ -298,6 +305,35 @@ public class WorkFlowImpl implements WorkFlow {
         return processNext(null, eventName,true , false, delayTime);
     }
 
+    @Override
+    public WorkFlow fireEventOnError(String eventName, long time) {
+        if (this.lastFuncExecutor != null) {
+            String uuid = this.lastFuncExecutor.getFireEventUUID();
+            this.onError(uuid);
+
+
+            return this.fireEvent(eventName, time);
+        } else {
+            throw new IllegalStateException("define position is not valid");
+        }
+    }
+
+    @Override
+    public WorkFlow count(int maxCount) {
+        return this;
+    }
+
+
+    @Override
+    public WorkFlow branch(ReturnEventFunction execObject) {
+        return processNext(execObject, null, false);
+    }
+
+    @Override
+    public WorkFlow check(CheckFunction execObject) {
+        return processNext(execObject, null, false);
+    }
+
     public WorkFlowImpl next(Runnable execObject) {
         return processNext(execObject, null, false);
     }
@@ -355,11 +391,14 @@ public class WorkFlowImpl implements WorkFlow {
             functionExecutorList.add(this.lastFuncExecutor);
         }
 
+        if (isLastExecuteMethod) {
+            clearLastFunctionExecutor();
+        }
+
         return this;
     }
 
     public WorkFlowImpl finish() {
-
         this.isSetFinish = true;
         return processNext(null, null, true, true,0);
     }

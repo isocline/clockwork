@@ -17,6 +17,8 @@ package isocline.clockwork;
 
 import isocline.clockwork.flow.FunctionExecutor;
 import isocline.clockwork.flow.FunctionExecutorList;
+import isocline.clockwork.flow.func.CheckFunction;
+import isocline.clockwork.flow.func.ReturnEventFunction;
 
 import java.util.function.Consumer;
 
@@ -53,6 +55,9 @@ public interface WorkFlow {
      * @return an instance of WorkFlow
      */
     WorkFlow onError(String... eventNames);
+
+
+    WorkFlow onError();
 
 
     /**
@@ -154,6 +159,12 @@ public interface WorkFlow {
     WorkFlow runAsync(Consumer<WorkEvent> execObject, int count);
 
 
+    WorkFlow branch(ReturnEventFunction execObject);
+
+
+    WorkFlow check(CheckFunction execObject);
+
+
     /**
      * Execute the corresponding method at completion of the previous step method execution.
      *
@@ -200,6 +211,13 @@ public interface WorkFlow {
      * @return an instance of WorkFlow
      */
     WorkFlow fireEvent(String eventName, long time);
+
+
+
+    WorkFlow fireEventOnError(String eventName, long time);
+
+
+    WorkFlow count(int maxCount);
 
     /**
      *

@@ -1,7 +1,5 @@
 package isocline.clockwork.dummy;
 
-import isocline.clockwork.WorkEvent;
-
 import java.util.Arrays;
 import java.util.function.Consumer;
 
@@ -25,18 +23,20 @@ public class TestSplit {
         Arrays.asList("1","2","3").stream()
 
                 .forEach(TestSplit::test); // 1,4,9
+                */
 
 
         TestSplit  s = new TestSplit();
-        s.forEach((WorkEvent z)-> z. );
-        */
-    }
-
-    public void forEach(Consumer<WorkEvent>  action) {
+        s.forEach(s::test);
 
     }
 
-    public static void test(WorkEvent x) {
-        System.err.println(">> "+x);
+    public void forEach(Consumer<String> action) {
+        action.accept(null);
+
+    }
+
+    public void test(String x) {
+        System.err.println(">--> "+x);
     }
 }

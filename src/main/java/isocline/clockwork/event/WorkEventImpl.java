@@ -43,6 +43,8 @@ public class WorkEventImpl implements WorkEvent {
 
     private Throwable throwable;
 
+    private int count = 0;
+
 
 
 
@@ -70,6 +72,14 @@ public class WorkEventImpl implements WorkEvent {
     }
 
 
+    @Override
+    public int count() {
+        return this.count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
 
     public WorkEventImpl setEventName(String eventName) {
         this.eventName = eventName;

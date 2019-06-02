@@ -130,9 +130,9 @@ public interface FlowableWork extends Work {
                 if (event.getThrowable() != null) {
                     isFireEvent = true;
                 }
-                executor.execute(event);
 
-                isFireEvent = true;
+
+                isFireEvent = executor.execute(event);;
 
             } catch (Throwable e) {
 

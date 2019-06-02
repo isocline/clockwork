@@ -35,13 +35,14 @@ public class MultiAsync2 {
     @Test
     public void test() throws InterruptedException {
 
-        WorkProcessorFactory.getProcessor().execute(
-                (WorkFlow flow) -> {
+        WorkProcessor.main().define(
+                flow -> {
                     flow.runAsync(this::asyncMulti, 5)
+                            .waitAll()
                             .next(this::sum);
                 }
 
-        ).activate();
+        ).setStartDelayTime(2000).run();
 
 
     }

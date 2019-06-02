@@ -17,6 +17,8 @@ package isocline.clockwork.flow;
 
 import isocline.clockwork.WorkEvent;
 import isocline.clockwork.WorkFlow;
+import isocline.clockwork.flow.func.CheckFunction;
+import isocline.clockwork.flow.func.ReturnEventFunction;
 
 import java.util.function.Consumer;
 
@@ -76,6 +78,12 @@ public class WorkFlowWrapper implements WorkFlow {
     }
 
     @Override
+    public WorkFlow onError() {
+        this.workFlowInstance.onError(this);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
     public WorkFlow runAsync(Runnable execObject) {
         this.workFlowInstance.runAsync(execObject);
         return new WorkFlowWrapper(this.workFlowInstance);
@@ -111,6 +119,18 @@ public class WorkFlowWrapper implements WorkFlow {
     }
 
     @Override
+    public WorkFlow branch(ReturnEventFunction execObject) {
+        this.workFlowInstance.branch(execObject);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
+    public WorkFlow check(CheckFunction execObject) {
+        this.workFlowInstance.check(execObject);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
     public WorkFlow next(Runnable execObject) {
         this.workFlowInstance.next(execObject);
         return new WorkFlowWrapper(this.workFlowInstance);
@@ -139,6 +159,19 @@ public class WorkFlowWrapper implements WorkFlow {
         this.workFlowInstance.fireEvent(eventName, time);
         return new WorkFlowWrapper(this.workFlowInstance);
 
+    }
+
+
+    @Override
+    public WorkFlow fireEventOnError(String eventName, long time) {
+        this.workFlowInstance.fireEventOnError(eventName, time);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
+    public WorkFlow count(int maxCount) {
+        this.workFlowInstance.count(maxCount);
+        return new WorkFlowWrapper(this.workFlowInstance);
     }
 
     @Override

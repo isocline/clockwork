@@ -34,6 +34,9 @@ public interface WorkEvent {
     public String getEventName();
 
 
+
+    int count();
+
     /**
      *
      * Set the WorkSchedule object.
