@@ -32,7 +32,7 @@ and code each time using a different API The Clockwork Work Processor can solve 
 Download
 --------
 
-Download [https://github.com/isocline/mvn-repo/raw/master/isocline/clockwork/1.0/clockwork-1.0.jar][dl] or depend via Maven:
+Download [https://github.com/isocline/mvn-repo/raw/master/isocline/clockwork/1.0/clockwork-1.0.jar] or depend via Maven:
 ```xml
 <dependency>
   <groupId>isocline</groupId>
