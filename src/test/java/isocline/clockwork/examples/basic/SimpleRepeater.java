@@ -28,10 +28,11 @@ public class SimpleRepeater implements Work {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-        WorkSchedule schedule = processor.createSchedule(new SimpleRepeater()).setRepeatInterval(1 * Clock.SECOND)
-                .setFinishTimeFromNow(5 * Clock.SECOND);
+        WorkSchedule schedule = processor.newSchedule(new SimpleRepeater())
+                .interval(1 * Clock.SECOND)
+                .finishTimeFromNow(5 * Clock.SECOND);
 
-        schedule.activate();
+        schedule.subscribe();
 
         processor.shutdown(TestConfiguration.TIMEOUT);
         //processor.awaitShutdown();
@@ -47,10 +48,10 @@ public class SimpleRepeater implements Work {
 
 
 
-        WorkSchedule schedule = processor.createSchedule(SimpleRepeater.class);
+        WorkSchedule schedule = processor.newSchedule(SimpleRepeater.class);
 
-        schedule.setRepeatInterval(1 * Clock.SECOND);
-        schedule.activate();
+        schedule.interval(1 * Clock.SECOND);
+        schedule.subscribe();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);
@@ -63,11 +64,11 @@ public class SimpleRepeater implements Work {
 
 
 
-        WorkSchedule schedule = processor.createSchedule(SimpleRepeater.class);
+        WorkSchedule schedule = processor.newSchedule(SimpleRepeater.class);
 
-        schedule.setRepeatInterval(1 * Clock.SECOND);
+        schedule.interval(1 * Clock.SECOND);
         schedule.setStrictMode();
-        schedule.activate();
+        schedule.subscribe();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);
@@ -80,11 +81,11 @@ public class SimpleRepeater implements Work {
 
 
 
-        WorkSchedule schedule = processor.createSchedule(SimpleRepeater.class);
+        WorkSchedule schedule = processor.newSchedule(SimpleRepeater.class);
 
-        schedule.setRepeatInterval(1 * Clock.SECOND);
-        schedule.setStartDelayTime(Clock.milliseconds(0,0,2));
-        schedule.activate();
+        schedule.interval(1 * Clock.SECOND);
+        schedule.startDelayTime(Clock.milliseconds(0,0,2));
+        schedule.subscribe();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);
@@ -98,11 +99,11 @@ public class SimpleRepeater implements Work {
 
 
 
-        WorkSchedule schedule = processor.createSchedule(SimpleRepeater.class);
+        WorkSchedule schedule = processor.newSchedule(SimpleRepeater.class);
 
-        schedule.setRepeatInterval(1 * Clock.SECOND);
-        schedule.setStartDateTime(Clock.nextSecond()+Clock.SECOND*2);
-        schedule.activate();
+        schedule.interval(1 * Clock.SECOND);
+        schedule.startTime(Clock.nextSecond()+Clock.SECOND*2);
+        schedule.subscribe();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);

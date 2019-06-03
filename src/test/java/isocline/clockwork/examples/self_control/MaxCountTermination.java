@@ -38,8 +38,8 @@ public class MaxCountTermination implements Work {
 
         MaxCountTermination checker = new MaxCountTermination();
 
-        WorkSchedule schedule = processor.createSchedule(checker);
-        schedule.activate();
+        WorkSchedule schedule = processor.newSchedule(checker);
+        schedule.subscribe();
 
         //wait until finish
         schedule.waitUntilFinish();

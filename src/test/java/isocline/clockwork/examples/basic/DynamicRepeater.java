@@ -31,9 +31,9 @@ public class DynamicRepeater implements Work {
 
 
 
-        WorkSchedule schedule = processor.createSchedule(new DynamicRepeater());
+        WorkSchedule schedule = processor.newSchedule(new DynamicRepeater());
 
-        schedule.activate();
+        schedule.subscribe();
 
         processor.shutdown(TestConfiguration.TIMEOUT);
 

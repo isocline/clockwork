@@ -61,7 +61,7 @@ public class TestWorkFlowTest implements FlowableWork {
     public void testStartByEvent() {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
-        processor.createSchedule(this).activate();
+        processor.newSchedule(this).subscribe();
 
         processor.awaitShutdown();
 

@@ -2,16 +2,17 @@ package isocline.clockwork.examples.microservices.pattern;
 
 import isocline.clockwork.TestUtil;
 import isocline.clockwork.WorkEvent;
+import isocline.clockwork.WorkFlow;
 import isocline.clockwork.WorkProcessor;
 import isocline.clockwork.log.XLogger;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class RetryPattern {
+public class RetryPattern3 {
 
 
-    private XLogger logger = XLogger.getLogger(RetryPattern.class);
+    private XLogger logger = XLogger.getLogger(RetryPattern3.class);
 
     public void init() {
         logger.debug("init");
@@ -74,25 +75,20 @@ public class RetryPattern {
     @Test
     public void startTest() {
 
-        WorkProcessor.main()
-                .newFlow(flow -> {
+        WorkProcessor.main().newFlow(flow -> {
 
-            flow.wait("check")
-                    .check(e -> {
-                        if (e.count() == 4) return false;
-                        return true;
-                    })
-                    .next(this::callService1, "success")
-                    .fireEventOnError("check", 2000);
+            flow.check(e -> {
+                if (e.count() == 4) return false;
+                return true;
+            })
+                    .next(this::callService1, WorkFlow.FINISH)
+                    .fireEventOnError(WorkFlow.START, 2000);
 
 
             flow.onError("*").next(this::onError);
 
             flow.onError(RuntimeException.class).next(this::onError2);
 
-            flow.wait("success").finish();
-
-            flow.fireEvent("check", 0);
 
         }).run();
 

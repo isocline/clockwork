@@ -90,7 +90,6 @@ public interface FlowableWork extends Work {
 
         final String eventName = event.getEventName();
 
-        //System.out.println(">>>>>>>> RECV : ["+eventName+"]");
 
         FunctionExecutor executor = null;
 
@@ -135,6 +134,15 @@ public interface FlowableWork extends Work {
                 isFireEvent = executor.execute(event);;
 
             } catch (Throwable e) {
+
+                String errClassEventName = e.getClass().getName() + "::error";
+
+                WorkEvent errClsEvent = WorkEventFactory.create(errClassEventName);
+                errClsEvent.setThrowable(e);
+
+                schedule.raiseLocalEvent(errClsEvent);
+
+
 
                 final String eventNm = executor.getFireEventName();
 

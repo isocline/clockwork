@@ -74,9 +74,9 @@ public class MultiPlexer implements Work {
 
 
         for(int i=0;i< 10;i++ ) {
-            WorkSchedule schedule = processor.createSchedule(new MultiPlexer("A",i)).setStartDateTime(startTime+i*10)
+            WorkSchedule schedule = processor.newSchedule(new MultiPlexer("A",i)).startTime(startTime+i*10)
                     .setStrictMode();
-            schedule.activate();
+            schedule.subscribe();
         }
 
 
@@ -84,8 +84,8 @@ public class MultiPlexer implements Work {
         /*
 
         for(int i=0;i<10;i++ ) {
-            WorkSchedule schedule = worker.createSchedule(new MultiPlexer("B",i)).setStrictMode(true).setStartTime(startTime+i*100+50);
-            schedule.activate();
+            WorkSchedule schedule = worker.newSchedule(new MultiPlexer("B",i)).setStrictMode(true).setStartTime(startTime+i*100+50);
+            schedule.subscribe();
         }
         */
 

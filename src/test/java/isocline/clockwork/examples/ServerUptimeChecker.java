@@ -109,8 +109,8 @@ public class ServerUptimeChecker  implements Work {
        for(String url:urls) {
 
            ServerUptimeChecker checker = new ServerUptimeChecker( url);
-           WorkSchedule schedule = processor.createSchedule(checker).bindEvent("connectTypeChange").setJitter(200).setStrictMode();
-           schedule.activate();
+           WorkSchedule schedule = processor.newSchedule(checker).bindEvent("connectTypeChange").jitter(200).setStrictMode();
+           schedule.subscribe();
        }
 
 

@@ -24,14 +24,28 @@ public class CrontSchedule implements Work {
     @Test
     public void case1() throws Exception {
 
+
+        WorkProcessor.main()
+                .newSchedule(CrontSchedule.class)
+                .scheduleDescriptor(new CronDescriptor("* * * * *"))
+                .subscribe();
+
+        WorkProcessor.main().shutdown(10*Clock.SECOND);
+
+
+    }
+
+    @Test
+    public void case2() throws Exception {
+
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-        WorkSchedule schedule = processor.createSchedule(new CronDescriptor("* * * * *"), CrontSchedule.class);
+        WorkSchedule schedule = processor.newSchedule(new CronDescriptor("* * * * *"), CrontSchedule.class);
 
-        schedule.activate();
+        schedule.subscribe();
 
-        processor.awaitShutdown();
+        processor.shutdown(Clock.MINUTE);
 
 
     }

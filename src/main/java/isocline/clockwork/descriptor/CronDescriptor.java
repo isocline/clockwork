@@ -58,9 +58,9 @@ public class CronDescriptor implements ScheduleDescriptor {
 
         //System.err.println("--- "+Clock.toDateFormat(t1));
 
-        workSchedule.setStartDateTime(t1);
-        workSchedule.setRepeatInterval(Clock.MINUTE);
-        workSchedule.setExecuteEventChecker(this.checker);
+        workSchedule.startTime(t1);
+        workSchedule.interval(Clock.MINUTE);
+        workSchedule.executeEventChecker(this.checker);
 
 
     }

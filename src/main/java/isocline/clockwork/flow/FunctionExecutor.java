@@ -45,6 +45,9 @@ public class FunctionExecutor {
 
     private int callCount=0;
 
+    private int maxCallCount = 0;
+
+
     private Runnable runnable = null;
 
     private Consumer<WorkEvent> consumer = null;
@@ -134,9 +137,22 @@ public class FunctionExecutor {
         this.delayTimeFireEvent = delayTimeFireEvent;
     }
 
+
+    public int getMaxCallCount() {
+        return maxCallCount;
+    }
+
+    public void setMaxCallCount(int maxCallCount) {
+        this.maxCallCount = maxCallCount;
+    }
+
     public boolean execute(WorkEvent event) {
 
         callCount++;
+
+        if(maxCallCount>0 && maxCallCount<=callCount) {
+            return false;
+        }
 
         WorkEventImpl e = (WorkEventImpl)event;
         e.setCount(callCount);
@@ -166,6 +182,7 @@ public class FunctionExecutor {
 
 
         }
+
 
         return true;
     }

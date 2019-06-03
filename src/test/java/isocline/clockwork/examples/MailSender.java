@@ -68,8 +68,8 @@ public class MailSender implements Work {
        for(String email:emails) {
 
            MailSender checker = new MailSender( email, "Test", "test");
-           WorkSchedule schedule = processor.createSchedule(checker);
-           schedule.activate();
+           WorkSchedule schedule = processor.newSchedule(checker);
+           schedule.subscribe();
        }
 
 

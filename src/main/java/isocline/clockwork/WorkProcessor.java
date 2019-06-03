@@ -140,18 +140,18 @@ public class WorkProcessor extends ThreadGroup {
      * @param eventNames an event names
      * @return an new instance of WorkSchedule
      */
-    public WorkSchedule regist(Work work, String... eventNames) {
+    public WorkSchedule newSchedule(Work work, String... eventNames) {
         WorkSchedule workSchedule = new WorkSchedule(this, work);
         workSchedule.setSleepMode();
         workSchedule.bindEvent(eventNames);
 
-        workSchedule.activate();
+        workSchedule.subscribe();
 
         return workSchedule;
     }
 
 
-    public WorkSchedule define(AbstractFlowableWork workFlow) {
+    public WorkSchedule newFlow(AbstractFlowableWork workFlow) {
 
         WorkSchedule workSchedule = new WorkSchedule(this, workFlow);
 
@@ -166,10 +166,10 @@ public class WorkProcessor extends ThreadGroup {
     public WorkSchedule execute(Work work, long startDelayTime) {
         WorkSchedule workSchedule = new WorkSchedule(this, work);
         if (startDelayTime > 0) {
-            workSchedule.setStartDelayTime(startDelayTime);
+            workSchedule.startDelayTime(startDelayTime);
         }
 
-        workSchedule.activate();
+        workSchedule.subscribe();
 
         return workSchedule;
     }
@@ -179,7 +179,7 @@ public class WorkProcessor extends ThreadGroup {
      *
      * @return a new instance of WorkSchedule
      */
-    public WorkSchedule createSchedule() {
+    public WorkSchedule newSchedule() {
         return new WorkSchedule(this, null);
     }
 
@@ -190,15 +190,15 @@ public class WorkProcessor extends ThreadGroup {
      * @param work Work implement class object
      * @return new instance of WorkSchedule
      */
-    public WorkSchedule createSchedule(Work work) {
-        return createSchedule(null, work);
+    public WorkSchedule newSchedule(Work work) {
+        return newSchedule(null, work);
     }
 
 
-    public WorkSchedule createSchedule(ScheduleDescriptor config, Work work) {
+    public WorkSchedule newSchedule(ScheduleDescriptor config, Work work) {
         WorkSchedule workSchedule = new WorkSchedule(this, work);
         if (config != null) {
-            workSchedule.setScheduleDescriptor(config);
+            workSchedule.scheduleDescriptor(config);
         }
 
         return workSchedule;
@@ -213,8 +213,8 @@ public class WorkProcessor extends ThreadGroup {
      * @throws InstantiationException InstantiationException
      * @throws IllegalAccessException IllegalAccessException
      */
-    public WorkSchedule createSchedule(Class workClass) throws InstantiationException, IllegalAccessException {
-        return createSchedule((Work) workClass.newInstance());
+    public WorkSchedule newSchedule(Class workClass) throws InstantiationException, IllegalAccessException {
+        return newSchedule((Work) workClass.newInstance());
     }
 
 
@@ -227,8 +227,8 @@ public class WorkProcessor extends ThreadGroup {
      * @throws InstantiationException InstantiationException
      * @throws IllegalAccessException IllegalAccessException
      */
-    public WorkSchedule createSchedule(ScheduleDescriptor descriptor, Class workClass) throws InstantiationException, IllegalAccessException {
-        return createSchedule(descriptor, (Work) workClass.newInstance());
+    public WorkSchedule newSchedule(ScheduleDescriptor descriptor, Class workClass) throws InstantiationException, IllegalAccessException {
+        return newSchedule(descriptor, (Work) workClass.newInstance());
     }
 
 
@@ -241,7 +241,7 @@ public class WorkProcessor extends ThreadGroup {
      * @throws InstantiationException if this Class represents an abstract class, an interface, an array class, a primitive type, or void; or if the class has no nullary constructor; or if the instantiation fails for some other reason.
      * @throws IllegalAccessException if the class or its nullary constructor is not accessible.
      */
-    public WorkSchedule createSchedule(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public WorkSchedule newSchedule(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         return new WorkSchedule(this, (Work) Class.forName(className).newInstance());
     }
 
@@ -282,9 +282,16 @@ public class WorkProcessor extends ThreadGroup {
      */
     public void waitingJob(long timeout) {
 
+        long tt1 = System.currentTimeMillis();
+
+
+        long t1 = System.currentTimeMillis() + timeout;
+
         try {
+            long gap = t1 - System.currentTimeMillis();
             Thread.sleep(500);
-            for (int i = 0; i < timeout / 100; i++) {
+            while (gap > 1) {
+                gap = t1 - System.currentTimeMillis();
                 if (this.getManagedWorkCount() > 0) {
                     Thread.sleep(100);
 
@@ -299,21 +306,11 @@ public class WorkProcessor extends ThreadGroup {
 
         }
 
-        long tt1 = System.currentTimeMillis();
 
         for (ThreadWorker t : this.threadWorkers) {
             t.interrupt();
         }
 
-        while (this.managedWorkCount.get() > 0) {
-            waiting(100);
-
-            long gap = System.currentTimeMillis() - tt1;
-            if (gap > timeout && timeout > 0) {
-                break;
-            }
-
-        }
 
         long tt2 = System.currentTimeMillis();
 
@@ -721,7 +718,7 @@ public class WorkProcessor extends ThreadGroup {
 
         private boolean check(WorkSchedule schedule, long time) {
 
-            if (!schedule.isActivated()) {
+            if (!schedule.isSubscribed()) {
                 return false;
             }
 

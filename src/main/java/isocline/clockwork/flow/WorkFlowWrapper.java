@@ -78,6 +78,12 @@ public class WorkFlowWrapper implements WorkFlow {
     }
 
     @Override
+    public WorkFlow onError(Class... errorClasses) {
+        this.workFlowInstance.onError(errorClasses);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
     public WorkFlow onError() {
         this.workFlowInstance.onError(this);
         return new WorkFlowWrapper(this.workFlowInstance);
@@ -171,6 +177,12 @@ public class WorkFlowWrapper implements WorkFlow {
     @Override
     public WorkFlow count(int maxCount) {
         this.workFlowInstance.count(maxCount);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
+    public WorkFlow retryOnError(int maxCount, long delayTime) {
+        this.workFlowInstance.retryOnError(maxCount, delayTime);
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 

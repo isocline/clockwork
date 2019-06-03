@@ -236,7 +236,7 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule setStartDateTime(long nextExecuteTime) {
+    public WorkSchedule startTime(long nextExecuteTime) {
 
         this.isDefinedStartTime = true;
         return setStartTime(nextExecuteTime);
@@ -259,7 +259,7 @@ public class WorkSchedule {
         return this;
     }
 
-    public WorkSchedule setStartDelayTime(long waitTime) {
+    public WorkSchedule startDelayTime(long waitTime) {
         checkLocking();
         this.waitingTime = waitTime;
 
@@ -349,7 +349,7 @@ public class WorkSchedule {
      * @param intervalTime a milliseconds time for interval
      * @return an instance of WorkSchedule
      */
-    public WorkSchedule setRepeatInterval(long intervalTime) {
+    public WorkSchedule interval(long intervalTime) {
 
         checkLocking();
 
@@ -369,7 +369,7 @@ public class WorkSchedule {
 
         this.intervalTime = intervalTime;
 
-        return setStartDelayTime(intervalTime);
+        return startDelayTime(intervalTime);
 
     }
 
@@ -381,11 +381,11 @@ public class WorkSchedule {
      * @return an instance of WorkSchedule
      * @throws java.text.ParseException if date time format is not valid.
      */
-    public WorkSchedule setStartDateTime(String isoDateTime) throws java.text.ParseException {
+    public WorkSchedule startTime(String isoDateTime) throws java.text.ParseException {
 
         this.isDefinedStartTime = true;
 
-        return setStartDateTime(Clock.toDate(isoDateTime));
+        return startTime(Clock.toDate(isoDateTime));
     }
 
 
@@ -395,7 +395,7 @@ public class WorkSchedule {
      * @param startDateTime Date of start
      * @return an instance of WorkSchedule
      */
-    public WorkSchedule setStartDateTime(Date startDateTime) {
+    public WorkSchedule startTime(Date startDateTime) {
 
         this.isDefinedStartTime = true;
 
@@ -411,9 +411,9 @@ public class WorkSchedule {
      * @return an instance of WorkSchedule
      * @throws java.text.ParseException if date time format is not valid.
      */
-    public WorkSchedule setFinishDateTime(String isoDateTime) throws java.text.ParseException {
+    public WorkSchedule finishTime(String isoDateTime) throws java.text.ParseException {
 
-        return setFinishDateTime(Clock.toDate(isoDateTime));
+        return finishTime(Clock.toDate(isoDateTime));
     }
 
 
@@ -423,7 +423,7 @@ public class WorkSchedule {
      * @param endDateTime Date of end
      * @return an instance of WorkSchedule
      */
-    public WorkSchedule setFinishDateTime(Date endDateTime) {
+    public WorkSchedule finishTime(Date endDateTime) {
 
         this.workEndTime = endDateTime.getTime();
         return this;
@@ -435,7 +435,7 @@ public class WorkSchedule {
      * @param milliSeconds milliseconds
      * @return an instance of WorkSchedule
      */
-    public WorkSchedule setFinishTimeFromNow(long milliSeconds) {
+    public WorkSchedule finishTimeFromNow(long milliSeconds) {
         this.workEndTime = System.currentTimeMillis() + milliSeconds;
         return this;
     }
@@ -448,7 +448,7 @@ public class WorkSchedule {
      * @throws InstantiationException if this Class represents an abstract class, an interface, an array class, a primitive type, or void; or if the class has no nullary constructor; or if the instantiation fails for some other reason.
      * @throws IllegalAccessException if the class or its nullary constructor is not accessible.
      */
-    public WorkSchedule setWorkSession(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public WorkSchedule workSession(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         checkLocking();
         this.workSession = (WorkSession) Class.forName(className).newInstance();
         return this;
@@ -460,7 +460,7 @@ public class WorkSchedule {
      * @param workSession an instance of WorkSession
      * @return an instance of WorkSchedule
      */
-    public WorkSchedule setWorkSession(WorkSession workSession) {
+    public WorkSchedule workSession(WorkSession workSession) {
         checkLocking();
 
         this.workSession = workSession;
@@ -484,7 +484,7 @@ public class WorkSchedule {
     }
 
 
-    public WorkFlow getWorkFlow() {
+    WorkFlow getWorkFlow() {
         return this.workFlow;
     }
 
@@ -542,7 +542,7 @@ public class WorkSchedule {
         return this;
     }
 
-    public WorkSchedule setJitter(long jitter) {
+    public WorkSchedule jitter(long jitter) {
         checkLocking();
         this.jitter = jitter;
         return this;
@@ -550,13 +550,13 @@ public class WorkSchedule {
 
     public WorkSchedule setSleepMode() {
         checkLocking();
-        this.setStartDelayTime(Work.WAIT);
+        this.startDelayTime(Work.WAIT);
         return this;
     }
 
 
     public WorkSchedule run() {
-        WorkSchedule schedule = activate(false);
+        WorkSchedule schedule = subscribe(false);
 
         try {
             schedule.waitUntilFinish();
@@ -568,8 +568,8 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule activate() {
-        return activate(false);
+    public WorkSchedule subscribe() {
+        return subscribe(false);
     }
 
 
@@ -578,10 +578,10 @@ public class WorkSchedule {
      * @param checkActivated  Check whether it is activated
      * @return an instance of WorkSchedule
      */
-    public WorkSchedule activate(boolean checkActivated) {
+    public WorkSchedule subscribe(boolean checkActivated) {
         if (isActivated) {
             if (checkActivated) {
-                throw new RuntimeException("Already activate!");
+                throw new RuntimeException("Already subscribe!");
             } else {
                 return this;
             }
@@ -600,7 +600,7 @@ public class WorkSchedule {
                 fw.defineWorkFlow(wf);
 
                 if (!wf.isSetFinish()) {
-                    wf.finish();
+                    wf.wait(WorkFlow.FINISH).finish();
                 }
             }
 
@@ -631,7 +631,7 @@ public class WorkSchedule {
         return this;
     }
 
-    public WorkSchedule setScheduleDescriptor(ScheduleDescriptor descriptor) {
+    public WorkSchedule scheduleDescriptor(ScheduleDescriptor descriptor) {
         descriptor.build(this);
         return this;
     }
@@ -641,7 +641,7 @@ public class WorkSchedule {
      *
      * @return True if WorkSchedule is activated
      */
-    public boolean isActivated() {
+    public boolean isSubscribed() {
         return isActivated;
     }
 
@@ -690,7 +690,7 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule setExecuteEventChecker(ExecuteEventChecker checker) {
+    public WorkSchedule executeEventChecker(ExecuteEventChecker checker) {
         this.executeEventChecker = checker;
         return this;
     }

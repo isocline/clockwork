@@ -38,16 +38,20 @@ public class EventReceiver implements Work {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-        WorkSchedule schedule = processor.createSchedule(new EventReceiver()).bindEvent("example-event");
-        schedule.activate();
+        WorkSchedule schedule = processor.newSchedule(new EventReceiver()).bindEvent("example-event");
+        schedule.subscribe();
 
 
         WorkEventGenerator gen = new WorkEventGenerator();
         gen.setEventName("example-event");
 
 
-        processor.createSchedule(gen).setFinishTimeFromNow(30 * Clock.SECOND).setStrictMode().setStartDateTime
-                (Clock.nextSecond()).activate();
+        processor.newSchedule(gen)
+
+                .setStrictMode()
+                .startTime(Clock.nextSecond())
+                .finishTimeFromNow(30 * Clock.SECOND)
+                .subscribe();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);
@@ -62,7 +66,7 @@ public class EventReceiver implements Work {
 
 
 
-        processor.regist(new EventReceiver(), "example-event");
+        processor.newSchedule(new EventReceiver(), "example-event").subscribe();
 
 
 
@@ -70,8 +74,8 @@ public class EventReceiver implements Work {
         WorkEventGenerator gen = new WorkEventGenerator();
         gen.setEventName("example-event");
 
-        processor.createSchedule(gen).setFinishTimeFromNow(30 * Clock.SECOND).setStrictMode().setStartDateTime
-                (Clock.nextSecond()).activate();
+        processor.newSchedule(gen).finishTimeFromNow(30 * Clock.SECOND).setStrictMode().startTime
+                (Clock.nextSecond()).subscribe();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);

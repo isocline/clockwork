@@ -8,10 +8,10 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class RetryPattern {
+public class RetryPattern2 {
 
 
-    private XLogger logger = XLogger.getLogger(RetryPattern.class);
+    private XLogger logger = XLogger.getLogger(RetryPattern2.class);
 
     public void init() {
         logger.debug("init");
@@ -19,7 +19,7 @@ public class RetryPattern {
 
     public void callService1(WorkEvent e) {
         logger.debug("Service1 - start");
-        TestUtil.waiting(2000);
+        TestUtil.waiting(500);
         logger.debug("Service1 - end");
 
         e.root().setAttribute("result:service1", "A");
@@ -77,25 +77,15 @@ public class RetryPattern {
         WorkProcessor.main()
                 .newFlow(flow -> {
 
-            flow.wait("check")
-                    .check(e -> {
-                        if (e.count() == 4) return false;
-                        return true;
-                    })
-                    .next(this::callService1, "success")
-                    .fireEventOnError("check", 2000);
+                    flow
+
+                            .next(this::callService1)
+                            .retryOnError(3, 2000);
 
 
-            flow.onError("*").next(this::onError);
-
-            flow.onError(RuntimeException.class).next(this::onError2);
-
-            flow.wait("success").finish();
-
-            flow.fireEvent("check", 0);
-
-        }).run();
+                }).run();
 
 
+        TestUtil.waiting(10000);
     }
 }

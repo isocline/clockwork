@@ -29,6 +29,11 @@ import java.util.function.Consumer;
 
 public interface WorkFlow {
 
+    String START = "CLOCKWORK:START";
+
+
+    String FINISH = "CLOCKWORK:FINISH";
+
 
     /**
      * If the input event occurs, proceed to the next operation.
@@ -55,6 +60,9 @@ public interface WorkFlow {
      * @return an instance of WorkFlow
      */
     WorkFlow onError(String... eventNames);
+
+
+    WorkFlow onError(Class... errorClasses);
 
 
     WorkFlow onError();
@@ -218,6 +226,8 @@ public interface WorkFlow {
 
 
     WorkFlow count(int maxCount);
+
+    WorkFlow retryOnError(int maxCount, long delayTime);
 
     /**
      *

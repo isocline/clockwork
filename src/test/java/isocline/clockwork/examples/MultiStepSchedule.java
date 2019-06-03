@@ -18,11 +18,11 @@ public class MultiStepSchedule   {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-        WorkSchedule schedule = processor.createSchedule(Step1Schedule.class).setStrictMode();
-        schedule.activate();
+        WorkSchedule schedule = processor.newSchedule(Step1Schedule.class).setStrictMode();
+        schedule.subscribe();
 
-        schedule = processor.createSchedule(Step2Schedule.class).bindEvent("fireEvent");
-        schedule.activate();
+        schedule = processor.newSchedule(Step2Schedule.class).bindEvent("fireEvent");
+        schedule.subscribe();
 
 
         processor.shutdown(20 * Clock.SECOND);

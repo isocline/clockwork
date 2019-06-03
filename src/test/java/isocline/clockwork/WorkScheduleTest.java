@@ -33,12 +33,12 @@ public class WorkScheduleTest {
     public void executeOneTime() throws Exception {
 
 
-        processor.createSchedule((WorkEvent event) -> {
+        processor.newSchedule((WorkEvent event) -> {
             seq++;
             logger.debug("exec " + seq);
 
             return Work.TERMINATE;
-        }).activate();
+        }).subscribe();
 
         Thread.sleep(100);
 
@@ -51,12 +51,12 @@ public class WorkScheduleTest {
     public void executeSleep() throws Exception {
 
 
-        processor.createSchedule((WorkEvent event) -> {
+        processor.newSchedule((WorkEvent event) -> {
             seq++;
             logger.debug("exec " + seq);
 
             return Work.WAIT;
-        }).activate();
+        }).subscribe();
 
         Thread.sleep(100);
 
@@ -68,7 +68,7 @@ public class WorkScheduleTest {
     public void executeLoop() throws Exception {
 
 
-        processor.createSchedule((WorkEvent event) -> {
+        processor.newSchedule((WorkEvent event) -> {
             seq++;
             logger.debug("exec " + seq);
 
@@ -77,7 +77,7 @@ public class WorkScheduleTest {
             }
 
             return Work.LOOP;
-        }).activate();
+        }).subscribe();
 
 
         Thread.sleep(100);

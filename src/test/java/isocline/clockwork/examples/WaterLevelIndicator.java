@@ -67,8 +67,8 @@ public class WaterLevelIndicator implements Work {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-        WorkSchedule schedule = processor.createSchedule(WaterLevelIndicator.class).setStrictMode();
-        schedule.activate();
+        WorkSchedule schedule = processor.newSchedule(WaterLevelIndicator.class).setStrictMode();
+        schedule.subscribe();
 
 
         processor.shutdown(20 * Clock.SECOND);

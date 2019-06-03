@@ -20,7 +20,7 @@ public class EndTimeSelfControl implements Work {
         logger.debug("execute:" + count);
 
         if(count ==1) {
-            event.getWorkSchedule().setFinishTimeFromNow(Clock.SECOND*2);
+            event.getWorkSchedule().finishTimeFromNow(Clock.SECOND*2);
         }
 
         return Clock.SECOND/2;
@@ -35,8 +35,8 @@ public class EndTimeSelfControl implements Work {
 
         EndTimeSelfControl checker = new EndTimeSelfControl();
 
-        WorkSchedule schedule = processor.createSchedule(checker);
-        schedule.activate();
+        WorkSchedule schedule = processor.newSchedule(checker);
+        schedule.subscribe();
 
         schedule.waitUntilFinish();
 

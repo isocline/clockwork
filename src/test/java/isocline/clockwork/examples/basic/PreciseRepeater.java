@@ -23,9 +23,9 @@ public class PreciseRepeater implements Work {
 
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
-        WorkSchedule schedule = processor.createSchedule(new PreciseRepeater()).setStrictMode();
+        WorkSchedule schedule = processor.newSchedule(new PreciseRepeater()).setStrictMode();
 
-        schedule.activate();
+        schedule.subscribe();
 
         processor.shutdown(TestConfiguration.TIMEOUT);
     }

@@ -76,8 +76,8 @@ public class HttpComm implements Work {
 
         for(int i=0;i<20;i++) {
             HttpComm work = new HttpComm("https://www.google.com");
-            //processor.createSchedule(work).setStartTime(startTime+i*50).activate();
-            processor.createSchedule(work).setStrictMode().activate();
+            //processor.newSchedule(work).setStartTime(startTime+i*50).subscribe();
+            processor.newSchedule(work).setStrictMode().subscribe();
 
         }
         processor.awaitShutdown();

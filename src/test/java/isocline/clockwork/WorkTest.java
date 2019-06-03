@@ -54,12 +54,12 @@ public class WorkTest  {
 
         WorkSchedule schedule =
 
-        workProcessor.regist((WorkEvent event) -> {
+        workProcessor.newSchedule((WorkEvent event) -> {
             seq++;
             logger.debug("exec " +seq + " event:"+event.getEventName());
 
             return Work.WAIT;
-        }, "testEvent");
+        }, "testEvent").subscribe();
 
         workProcessor.execute((WorkEvent event) -> {
             logger.debug("fire event:"+event.getEventName());
@@ -83,12 +83,12 @@ public class WorkTest  {
 
         WorkSchedule schedule =
 
-        workProcessor.createSchedule((WorkEvent event) -> {
+        workProcessor.newSchedule((WorkEvent event) -> {
             seq++;
             logger.debug("exec " +seq);
 
             return Work.TERMINATE;
-        }).activate();
+        }).subscribe();
 
         schedule.waitUntilFinish(1000);
 
@@ -102,12 +102,12 @@ public class WorkTest  {
 
         WorkSchedule schedule =
 
-        workProcessor.createSchedule((WorkEvent event) -> {
+        workProcessor.newSchedule((WorkEvent event) -> {
             seq++;
             logger.debug("exec " +seq);
 
             return Work.WAIT;
-        }).activate();
+        }).subscribe();
 
         schedule.waitUntilFinish(100);
 
@@ -120,7 +120,7 @@ public class WorkTest  {
 
         WorkSchedule schedule =
 
-        workProcessor.createSchedule((WorkEvent event) -> {
+        workProcessor.newSchedule((WorkEvent event) -> {
             seq++;
             logger.debug("exec " +seq);
 
@@ -129,7 +129,7 @@ public class WorkTest  {
             }
 
             return Work.LOOP;
-        }).activate();
+        }).subscribe();
 
 
         schedule.waitUntilFinish(100);

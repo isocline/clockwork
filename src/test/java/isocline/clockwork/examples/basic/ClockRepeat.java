@@ -20,7 +20,7 @@ public class ClockRepeat implements Work {
     public void case1() throws Exception {
 
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
-        processor.createSchedule(new CronDescriptor("49 1 * * *"), this).activate();
+        processor.newSchedule(new CronDescriptor("49 1 * * *"), this).subscribe();
 
         processor.shutdown(3000);
         //processor.awaitShutdown();
