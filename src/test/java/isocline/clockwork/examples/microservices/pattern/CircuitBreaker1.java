@@ -3,28 +3,37 @@ package isocline.clockwork.examples.microservices.pattern;
 import isocline.clockwork.TestUtil;
 import isocline.clockwork.WorkEvent;
 import isocline.clockwork.WorkProcessor;
-import isocline.clockwork.check.Count;
+import isocline.clockwork.check.CircuitBreaker;
 import isocline.clockwork.log.XLogger;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class RetryPattern {
+public class CircuitBreaker1 {
 
+    private static int CNT = 0;
 
-    private XLogger logger = XLogger.getLogger(RetryPattern.class);
+    private XLogger logger = XLogger.getLogger(CircuitBreaker1.class);
 
     public void init() {
         logger.debug("init");
     }
 
     public void callService1(WorkEvent e) {
+        CNT++;
+
         logger.debug("Service1 - start");
-        TestUtil.waiting(2000);
+        TestUtil.waiting(100);
         logger.debug("Service1 - end");
 
         e.root().setAttribute("result:service1", "A");
-        throw new RuntimeException("zzzz");
+
+        if(CNT >2 && CNT<5) {
+            TestUtil.waiting(3000);
+
+            throw new RuntimeException("connect fail");
+        }
+
     }
 
 
@@ -48,52 +57,71 @@ public class RetryPattern {
         logger.debug("timeout  " + e.getEventName());
     }
 
-    public void onError(WorkEvent e) {
+    public void onError(WorkEvent e)throws Throwable {
 
         logger.debug("error " + e.getEventName());
 
         Throwable err = e.getThrowable();
         if (err != null) {
             err.printStackTrace();
+            throw err;
+        }else {
+            throw new RuntimeException("timeout");
         }
     }
 
 
-    public void onError2(WorkEvent e) {
+    public void onError2(WorkEvent e)  throws IllegalArgumentException {
 
         logger.debug("error2 " + e.getEventName());
 
         Throwable err = e.getThrowable();
         if (err != null) {
             err.printStackTrace();
+
+        }else {
+            throw new RuntimeException("timeout");
         }
     }
 
     public static int count = 0;
 
 
-    @Test
+
     public void startTest() {
+
+        CircuitBreaker circuitBreaker = CircuitBreaker.create("xhk");
+        circuitBreaker.setMaxFailCount(3);
 
         WorkProcessor.main()
                 .newFlow(flow -> {
 
-            flow.wait("check")
-                    .check(Count.max(3))
-                    .next(this::callService1, "success")
-                    .fireEventOnError("check", 2000);
+
+                    flow.fireEvent("error::timeout", 3000)
+                            .check(circuitBreaker::check)
+                            .next(this::callService1)
+                            .finish();
+
+                    flow.onError("*").next(this::onError2).finish();
 
 
-            flow.onError("*").next(this::onError);
+                    flow.wait("test").finish();
+                }).run();
 
-            flow.onError(RuntimeException.class).next(this::onError2);
 
-            flow.wait("success").finish();
+    }
 
-            flow.fireEvent("check", 0);
+    @Test
+    public void testMulti() {
+        for(int i=0;i<5;i++ ) {
 
-        }).run();
-
+            CircuitBreaker1 test = new CircuitBreaker1();
+            try {
+                test.startTest();
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 }

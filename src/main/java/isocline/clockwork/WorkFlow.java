@@ -19,6 +19,7 @@ import isocline.clockwork.flow.FunctionExecutor;
 import isocline.clockwork.flow.FunctionExecutorList;
 import isocline.clockwork.flow.func.CheckFunction;
 import isocline.clockwork.flow.func.ReturnEventFunction;
+import isocline.clockwork.flow.func.WorkEventConsumer;
 
 import java.util.function.Consumer;
 
@@ -29,10 +30,13 @@ import java.util.function.Consumer;
 
 public interface WorkFlow {
 
-    String START = "CLOCKWORK:START";
+    String START = "CLOCKWORK::start";
 
 
-    String FINISH = "CLOCKWORK:FINISH";
+    String FINISH = "CLOCKWORK::finish";
+
+
+    String ERROR = "error::*";
 
 
     /**
@@ -172,6 +176,8 @@ public interface WorkFlow {
 
     WorkFlow check(CheckFunction execObject);
 
+    WorkFlow check(int maxCount);
+
 
     /**
      * Execute the corresponding method at completion of the previous step method execution.
@@ -182,13 +188,19 @@ public interface WorkFlow {
     WorkFlow next(Runnable execObject);
 
 
+    WorkFlow next(WorkEventConsumer execObject);
+
+
+    WorkFlow next(WorkEventConsumer execObject, String fireEventName);
+
+
     /**
      * Execute the corresponding method at completion of the previous step method execution.
      *
      * @param execObject executable object
      * @return an instance of WorkFlow
      */
-    WorkFlow next(Consumer<WorkEvent> execObject);
+    WorkFlow next(Consumer<?> execObject);
 
     /**
      * Execute the corresponding method at completion of the previous step method execution.
@@ -208,7 +220,7 @@ public interface WorkFlow {
      * @param fireEventName name of event
      * @return an instance of WorkFlow
      */
-    WorkFlow next(Consumer<WorkEvent> execObject, String fireEventName);
+    WorkFlow next(Consumer<?> execObject, String fireEventName);
 
 
     /**

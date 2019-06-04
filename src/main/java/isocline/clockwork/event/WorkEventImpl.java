@@ -132,6 +132,10 @@ public class WorkEventImpl implements WorkEvent {
     }
 
 
+
+    public Map getAttributeMap() {
+        return this.attributeMap;
+    }
     /**
      * @param event
      */

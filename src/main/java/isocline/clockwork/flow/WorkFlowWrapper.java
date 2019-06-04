@@ -19,6 +19,7 @@ import isocline.clockwork.WorkEvent;
 import isocline.clockwork.WorkFlow;
 import isocline.clockwork.flow.func.CheckFunction;
 import isocline.clockwork.flow.func.ReturnEventFunction;
+import isocline.clockwork.flow.func.WorkEventConsumer;
 
 import java.util.function.Consumer;
 
@@ -137,13 +138,19 @@ public class WorkFlowWrapper implements WorkFlow {
     }
 
     @Override
+    public WorkFlow check(int maxCount) {
+        this.workFlowInstance.check(maxCount);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
     public WorkFlow next(Runnable execObject) {
         this.workFlowInstance.next(execObject);
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 
     @Override
-    public WorkFlow next(Consumer<WorkEvent> execObject) {
+    public WorkFlow next(Consumer<?> execObject) {
         this.workFlowInstance.next(execObject);
         return new WorkFlowWrapper(this.workFlowInstance);
     }
@@ -155,10 +162,24 @@ public class WorkFlowWrapper implements WorkFlow {
     }
 
     @Override
-    public WorkFlow next(Consumer execObject, String eventName) {
+    public WorkFlow next(Consumer<?> execObject, String eventName) {
         this.workFlowInstance.next(execObject, eventName);
         return new WorkFlowWrapper(this.workFlowInstance);
     }
+
+
+    @Override
+    public WorkFlow next(WorkEventConsumer execObject) {
+        this.workFlowInstance.next(execObject);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
+    public WorkFlow next(WorkEventConsumer execObject, String eventName) {
+        this.workFlowInstance.next(execObject, eventName);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
 
     @Override
     public WorkFlow fireEvent(String eventName, long time) {

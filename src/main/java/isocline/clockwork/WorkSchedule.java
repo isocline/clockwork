@@ -82,6 +82,8 @@ public class WorkSchedule {
 
     private ExecuteEventChecker executeEventChecker = null;
 
+    private Throwable error = null;
+
 
     WorkSchedule(WorkProcessor workProcessor, Work work) {
         this.workProcessor = workProcessor;
@@ -564,6 +566,12 @@ public class WorkSchedule {
 
         }
 
+        Throwable error = schedule.getError();
+        if(error!=null) {
+            RuntimeException runtimeException = new RuntimeException(error);
+            throw runtimeException;
+        }
+
         return schedule;
     }
 
@@ -703,8 +711,16 @@ public class WorkSchedule {
         return true;
     }
 
+    public Throwable getError() {
+        return error;
+    }
 
-    ///////////////////////////////////
+    public void setError(Throwable error) {
+        this.error = error;
+    }
+
+
+///////////////////////////////////////////////////////////////////
 
 
     private WorkEvent defaultEvent = null;

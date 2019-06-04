@@ -123,6 +123,8 @@ public interface FlowableWork extends Work {
 
         if (executor != null) {
 
+            Throwable error = null;
+
             boolean isFireEvent = false;
 
             try {
@@ -135,7 +137,9 @@ public interface FlowableWork extends Work {
 
             } catch (Throwable e) {
 
-                String errClassEventName = e.getClass().getName() + "::error";
+                error = e;
+
+                String errClassEventName = "error::"+e.getClass().getName() ;
 
                 WorkEvent errClsEvent = WorkEventFactory.create(errClassEventName);
                 errClsEvent.setThrowable(e);
@@ -147,7 +151,7 @@ public interface FlowableWork extends Work {
                 final String eventNm = executor.getFireEventName();
 
                 if (eventNm != null) {
-                    String errEventName = eventName + "::error";
+                    String errEventName = "error::"+ eventName;
 
                     WorkEvent errEvent = WorkEventFactory.create(errEventName);
                     errEvent.setThrowable(e);
@@ -155,7 +159,7 @@ public interface FlowableWork extends Work {
                     schedule.raiseLocalEvent(errEvent);
 
                 }
-                String errEventName = executor.getFireEventUUID() + "::error";
+                String errEventName = "error::"+ executor.getFireEventUUID() ;
 
                 final WorkEvent errEvent = WorkEventFactory.create(errEventName);
                 errEvent.setThrowable(e);
@@ -164,7 +168,7 @@ public interface FlowableWork extends Work {
                 schedule.raiseLocalEvent(errEvent);
 
 
-                final WorkEvent errEvent2 = WorkEventFactory.create("*::error");
+                final WorkEvent errEvent2 = WorkEventFactory.create(WorkFlow.ERROR);
                 errEvent2.setThrowable(e);
 
                 schedule.raiseLocalEvent(errEvent2);
@@ -174,6 +178,11 @@ public interface FlowableWork extends Work {
                     if (eventNm != null) {
                         long delayTime = executor.getDelayTimeFireEvent();
                         schedule.raiseLocalEvent(event.createChild(eventNm), delayTime);
+
+                        if(eventNm.indexOf("error::")==0) {
+                            schedule.raiseLocalEvent(event.createChild(WorkFlow.ERROR),delayTime);
+                        }
+
                     }
                     schedule.raiseLocalEvent(event.createChild(executor.getFireEventUUID()));
                 }
@@ -182,6 +191,12 @@ public interface FlowableWork extends Work {
 
             if (executor.isLastExecutor()) {
                 return TERMINATE;
+            }else {
+
+                if(error!=null) {
+                    schedule.setError(error);
+                }
+
             }
 
             if (existNextExecutor) {

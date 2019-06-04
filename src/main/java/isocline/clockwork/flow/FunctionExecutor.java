@@ -19,6 +19,7 @@ import isocline.clockwork.WorkEvent;
 import isocline.clockwork.event.WorkEventImpl;
 import isocline.clockwork.flow.func.CheckFunction;
 import isocline.clockwork.flow.func.ReturnEventFunction;
+import isocline.clockwork.flow.func.WorkEventConsumer;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -50,11 +51,13 @@ public class FunctionExecutor {
 
     private Runnable runnable = null;
 
-    private Consumer<WorkEvent> consumer = null;
+    private Consumer<java.util.Map> consumer = null;
 
     private Supplier supplier = null;
 
     private Function function = null;
+
+    private WorkEventConsumer workEventConsumer = null;
 
     private CheckFunction checkFunction = null;
 
@@ -74,8 +77,10 @@ public class FunctionExecutor {
                 this.runnable = (Runnable) obj;
             } else if (obj instanceof Consumer) {
 
-
                 this.consumer = (Consumer) obj;
+
+            } else if(obj instanceof WorkEventConsumer) {
+                this.workEventConsumer = (WorkEventConsumer) obj;
             } else if (obj instanceof Supplier) {
                 this.supplier = (Supplier) obj;
             } else if (obj instanceof Function) {
@@ -146,7 +151,7 @@ public class FunctionExecutor {
         this.maxCallCount = maxCallCount;
     }
 
-    public boolean execute(WorkEvent event) {
+    public boolean execute(WorkEvent event) throws Throwable {
 
         callCount++;
 
@@ -162,7 +167,16 @@ public class FunctionExecutor {
         }
 
         else if (consumer != null) {
-            consumer.accept(event);
+
+            WorkEventImpl rootEvent = (WorkEventImpl) event.root();
+
+
+
+            consumer.accept(rootEvent.getAttributeMap());
+        }
+
+        else if (workEventConsumer !=null) {
+            workEventConsumer.accept(event);
         }
 
         else if (checkFunction != null) {
