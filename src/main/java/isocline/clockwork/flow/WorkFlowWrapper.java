@@ -17,9 +17,11 @@ package isocline.clockwork.flow;
 
 import isocline.clockwork.WorkEvent;
 import isocline.clockwork.WorkFlow;
+import isocline.clockwork.WorkFlowPattern;
 import isocline.clockwork.flow.func.CheckFunction;
 import isocline.clockwork.flow.func.ReturnEventFunction;
 import isocline.clockwork.flow.func.WorkEventConsumer;
+import isocline.clockwork.flow.func.WorkFlowPatternFunction;
 
 import java.util.function.Consumer;
 
@@ -180,6 +182,12 @@ public class WorkFlowWrapper implements WorkFlow {
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 
+
+    @Override
+    public WorkFlow pattern(WorkFlowPattern pattern, WorkFlowPatternFunction func) {
+        this.workFlowInstance.pattern(pattern, func);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
 
     @Override
     public WorkFlow fireEvent(String eventName, long time) {

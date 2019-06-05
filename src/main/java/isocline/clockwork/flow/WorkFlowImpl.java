@@ -17,11 +17,13 @@ package isocline.clockwork.flow;
 
 import isocline.clockwork.WorkEvent;
 import isocline.clockwork.WorkFlow;
+import isocline.clockwork.WorkFlowPattern;
 import isocline.clockwork.event.EventRepository;
 import isocline.clockwork.event.EventSet;
 import isocline.clockwork.flow.func.CheckFunction;
 import isocline.clockwork.flow.func.ReturnEventFunction;
 import isocline.clockwork.flow.func.WorkEventConsumer;
+import isocline.clockwork.flow.func.WorkFlowPatternFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -345,7 +347,7 @@ public class WorkFlowImpl implements WorkFlow {
 
             return this.fireEvent(eventName, time);
         } else {
-            throw new IllegalStateException("newFlow position is not valid");
+            throw new IllegalStateException("reflow position is not valid");
         }
     }
 
@@ -419,17 +421,25 @@ public class WorkFlowImpl implements WorkFlow {
     }
 
 
-    private WorkFlowImpl processNext(Object execObject, String eventName, boolean allowFuncInfNull) {
+    @Override
+    public WorkFlow pattern(WorkFlowPattern pattern, WorkFlowPatternFunction func) {
+        pattern.beforeFlow(this);
+        func.design();
+        pattern.afterFlow(this);
+        return this;
+    }
+
+    WorkFlowImpl processNext(Object execObject, String eventName, boolean allowFuncInfNull) {
         return processNext(execObject, eventName, allowFuncInfNull, false, 0);
     }
 
 
-    private WorkFlowImpl processNext(Object functionalInterface, String fireEventName, boolean allowFuncInfNull, boolean isLastExecuteMethod, long delayTime) {
+    WorkFlowImpl processNext(Object functionalInterface, String fireEventName, boolean allowFuncInfNull, boolean isLastExecuteMethod, long delayTime) {
         return processNext(functionalInterface, fireEventName, allowFuncInfNull, isLastExecuteMethod, delayTime, -1);
     }
 
 
-    private WorkFlowImpl processNext(Object functionalInterface, String fireEventName, boolean allowFuncInfNull, boolean isLastExecuteMethod, long delayTime, int maxCallCount) {
+    WorkFlowImpl processNext(Object functionalInterface, String fireEventName, boolean allowFuncInfNull, boolean isLastExecuteMethod, long delayTime, int maxCallCount) {
 
         if (!allowFuncInfNull && functionalInterface == null) {
             throw new IllegalArgumentException("function interface is null");

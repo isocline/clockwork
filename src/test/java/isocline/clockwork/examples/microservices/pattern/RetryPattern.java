@@ -76,7 +76,7 @@ public class RetryPattern {
     public void startTest() {
 
         WorkProcessor.main()
-                .newFlow(flow -> {
+                .reflow(flow -> {
 
             flow.wait("check")
                     .check(Count.max(3))

@@ -30,7 +30,7 @@ package isocline.clockwork;
  * WorkProcessor processor = WorkProcessorFactory.getProcessor("echo", Configuration.ECHO);
  *
  *
- * // user newFlow
+ * // user reflow
  * Configuration config = Configuration.create()
  *                          .setInitThreadWorkerSize(3)
  *                          .setMaxThreadWorkerSize(12)

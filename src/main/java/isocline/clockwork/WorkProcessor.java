@@ -151,7 +151,7 @@ public class WorkProcessor extends ThreadGroup {
     }
 
 
-    public WorkSchedule newFlow(AbstractFlowableWork workFlow) {
+    public WorkSchedule reflow(AbstractFlowableWork workFlow) {
 
         WorkSchedule workSchedule = new WorkSchedule(this, workFlow);
 

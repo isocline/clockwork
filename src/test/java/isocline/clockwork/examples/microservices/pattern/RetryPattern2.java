@@ -76,7 +76,7 @@ public class RetryPattern2 {
 
 
         WorkProcessor.main()
-                .newFlow(flow -> {
+                .reflow(flow -> {
 
                     flow
 

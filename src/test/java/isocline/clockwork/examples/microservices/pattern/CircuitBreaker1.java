@@ -22,13 +22,14 @@ public class CircuitBreaker1 {
     public void callService1(WorkEvent e) {
         CNT++;
 
-        logger.debug("Service1 - start");
+        logger.debug("Service1 - start " + CNT);
         TestUtil.waiting(100);
-        logger.debug("Service1 - end");
+        logger.debug("Service1 - end " + CNT);
 
         e.root().setAttribute("result:service1", "A");
 
-        if(CNT >2 && CNT<5) {
+        if (CNT > 2 && CNT < 7) {
+            logger.debug("Service1 - wait " + CNT);
             TestUtil.waiting(3000);
 
             throw new RuntimeException("connect fail");
@@ -57,7 +58,7 @@ public class CircuitBreaker1 {
         logger.debug("timeout  " + e.getEventName());
     }
 
-    public void onError(WorkEvent e)throws Throwable {
+    public void onError(WorkEvent e) throws Throwable {
 
         logger.debug("error " + e.getEventName());
 
@@ -65,13 +66,13 @@ public class CircuitBreaker1 {
         if (err != null) {
             err.printStackTrace();
             throw err;
-        }else {
+        } else {
             throw new RuntimeException("timeout");
         }
     }
 
 
-    public void onError2(WorkEvent e)  throws IllegalArgumentException {
+    public void onError2(WorkEvent e) throws IllegalArgumentException {
 
         logger.debug("error2 " + e.getEventName());
 
@@ -79,13 +80,12 @@ public class CircuitBreaker1 {
         if (err != null) {
             err.printStackTrace();
 
-        }else {
-            throw new RuntimeException("timeout");
+        } else {
+            //throw new RuntimeException("timeout");
         }
     }
 
     public static int count = 0;
-
 
 
     public void startTest() {
@@ -94,15 +94,21 @@ public class CircuitBreaker1 {
         circuitBreaker.setMaxFailCount(3);
 
         WorkProcessor.main()
-                .newFlow(flow -> {
+                .reflow(flow -> {
 
 
-                    flow.fireEvent("error::timeout", 3000)
+
+                    String cursor = flow.fireEvent("error::timeout", 3000)
                             .check(circuitBreaker::check)
-                            .next(this::callService1)
-                            .finish();
+                            .next(this::callService1).cursor();
 
-                    flow.onError("*").next(this::onError2).finish();
+                    flow.finish();
+
+
+                    flow.onError(cursor).next(circuitBreaker::error).finish();
+
+
+                    //flow.onError("*").next(this::onError2).finish();
 
 
                     flow.wait("test").finish();
@@ -113,12 +119,12 @@ public class CircuitBreaker1 {
 
     @Test
     public void testMulti() {
-        for(int i=0;i<5;i++ ) {
+        for (int i = 0; i < 15; i++) {
 
             CircuitBreaker1 test = new CircuitBreaker1();
             try {
                 test.startTest();
-            }catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

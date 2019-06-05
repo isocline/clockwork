@@ -20,6 +20,7 @@ import isocline.clockwork.flow.FunctionExecutorList;
 import isocline.clockwork.flow.func.CheckFunction;
 import isocline.clockwork.flow.func.ReturnEventFunction;
 import isocline.clockwork.flow.func.WorkEventConsumer;
+import isocline.clockwork.flow.func.WorkFlowPatternFunction;
 
 import java.util.function.Consumer;
 
@@ -221,6 +222,11 @@ public interface WorkFlow {
      * @return an instance of WorkFlow
      */
     WorkFlow next(Consumer<?> execObject, String fireEventName);
+
+
+
+    WorkFlow pattern(WorkFlowPattern pattern, WorkFlowPatternFunction func);
+
 
 
     /**

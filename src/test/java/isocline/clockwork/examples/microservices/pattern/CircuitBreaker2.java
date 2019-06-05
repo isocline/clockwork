@@ -2,29 +2,39 @@ package isocline.clockwork.examples.microservices.pattern;
 
 import isocline.clockwork.TestUtil;
 import isocline.clockwork.WorkEvent;
-import isocline.clockwork.WorkFlow;
 import isocline.clockwork.WorkProcessor;
 import isocline.clockwork.log.XLogger;
+import isocline.clockwork.pattern.CircuitBreaker;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class RetryPattern3 {
+public class CircuitBreaker2 {
 
+    private static int CNT = 0;
 
-    private XLogger logger = XLogger.getLogger(RetryPattern3.class);
+    private XLogger logger = XLogger.getLogger(CircuitBreaker2.class);
 
     public void init() {
         logger.debug("init");
     }
 
     public void callService1(WorkEvent e) {
-        logger.debug("Service1 - start");
-        TestUtil.waiting(2000);
-        logger.debug("Service1 - end");
+        CNT++;
+
+        logger.debug("Service1 - start " + CNT);
+        TestUtil.waiting(100);
+        logger.debug("Service1 - end " + CNT);
 
         e.root().setAttribute("result:service1", "A");
-        throw new RuntimeException("zzzz");
+
+        if (CNT > 2 && CNT < 7) {
+            logger.debug("Service1 - wait " + CNT);
+            TestUtil.waiting(3000);
+
+            throw new RuntimeException("connect fail");
+        }
+
     }
 
 
@@ -48,50 +58,67 @@ public class RetryPattern3 {
         logger.debug("timeout  " + e.getEventName());
     }
 
-    public void onError(WorkEvent e) {
+    public void onError(WorkEvent e) throws Throwable {
 
         logger.debug("error " + e.getEventName());
 
         Throwable err = e.getThrowable();
         if (err != null) {
             err.printStackTrace();
+            throw err;
+        } else {
+            throw new RuntimeException("timeout");
         }
     }
 
 
-    public void onError2(WorkEvent e) {
+    public void onError2(WorkEvent e) throws IllegalArgumentException {
 
         logger.debug("error2 " + e.getEventName());
 
         Throwable err = e.getThrowable();
         if (err != null) {
             err.printStackTrace();
+
+        } else {
+            //throw new RuntimeException("timeout");
         }
     }
 
     public static int count = 0;
 
 
-    @Test
     public void startTest() {
 
-        WorkProcessor.main().reflow(flow -> {
 
-            flow.check(e -> {
-                if (e.count() == 4) return false;
-                return true;
-            })
-                    .next(this::callService1, WorkFlow.FINISH)
-                    .fireEventOnError(WorkFlow.START, 2000);
+        WorkProcessor
+                .main()
+                .reflow(flow -> {
 
-
-            flow.onError("*").next(this::onError);
-
-            flow.onError(RuntimeException.class).next(this::onError2);
+                    flow.pattern(
+                            CircuitBreaker.create("xdR"), () -> {
+                                flow.next(this::callService1);
+                            }
 
 
-        }).run();
+                    );
 
+                }).run();
+
+
+    }
+
+    @Test
+    public void testMulti() {
+        for (int i = 0; i < 10; i++) {
+
+            CircuitBreaker2 test = new CircuitBreaker2();
+            try {
+                test.startTest();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 }
