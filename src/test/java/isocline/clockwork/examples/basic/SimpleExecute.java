@@ -13,7 +13,7 @@ public class SimpleExecute implements Work {
 
     public long execute(WorkEvent event) throws InterruptedException {
 
-        logger.debug("execute:" + seq++);
+        logger.debug("activate:" + seq++);
 
 
         return TERMINATE;
@@ -27,7 +27,7 @@ public class SimpleExecute implements Work {
 
 
 
-        // execute async
+        // activate async
         processor.execute(new SimpleExecute());
 
 

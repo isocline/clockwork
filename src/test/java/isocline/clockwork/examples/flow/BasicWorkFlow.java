@@ -57,9 +57,9 @@ public class BasicWorkFlow implements FlowableWork {
     public void test() {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
-        processor.newSchedule(this).startDelayTime(2000).subscribe();
+        processor.newPlan(this).startDelayTime(2000).activate();
 
-        //processor.execute(this);
+        //processor.activate(this);
 
         processor.awaitShutdown();
 

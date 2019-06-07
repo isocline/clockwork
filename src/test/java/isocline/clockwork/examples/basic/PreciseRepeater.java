@@ -13,7 +13,7 @@ public class PreciseRepeater implements Work {
 
     public long execute(WorkEvent event) throws InterruptedException {
 
-        logger.debug("execute:" + seq++);
+        logger.debug("activate:" + seq++);
 
         return 10;
     }
@@ -23,9 +23,9 @@ public class PreciseRepeater implements Work {
 
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
-        WorkSchedule schedule = processor.newSchedule(new PreciseRepeater()).setStrictMode();
+        Plan schedule = processor.newPlan(new PreciseRepeater()).setStrictMode();
 
-        schedule.subscribe();
+        schedule.activate();
 
         processor.shutdown(TestConfiguration.TIMEOUT);
     }

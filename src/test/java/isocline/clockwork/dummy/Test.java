@@ -16,12 +16,12 @@ public class Test {
         for (int i = 0; i < 1; i++) {
 
             TestJob work = new TestJob(i);
-            //WorkSchedule schedule = processor.newSchedule(work).bindEvent("fire").setStartDelay(1000);
-            //WorkSchedule schedule = processor.newSchedule(work).bindEvent("fire").setStartDelay(Clock.milliseconds("2019-01-17T13:32:30+09:00"));
-            WorkSchedule schedule = processor.newSchedule(work).bindEvent("fire").setStrictMode();
-            //WorkSchedule schedule = processor.newSchedule(work).bindEvent("fire");
+            //Plan schedule = processor.newPlan(work).bindEvent("fire").setStartDelay(1000);
+            //Plan schedule = processor.newPlan(work).bindEvent("fire").setStartDelay(Clock.milliseconds("2019-01-17T13:32:30+09:00"));
+            Plan schedule = processor.newPlan(work).bindEvent("fire").setStrictMode();
+            //Plan schedule = processor.newPlan(work).bindEvent("fire");
 
-            schedule.subscribe();
+            schedule.activate();
 
         }
 
@@ -32,7 +32,7 @@ public class Test {
                 break;
             }
 
-            System.out.println("WORKER SIZE = "+ worker.getWorkQueueSize() +"  subscribe");
+            System.out.println("WORKER SIZE = "+ worker.getWorkQueueSize() +"  activate");
             System.out.println("WORK COUNT = "+worker.getManagedWorkCount() +"  chk");
 
             if(i==15) {
@@ -68,7 +68,7 @@ public class Test {
             count ++;
 
             Object eventMsg = event.getAttribute("x");
-            log(seq + "th job execute. count="+count + " "+eventMsg);
+            log(seq + "th job activate. count="+count + " "+eventMsg);
 
             if(eventMsg!=null) {
                 return TERMINATE;

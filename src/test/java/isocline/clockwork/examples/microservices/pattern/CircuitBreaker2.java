@@ -2,11 +2,11 @@ package isocline.clockwork.examples.microservices.pattern;
 
 import isocline.clockwork.TestUtil;
 import isocline.clockwork.WorkEvent;
-import isocline.clockwork.WorkProcessor;
 import isocline.clockwork.log.XLogger;
 import isocline.clockwork.pattern.CircuitBreaker;
 import org.junit.Test;
 
+import static isocline.clockwork.WorkHelper.reflow;
 import static org.junit.Assert.assertEquals;
 
 public class CircuitBreaker2 {
@@ -26,7 +26,7 @@ public class CircuitBreaker2 {
         TestUtil.waiting(100);
         logger.debug("Service1 - end " + CNT);
 
-        e.root().setAttribute("result:service1", "A");
+        e.origin().setAttribute("result:service1", "A");
 
         if (CNT > 2 && CNT < 7) {
             logger.debug("Service1 - wait " + CNT);
@@ -37,16 +37,27 @@ public class CircuitBreaker2 {
 
     }
 
+    public void callService2(WorkEvent e) {
+        CNT++;
+
+        logger.debug("Service2 - start " + CNT);
+        TestUtil.waiting(100);
+        logger.debug("Service2 - end " + CNT);
+
+        e.origin().setAttribute("result:service1", "A");
+
+    }
+
 
     public void finish(WorkEvent e) {
         logger.debug("finish start " + Thread.currentThread().getId());
 
-        logger.debug(e.root());
-        logger.debug(e.root().getAttribute("result:service1"));
+        logger.debug(e.origin());
+        logger.debug(e.origin().getAttribute("result:service1"));
 
-        String result = e.root().getAttribute("result:service1").toString()
-                + e.root().getAttribute("result:service2")
-                + e.root().getAttribute("result:service3");
+        String result = e.origin().getAttribute("result:service1").toString()
+                + e.origin().getAttribute("result:service2")
+                + e.origin().getAttribute("result:service3");
 
         assertEquals("ABC", result);
 
@@ -91,22 +102,17 @@ public class CircuitBreaker2 {
     public void startTest() {
 
 
-        WorkProcessor
-                .main()
-                .reflow(flow -> {
+        reflow(flow -> {
 
-                    flow.pattern(
-                            CircuitBreaker.create("xdR"), () -> {
-                                flow.next(this::callService1);
-                            }
+            flow.pattern(
+                    CircuitBreaker.create("xdR"),
+                    () -> {
+                        flow.next(this::callService1);
+                    });
 
-
-                    );
-
-                }).run();
-
-
+        }).run();
     }
+
 
     @Test
     public void testMulti() {

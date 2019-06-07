@@ -33,7 +33,7 @@ public class WorkTest  {
     public void executeSimple() throws Exception {
 
 
-        WorkSchedule schedule =
+        Plan schedule =
 
         workProcessor.execute((WorkEvent event) -> {
             seq++;
@@ -42,7 +42,7 @@ public class WorkTest  {
             return Work.TERMINATE;
         });
 
-        schedule.waitUntilFinish(1000);
+        schedule.block(1000);
 
 
         assertEquals(1, seq);
@@ -52,24 +52,24 @@ public class WorkTest  {
     @Test
     public void executeByEvent() throws Exception {
 
-        WorkSchedule schedule =
+        Plan schedule =
 
-        workProcessor.newSchedule((WorkEvent event) -> {
+        workProcessor.newPlan((WorkEvent event) -> {
             seq++;
             logger.debug("exec " +seq + " event:"+event.getEventName());
 
             return Work.WAIT;
-        }, "testEvent").subscribe();
+        }, "testEvent").activate();
 
         workProcessor.execute((WorkEvent event) -> {
             logger.debug("fire event:"+event.getEventName());
 
-            event.getWorkSchedule().getWorkProcessor().raiseEvent("testEvent", event);
+            event.getPlan().getWorkProcessor().raiseEvent("testEvent", event);
 
             return Work.TERMINATE;
         });
 
-        schedule.waitUntilFinish(1000);
+        schedule.block(1000);
 
 
         assertEquals(1, seq);
@@ -81,16 +81,16 @@ public class WorkTest  {
     public void executeOneTime() throws Exception {
 
 
-        WorkSchedule schedule =
+        Plan schedule =
 
-        workProcessor.newSchedule((WorkEvent event) -> {
+        workProcessor.newPlan((WorkEvent event) -> {
             seq++;
             logger.debug("exec " +seq);
 
             return Work.TERMINATE;
-        }).subscribe();
+        }).activate();
 
-        schedule.waitUntilFinish(1000);
+        schedule.block(1000);
 
 
         assertEquals(1, seq);
@@ -100,16 +100,16 @@ public class WorkTest  {
     @Test
     public void executeSleep() throws Exception{
 
-        WorkSchedule schedule =
+        Plan schedule =
 
-        workProcessor.newSchedule((WorkEvent event) -> {
+        workProcessor.newPlan((WorkEvent event) -> {
             seq++;
             logger.debug("exec " +seq);
 
             return Work.WAIT;
-        }).subscribe();
+        }).activate();
 
-        schedule.waitUntilFinish(100);
+        schedule.block(100);
 
         assertEquals(1, seq);
 
@@ -118,9 +118,9 @@ public class WorkTest  {
     @Test
     public void executeLoop() throws Exception{
 
-        WorkSchedule schedule =
+        Plan schedule =
 
-        workProcessor.newSchedule((WorkEvent event) -> {
+        workProcessor.newPlan((WorkEvent event) -> {
             seq++;
             logger.debug("exec " +seq);
 
@@ -129,10 +129,10 @@ public class WorkTest  {
             }
 
             return Work.LOOP;
-        }).subscribe();
+        }).activate();
 
 
-        schedule.waitUntilFinish(100);
+        schedule.block(100);
         assertEquals(10, seq);
 
     }

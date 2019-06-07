@@ -13,7 +13,7 @@ public class ScheduledWork implements Work {
 
     public long execute(WorkEvent event) throws InterruptedException {
 
-        logger.debug("execute:" + seq++);
+        logger.debug("activate:" + seq++);
 
 
         return WAIT;
@@ -25,11 +25,11 @@ public class ScheduledWork implements Work {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-        WorkSchedule schedule = processor.newSchedule(new ScheduledWork())
+        Plan schedule = processor.newPlan(new ScheduledWork())
                 .interval(1 * Clock.HOUR)
                 .startTime("2020-04-24T09:00:00Z")
                 .finishTime("2020-06-16T16:00:00Z")
-                .subscribe();
+                .activate();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);
@@ -46,10 +46,10 @@ public class ScheduledWork implements Work {
 
 
 
-        WorkSchedule schedule = manager.newSchedule(ScheduledWork.class);
+        Plan schedule = manager.newPlan(ScheduledWork.class);
 
         schedule.interval(1 * Clock.SECOND);
-        schedule.subscribe();
+        schedule.activate();
 
 
         manager.shutdown(TestConfiguration.TIMEOUT);
@@ -62,11 +62,11 @@ public class ScheduledWork implements Work {
 
 
 
-        WorkSchedule schedule = processor.newSchedule(ScheduledWork.class);
+        Plan schedule = processor.newPlan(ScheduledWork.class);
 
         schedule.interval(1 * Clock.SECOND);
         schedule.setStrictMode();
-        schedule.subscribe();
+        schedule.activate();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);
@@ -79,11 +79,11 @@ public class ScheduledWork implements Work {
 
 
 
-        WorkSchedule schedule = processor.newSchedule(ScheduledWork.class);
+        Plan schedule = processor.newPlan(ScheduledWork.class);
 
         schedule.interval(1 * Clock.SECOND);
         schedule.startDelayTime(Clock.milliseconds(0,0,2));
-        schedule.subscribe();
+        schedule.activate();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);
@@ -97,11 +97,11 @@ public class ScheduledWork implements Work {
 
 
 
-        WorkSchedule schedule = processor.newSchedule(ScheduledWork.class);
+        Plan schedule = processor.newPlan(ScheduledWork.class);
 
         schedule.interval(1 * Clock.SECOND);
         schedule.startTime(Clock.nextSecond()+Clock.SECOND*2);
-        schedule.subscribe();
+        schedule.activate();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);

@@ -1,12 +1,15 @@
-package isocline.clockwork.check;
+package isocline.clockwork.pattern;
 
 import isocline.clockwork.Clock;
 import isocline.clockwork.WorkEvent;
+import isocline.clockwork.WorkFlow;
+import isocline.clockwork.WorkFlowPattern;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class CircuitBreaker {
+public class Bulkhead implements WorkFlowPattern {
+
 
     private String id;
     private int failCount;
@@ -17,15 +20,19 @@ public class CircuitBreaker {
 
     private long retryTimeGap = Clock.SECOND * 10;
 
+    private long timeout = 3000;
 
-    private static Map<String, CircuitBreaker> map = new HashMap<>();
+    private String timeoutEventName;
 
-    public static CircuitBreaker create(String id) {
 
-        CircuitBreaker circuitBreaker = map.get(id);
+    private static Map<String, Bulkhead> map = new HashMap<>();
+
+    public static Bulkhead create(String id) {
+
+        Bulkhead circuitBreaker = map.get(id);
 
         if (circuitBreaker == null) {
-            circuitBreaker = new CircuitBreaker(id);
+            circuitBreaker = new Bulkhead(id);
             map.put(id, circuitBreaker);
         }
 
@@ -33,8 +40,9 @@ public class CircuitBreaker {
     }
 
 
-    private CircuitBreaker(String id) {
+    private Bulkhead(String id) {
         this.id = id;
+        this.timeoutEventName = "timeout-" + this.hashCode();
     }
 
     public void setMaxFailCount(int maxFailCount) {
@@ -52,20 +60,25 @@ public class CircuitBreaker {
         failCount++;
         lastFailTime = System.currentTimeMillis();
 
-        System.err.println("!!!!! RAISE ERROR count== "+failCount);
+        System.err.println("!!!!! RAISE ERROR count== " + failCount + " " + e.getEventName());
     }
 
+    private void ok(WorkEvent e) {
+        failCount--;
+        if (failCount < 0) {
+        }
+    }
 
 
     public boolean check(WorkEvent event) {
 
-        System.err.println( "FAIL COUNT: "+failCount + "  max :"+maxFailCount);
+        System.err.println("FAIL COUNT: " + failCount + "  max :" + maxFailCount);
 
         long gap = System.currentTimeMillis() - lastFailTime;
 
         if (gap > retryTimeGap) {
             System.err.println("? === FAIL T");
-            return  true;
+            return true;
         }
 
         if (maxFailCount > failCount) {
@@ -78,5 +91,25 @@ public class CircuitBreaker {
         }
 
     }
+
+
+    @Override
+    public void beforeFlow(WorkFlow flow) {
+
+        flow.check(this::check);
+    }
+
+    @Override
+    public void afterFlow(WorkFlow flow) {
+
+        String cursor = flow.cursor();
+
+        flow.onError(cursor).next(this::error);
+
+        flow.wait(cursor).next(this::ok);
+
+
+    }
+
 
 }

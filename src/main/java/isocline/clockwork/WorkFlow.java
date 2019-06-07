@@ -17,10 +17,7 @@ package isocline.clockwork;
 
 import isocline.clockwork.flow.FunctionExecutor;
 import isocline.clockwork.flow.FunctionExecutorList;
-import isocline.clockwork.flow.func.CheckFunction;
-import isocline.clockwork.flow.func.ReturnEventFunction;
-import isocline.clockwork.flow.func.WorkEventConsumer;
-import isocline.clockwork.flow.func.WorkFlowPatternFunction;
+import isocline.clockwork.flow.func.*;
 
 import java.util.function.Consumer;
 
@@ -29,7 +26,7 @@ import java.util.function.Consumer;
  *
  */
 
-public interface WorkFlow {
+public interface WorkFlow<T> {
 
     String START = "CLOCKWORK::start";
 
@@ -50,7 +47,7 @@ public interface WorkFlow {
 
 
     /**
-     * Only if all the input events have occurred, execute the next definition method.
+     * Only if all the input events have occurred, activate the next definition method.
      *
      * @param eventNames event names
      * @return an instance of WorkFlow
@@ -83,7 +80,7 @@ public interface WorkFlow {
 
 
     /**
-     * Only if all the input events have occurred, execute the next definition method.
+     * Only if all the input events have occurred, activate the next definition method.
      *
      *
      * @return an instance of WorkFlow
@@ -91,7 +88,7 @@ public interface WorkFlow {
     WorkFlow waitAll();
 
     /**
-     * Only if all the input events have occurred, execute the next definition method.
+     * Only if all the input events have occurred, activate the next definition method.
      *
      * @param workFlows Array of WorkFlow
      * @return an instance of WorkFlow
@@ -109,7 +106,7 @@ public interface WorkFlow {
 
 
     /**
-     * Asynchronously execute method of Runnable implement object
+     * Asynchronously activate method of Runnable implement object
      *
      * @param execObject executable object
      * @return an instance of WorkFlow
@@ -118,16 +115,16 @@ public interface WorkFlow {
 
     /**
      *
-     * Asynchronously execute method of Consumer implement object
+     * Asynchronously activate method of Consumer implement object
      *
      * @param execObject executable object
      * @return an instance of WorkFlow
      */
-    WorkFlow runAsync(Consumer<WorkEvent> execObject);
+    //WorkFlow applyAsync(Consumer<? extends T> execObject);
 
     /**
      *
-     * Asynchronously execute method of Runnable implement object.
+     * Asynchronously activate method of Runnable implement object.
      * Raises an event after completion of method execution.
      *
      * @param execObject executable object
@@ -138,20 +135,20 @@ public interface WorkFlow {
 
     /**
      *
-     * Asynchronously execute method of Consumer implement object
+     * Asynchronously activate method of Consumer implement object
      * Raises an event after completion of method execution.
      *
      * @param execObject executable object
      * @param fireEventName name of event
      * @return an instance of WorkFlow
      */
-    WorkFlow runAsync(Consumer<WorkEvent> execObject, String fireEventName);
+    //WorkFlow applyAsync(Consumer<? extends T> execObject, String fireEventName);
 
 
 
     /**
      *
-     * Asynchronously execute method of Runnable implement object.
+     * Asynchronously activate method of Runnable implement object.
      * Raises an event after completion of method execution.
      *
      * @param execObject executable object
@@ -162,14 +159,27 @@ public interface WorkFlow {
 
     /**
      *
-     * Asynchronously execute method of Consumer implement object
+     * Asynchronously activate method of Consumer implement object
      * Raises an event after completion of method execution.
      *
      * @param execObject executable object
      * @param count name of event
      * @return an instance of WorkFlow
      */
-    WorkFlow runAsync(Consumer<WorkEvent> execObject, int count);
+    //WorkFlow applyAsync(Consumer<? extends T> execObject, int count);
+
+
+    WorkFlow runAsync(WorkEventConsumer execObject);
+    WorkFlow runAsync(WorkEventConsumer execObject, String fireEventName);
+    WorkFlow runAsync(WorkEventConsumer execObject, int count);
+
+
+    WorkFlow applyAsync(WorkEventFunction execObject);
+    WorkFlow applyAsync(WorkEventFunction execObject, String fireEventName);
+    WorkFlow applyAsync(WorkEventFunction execObject, int count);
+
+
+    WorkFlow mapAsync(WorkEventFunction... execObjects);
 
 
     WorkFlow branch(ReturnEventFunction execObject);
@@ -189,19 +199,9 @@ public interface WorkFlow {
     WorkFlow next(Runnable execObject);
 
 
-    WorkFlow next(WorkEventConsumer execObject);
 
 
-    WorkFlow next(WorkEventConsumer execObject, String fireEventName);
 
-
-    /**
-     * Execute the corresponding method at completion of the previous step method execution.
-     *
-     * @param execObject executable object
-     * @return an instance of WorkFlow
-     */
-    WorkFlow next(Consumer<?> execObject);
 
     /**
      * Execute the corresponding method at completion of the previous step method execution.
@@ -213,6 +213,16 @@ public interface WorkFlow {
      */
     WorkFlow next(Runnable execObject, String fireEventName);
 
+
+    /**
+     * Execute the corresponding method at completion of the previous step method execution.
+     *
+     * @param execObject executable object
+     * @return an instance of WorkFlow
+     */
+    WorkFlow<Void> next(Consumer<? super T> execObject);
+
+
     /**
      * Execute the corresponding method at completion of the previous step method execution.
      * Raises an event after completion of method execution.
@@ -221,7 +231,19 @@ public interface WorkFlow {
      * @param fireEventName name of event
      * @return an instance of WorkFlow
      */
-    WorkFlow next(Consumer<?> execObject, String fireEventName);
+    WorkFlow next(Consumer<? super T> execObject, String fireEventName);
+
+
+    WorkFlow next(WorkEventConsumer execObject);
+
+
+    WorkFlow next(WorkEventConsumer execObject, String fireEventName);
+
+
+    WorkFlow next(WorkEventFunction execObject);
+
+
+    WorkFlow next(WorkEventFunction execObject, String fireEventName);
 
 
 

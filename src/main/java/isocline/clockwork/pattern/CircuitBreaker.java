@@ -10,20 +10,6 @@ import java.util.Map;
 
 public class CircuitBreaker implements WorkFlowPattern {
 
-    @Override
-    public void beforeFlow(WorkFlow flow) {
-        System.err.println("1 ---"+this.timeoutEventName);
-        flow.fireEvent("error::"+timeoutEventName, this.timeout)
-        .check(this::check);
-    }
-
-    @Override
-    public void afterFlow(WorkFlow flow) {
-        System.err.println("2 ---"+this.timeoutEventName);
-        String cursor = flow.cursor();
-
-        flow.onError(cursor, this.timeoutEventName).next(this::error).finish();
-    }
 
 
     private String id;
@@ -75,7 +61,13 @@ public class CircuitBreaker implements WorkFlowPattern {
         failCount++;
         lastFailTime = System.currentTimeMillis();
 
-        System.err.println("!!!!! RAISE ERROR count== "+failCount);
+        System.err.println("!!!!! RAISE ERROR count== "+failCount + " "+e.getEventName()) ;
+    }
+
+    private void ok(WorkEvent e) {
+        failCount--;
+        if(failCount<0) {
+        }
     }
 
 
@@ -95,11 +87,30 @@ public class CircuitBreaker implements WorkFlowPattern {
             System.err.println("___ OK");
             return true;
         } else {
-            event.getWorkSchedule().setError(new RuntimeException("circuit open"));
+            event.getPlan().setError(new RuntimeException("circuit open"));
             System.err.println("? === FAIL 1");
             return false;
         }
 
+    }
+
+
+    @Override
+    public void beforeFlow(WorkFlow flow) {
+        System.err.println("1 ---"+this.timeoutEventName);
+        flow.fireEvent("error::"+timeoutEventName, this.timeout)
+                .check(this::check);
+    }
+
+    @Override
+    public void afterFlow(WorkFlow flow) {
+        System.err.println("2 ---"+this.timeoutEventName);
+        String cursor = flow.cursor();
+
+        flow.next(this::ok);
+
+        //flow.onError(cursor, this.timeoutEventName).next(this::error).finish();
+        flow.onError("*").next(this::error).finish();
     }
 
 

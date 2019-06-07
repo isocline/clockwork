@@ -3,6 +3,7 @@ package isocline.clockwork.examples.microservices.pattern;
 import isocline.clockwork.TestUtil;
 import isocline.clockwork.WorkEvent;
 import isocline.clockwork.WorkProcessor;
+import isocline.clockwork.Plan;
 import isocline.clockwork.check.CircuitBreaker;
 import isocline.clockwork.log.XLogger;
 import org.junit.Test;
@@ -26,7 +27,7 @@ public class CircuitBreaker1 {
         TestUtil.waiting(100);
         logger.debug("Service1 - end " + CNT);
 
-        e.root().setAttribute("result:service1", "A");
+        e.origin().setAttribute("result:service1", "A");
 
         if (CNT > 2 && CNT < 7) {
             logger.debug("Service1 - wait " + CNT);
@@ -41,12 +42,12 @@ public class CircuitBreaker1 {
     public void finish(WorkEvent e) {
         logger.debug("finish start " + Thread.currentThread().getId());
 
-        logger.debug(e.root());
-        logger.debug(e.root().getAttribute("result:service1"));
+        logger.debug(e.origin());
+        logger.debug(e.origin().getAttribute("result:service1"));
 
-        String result = e.root().getAttribute("result:service1").toString()
-                + e.root().getAttribute("result:service2")
-                + e.root().getAttribute("result:service3");
+        String result = e.origin().getAttribute("result:service1").toString()
+                + e.origin().getAttribute("result:service2")
+                + e.origin().getAttribute("result:service3");
 
         assertEquals("ABC", result);
 
@@ -93,26 +94,30 @@ public class CircuitBreaker1 {
         CircuitBreaker circuitBreaker = CircuitBreaker.create("xhk");
         circuitBreaker.setMaxFailCount(3);
 
-        WorkProcessor.main()
-                .reflow(flow -> {
+        Plan schedule =
+                WorkProcessor.main()
+                        .reflow(flow -> {
+
+
+                            String cursor = flow.fireEvent("error::timeout", 3000)
+                                    .check(circuitBreaker::check)
+                                    .next(this::callService1).cursor();
+
+                            flow.finish();
+
+
+                            flow.onError(cursor).next(circuitBreaker::error).finish();
+
+
+                            //flow.onError("*").next(this::onError2).finish();
+
+
+                            flow.wait("test").finish();
+                        });
 
 
 
-                    String cursor = flow.fireEvent("error::timeout", 3000)
-                            .check(circuitBreaker::check)
-                            .next(this::callService1).cursor();
-
-                    flow.finish();
-
-
-                    flow.onError(cursor).next(circuitBreaker::error).finish();
-
-
-                    //flow.onError("*").next(this::onError2).finish();
-
-
-                    flow.wait("test").finish();
-                }).run();
+        schedule.run();
 
 
     }

@@ -18,11 +18,11 @@ public class MultiStepSchedule   {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-        WorkSchedule schedule = processor.newSchedule(Step1Schedule.class).setStrictMode();
-        schedule.subscribe();
+        Plan schedule = processor.newPlan(Step1Schedule.class).setStrictMode();
+        schedule.activate();
 
-        schedule = processor.newSchedule(Step2Schedule.class).bindEvent("fireEvent");
-        schedule.subscribe();
+        schedule = processor.newPlan(Step2Schedule.class).bindEvent("fireEvent");
+        schedule.activate();
 
 
         processor.shutdown(20 * Clock.SECOND);
@@ -40,7 +40,7 @@ public class MultiStepSchedule   {
 
             if (count > 5) {
 
-                event.getWorkSchedule().getWorkProcessor().raiseEvent(WorkEventFactory.create("fireEvent"));
+                event.getPlan().getWorkProcessor().raiseEvent(WorkEventFactory.create("fireEvent"));
 
                 return TERMINATE;
             } else {

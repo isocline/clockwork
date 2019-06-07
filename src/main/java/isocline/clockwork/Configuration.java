@@ -243,7 +243,7 @@ public class Configuration {
      * it enters the execution wait queue and enters the job wait state.
      *
      *
-     * @return Returns a milliseconds of execute countdown
+     * @return Returns a milliseconds of activate countdown
      */
     public long getThresholdWaitTimeToReady() {
         return thresholdWaitTimeToReady;

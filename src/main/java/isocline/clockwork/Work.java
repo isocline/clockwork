@@ -18,7 +18,7 @@ package isocline.clockwork;
 
 /**
  * An interface implemented by an object that defines the underlying operation.
- * The corresponding operation is performed through the execute method call,
+ * The corresponding operation is performed through the activate method call,
  * and the identical operation is performed by the WorkProcessor.
  *
  * @author Richard D. Kim

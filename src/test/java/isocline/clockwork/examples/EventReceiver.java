@@ -35,8 +35,8 @@ public class EventReceiver implements Work {
 
 
         EventReceiver checker = new EventReceiver();
-        WorkSchedule schedule = processor.newSchedule(checker).finishTimeFromNow(30 * Clock.SECOND).bindEvent("test").setSleepMode();
-        schedule.subscribe();
+        Plan schedule = processor.newPlan(checker).finishTimeFromNow(30 * Clock.SECOND).bindEvent("test").setSleepMode();
+        schedule.activate();
 
 
         WorkEventGenerator gen = new WorkEventGenerator();
@@ -46,8 +46,8 @@ public class EventReceiver implements Work {
 
 
 
-        processor.newSchedule(gen).finishTimeFromNow(30 * Clock.SECOND).setStrictMode().startTime
-                (startTime).subscribe();
+        processor.newPlan(gen).finishTimeFromNow(30 * Clock.SECOND).setStrictMode().startTime
+                (startTime).activate();
 
 
         processor.shutdown(20 * Clock.SECOND);

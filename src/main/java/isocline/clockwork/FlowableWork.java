@@ -26,7 +26,7 @@ import isocline.clockwork.flow.FunctionExecutorList;
  *
  * @see isocline.clockwork.Work
  */
-public interface FlowableWork extends Work {
+public interface FlowableWork<T> extends Work {
 
 
     /**
@@ -47,7 +47,7 @@ public interface FlowableWork extends Work {
      * <pre>
      *
      *  public void defineWorkFlow(WorkFlow flow) {
-     *    // step1 : execute this.checkMemory() then execute this.checkStorage()
+     *    // step1 : activate this.checkMemory() then activate this.checkStorage()
      *    WorkFlow p1 = flow.next(this::checkMemory).next(this::checkStorage);
      *
      *    // Until wait finish of step1, then this.sendSignal()
@@ -56,7 +56,7 @@ public interface FlowableWork extends Work {
      *    // Until wait finish of step1, then this.sendStatusMsg() and this.sendReportMsg()
      *    WorkFlow t2 = flow.wait(p1).next(this::sendStatusMsg).next(this::sendReportMsg);
      *
-     *    // Wait until both step1 and step2 are finished, then execute this.report()
+     *    // Wait until both step1 and step2 are finished, then activate this.report()
      *    flow.waitAll(t1, t2).next(this::report).finish();
      *  }
      * </pre>
@@ -64,7 +64,7 @@ public interface FlowableWork extends Work {
      *
      * @param flow WorkFlow instance
      */
-    default void defineWorkFlow(WorkFlow flow) {
+    default void defineWorkFlow(WorkFlow<T> flow) {
 
         throw new UnsupportedOperationException();
     }
@@ -80,7 +80,7 @@ public interface FlowableWork extends Work {
     default long execute(WorkEvent event) throws InterruptedException {
 
 
-        final WorkSchedule schedule = event.getWorkSchedule();
+        final Plan schedule = event.getPlan();
 
         final WorkFlow flow = schedule.getWorkFlow();
 
@@ -88,7 +88,7 @@ public interface FlowableWork extends Work {
             return TERMINATE;
         }
 
-        final String eventName = event.getEventName();
+        final String eventName = event.getFireEventName();
 
 
         FunctionExecutor executor = null;
@@ -171,7 +171,8 @@ public interface FlowableWork extends Work {
 
 
                 //final WorkEvent errEvent2 = WorkEventFactory.create(WorkFlow.ERROR);
-                final WorkEvent errEvent2 = event.createChild(WorkFlow.ERROR);
+                final WorkEvent errEvent2 = event.createChild(errEventName);
+                errEvent2.setFireEventName(WorkFlow.ERROR);
                 errEvent2.setThrowable(e);
 
                 schedule.raiseLocalEvent(errEvent2);
@@ -183,7 +184,9 @@ public interface FlowableWork extends Work {
                         schedule.raiseLocalEvent(event.createChild(fireEventName), delayTime);
 
                         if(fireEventName.indexOf("error::")==0) {
-                            schedule.raiseLocalEvent(event.createChild(WorkFlow.ERROR),delayTime);
+                            WorkEvent we = event.createChild(fireEventName);
+                            we.setFireEventName(WorkFlow.ERROR);
+                            schedule.raiseLocalEvent(we,delayTime);
                         }
 
                     }
@@ -211,7 +214,7 @@ public interface FlowableWork extends Work {
     }
 
 
-    default WorkSchedule start() {
+    default Plan start() {
 
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
         return processor.execute(this);

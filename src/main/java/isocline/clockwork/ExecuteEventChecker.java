@@ -21,7 +21,7 @@ package isocline.clockwork;
  * Provides the function to check whether method is executed every time execution event occurs.
  * It is used when the user wants to check whether it is executed according to the situation.
  *
- * @see WorkSchedule
+ * @see Plan
  *
  */
 public interface ExecuteEventChecker {
@@ -31,7 +31,7 @@ public interface ExecuteEventChecker {
      * And judges whether or not it is executed.
      *
      * @param time the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
-     * @return true if it can be runAsync at input time, otherwise false
+     * @return true if it can be applyAsync at input time, otherwise false
      */
     boolean check(long time);
 }

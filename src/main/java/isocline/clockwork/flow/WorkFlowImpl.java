@@ -15,15 +15,11 @@
  */
 package isocline.clockwork.flow;
 
-import isocline.clockwork.WorkEvent;
 import isocline.clockwork.WorkFlow;
 import isocline.clockwork.WorkFlowPattern;
 import isocline.clockwork.event.EventRepository;
 import isocline.clockwork.event.EventSet;
-import isocline.clockwork.flow.func.CheckFunction;
-import isocline.clockwork.flow.func.ReturnEventFunction;
-import isocline.clockwork.flow.func.WorkEventConsumer;
-import isocline.clockwork.flow.func.WorkFlowPatternFunction;
+import isocline.clockwork.flow.func.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,13 +29,12 @@ import java.util.function.Consumer;
  *
  *
  */
-public class WorkFlowImpl implements WorkFlow {
-
+public class WorkFlowImpl<T> implements WorkFlow<T> {
 
 
     private int funcExecSequence = 0;
 
-    private String[] regReadyEventNameArray = new String[] {WorkFlow.START};
+    private String[] regReadyEventNameArray = new String[]{WorkFlow.START};
 
     private String[] prestepRegEventNameArray = null;
 
@@ -82,7 +77,7 @@ public class WorkFlowImpl implements WorkFlow {
     public WorkFlow onError(String... eventNames) {
         String[] inputEventNameArray = eventNames;
         for (int i = 0; i < inputEventNameArray.length; i++) {
-            inputEventNameArray[i] = "error::"+inputEventNameArray[i];
+            inputEventNameArray[i] = "error::" + inputEventNameArray[i];
         }
 
         wait(inputEventNameArray);
@@ -238,19 +233,17 @@ public class WorkFlowImpl implements WorkFlow {
             prestepRegEventNameArray = regReadyEventNameArray;
 
             boolean isStartEvent = false;
-            if(regReadyEventNameArray!=null && regReadyEventNameArray.length==1 && regReadyEventNameArray[0].equals(START)) {
+            if (regReadyEventNameArray != null && regReadyEventNameArray.length == 1 && regReadyEventNameArray[0].equals(START)) {
                 isStartEvent = true;
             }
 
             regReadyEventNameArray = null;
 
-            if(isStartEvent) {
+            if (isStartEvent) {
                 return false;
             }
 
         }
-
-
 
 
         return true;
@@ -261,7 +254,7 @@ public class WorkFlowImpl implements WorkFlow {
         return processRunAsync(execObject, null);
     }
 
-    public WorkFlow runAsync(Consumer<WorkEvent> execObject) {
+    public WorkFlow runAsync(Consumer execObject) {
         return processRunAsync(execObject, null);
     }
 
@@ -269,7 +262,7 @@ public class WorkFlowImpl implements WorkFlow {
         return processRunAsync(execObject, eventName);
     }
 
-    public WorkFlow runAsync(Consumer<WorkEvent> execObject, String eventName) {
+    public WorkFlow runAsync(Consumer execObject, String eventName) {
         return processRunAsync(execObject, eventName);
     }
 
@@ -284,7 +277,7 @@ public class WorkFlowImpl implements WorkFlow {
     }
 
 
-    public WorkFlow runAsync(Consumer<WorkEvent> execObject, int count) {
+    public WorkFlow runAsync(Consumer execObject, int count) {
         WorkFlow workFlow = null;
         for (int i = 0; i < count; i++) {
             workFlow = processRunAsync(execObject, null);
@@ -292,6 +285,58 @@ public class WorkFlowImpl implements WorkFlow {
 
         return workFlow;
     }
+
+
+    @Override
+    public WorkFlow runAsync(WorkEventConsumer execObject) {
+        return processRunAsync(execObject, null);
+    }
+
+    @Override
+    public WorkFlow runAsync(WorkEventConsumer execObject, String fireEventName) {
+        return processRunAsync(execObject, fireEventName);
+    }
+
+    @Override
+    public WorkFlow runAsync(WorkEventConsumer execObject, int count) {
+        WorkFlow workFlow = null;
+        for (int i = 0; i < count; i++) {
+            workFlow = processRunAsync(execObject, null);
+        }
+
+        return workFlow;
+    }
+
+
+    @Override
+    public WorkFlow applyAsync(WorkEventFunction execObject) {
+        return processRunAsync(execObject, null);
+    }
+
+    @Override
+    public WorkFlow applyAsync(WorkEventFunction execObject, String fireEventName) {
+        return processRunAsync(execObject, fireEventName);
+    }
+
+    @Override
+    public WorkFlow applyAsync(WorkEventFunction execObject, int count) {
+        WorkFlow workFlow = null;
+        for (int i = 0; i < count; i++) {
+            workFlow = processRunAsync(execObject, null);
+        }
+
+        return workFlow;
+    }
+
+    public WorkFlow mapAsync(WorkEventFunction... execObjects) {
+
+        for (WorkEventFunction execObject : execObjects) {
+            processRunAsync(execObject, null);
+        }
+
+        return waitAll();
+    }
+
 
     /**
      * @param execObject
@@ -361,7 +406,7 @@ public class WorkFlowImpl implements WorkFlow {
     public WorkFlow retryOnError(int maxCount, long delayTime) {
 
 
-        if (this.lastFuncExecutor != null && prestepRegEventNameArray!=null && prestepRegEventNameArray.length>0) {
+        if (this.lastFuncExecutor != null && prestepRegEventNameArray != null && prestepRegEventNameArray.length > 0) {
 
 
             String uuid = this.lastFuncExecutor.getFireEventUUID();
@@ -389,8 +434,8 @@ public class WorkFlowImpl implements WorkFlow {
 
     @Override
     public WorkFlow check(int maxCount) {
-        return check(event->{
-            if(event.count()<=maxCount) return true;
+        return check(event -> {
+            if (event.count() <= maxCount) return true;
             else return false;
         });
     }
@@ -399,7 +444,7 @@ public class WorkFlowImpl implements WorkFlow {
         return processNext(execObject, null, false);
     }
 
-    public WorkFlowImpl next(Consumer<?> execObject) {
+    public WorkFlowImpl next(Consumer<? super T> execObject) {
         return processNext(execObject, null, false);
     }
 
@@ -407,7 +452,7 @@ public class WorkFlowImpl implements WorkFlow {
         return processNext(execObject, eventName, false);
     }
 
-    public WorkFlowImpl next(Consumer<?> execObject, String eventName) {
+    public WorkFlowImpl next(Consumer<? super T> execObject, String eventName) {
         return processNext(execObject, eventName, true);
     }
 
@@ -417,6 +462,14 @@ public class WorkFlowImpl implements WorkFlow {
     }
 
     public WorkFlowImpl next(WorkEventConsumer execObject, String eventName) {
+        return processNext(execObject, eventName, false);
+    }
+
+    public WorkFlowImpl next(WorkEventFunction execObject) {
+        return processNext(execObject, null, false);
+    }
+
+    public WorkFlowImpl next(WorkEventFunction execObject, String eventName) {
         return processNext(execObject, eventName, false);
     }
 

@@ -216,7 +216,7 @@ var activeTableTab = "activeTableTab";
 <tr id="i14" class="altColor">
 <td class="colFirst"><code><a href="../../isocline/clockwork/WorkFlow.html" title="interface in isocline.clockwork">WorkFlow</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../isocline/clockwork/WorkFlow.html#runAsync-java.util.function.Consumer-int-">runAsync</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../isocline/clockwork/WorkEvent.html" title="interface in isocline.clockwork">WorkEvent</a>&gt;&nbsp;execObject,
-        int&nbsp;count)</code>
+        int&nbsp;emitCount)</code>
 <div class="block">Asynchronously execute method of Consumer implement object
  Raises an event after completion of method execution.</div>
 </td>
@@ -238,7 +238,7 @@ var activeTableTab = "activeTableTab";
 <tr id="i17" class="rowColor">
 <td class="colFirst"><code><a href="../../isocline/clockwork/WorkFlow.html" title="interface in isocline.clockwork">WorkFlow</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../isocline/clockwork/WorkFlow.html#runAsync-java.lang.Runnable-int-">runAsync</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang">Runnable</a>&nbsp;execObject,
-        int&nbsp;count)</code>
+        int&nbsp;emitCount)</code>
 <div class="block">Asynchronously execute method of Runnable implement object.</div>
 </td>
 </tr>
@@ -481,13 +481,13 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>runAsync</h4>
 <pre><a href="../../isocline/clockwork/WorkFlow.html" title="interface in isocline.clockwork">WorkFlow</a>&nbsp;runAsync(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang">Runnable</a>&nbsp;execObject,
-                  int&nbsp;count)</pre>
+                  int&nbsp;emitCount)</pre>
 <div class="block">Asynchronously execute method of Runnable implement object.
  Raises an event after completion of method execution.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>execObject</code> - executable object</dd>
-<dd><code>count</code> - name of event</dd>
+<dd><code>emitCount</code> - name of event</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>an instance of WorkFlow</dd>
 </dl>
@@ -500,13 +500,13 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>runAsync</h4>
 <pre><a href="../../isocline/clockwork/WorkFlow.html" title="interface in isocline.clockwork">WorkFlow</a>&nbsp;runAsync(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html?is-external=true" title="class or interface in java.util.function">Consumer</a>&lt;<a href="../../isocline/clockwork/WorkEvent.html" title="interface in isocline.clockwork">WorkEvent</a>&gt;&nbsp;execObject,
-                  int&nbsp;count)</pre>
+                  int&nbsp;emitCount)</pre>
 <div class="block">Asynchronously execute method of Consumer implement object
  Raises an event after completion of method execution.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>execObject</code> - executable object</dd>
-<dd><code>count</code> - name of event</dd>
+<dd><code>emitCount</code> - name of event</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>an instance of WorkFlow</dd>
 </dl>

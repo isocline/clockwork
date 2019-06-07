@@ -65,8 +65,8 @@ public class ServerHeartbeat implements Work {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-        WorkSchedule schedule = processor.newSchedule(ServerHeartbeat.class).setStrictMode();
-        schedule.subscribe();
+        Plan schedule = processor.newPlan(ServerHeartbeat.class).setStrictMode();
+        schedule.activate();
 
 
         processor.shutdown(20 * Clock.SECOND);

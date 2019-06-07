@@ -17,7 +17,7 @@ public class MaxCountTermination implements Work {
 
         count++;
 
-        logger.debug("execute:" + count);
+        logger.debug("activate:" + count);
 
         if(count==3) {
             return TERMINATE;
@@ -38,11 +38,11 @@ public class MaxCountTermination implements Work {
 
         MaxCountTermination checker = new MaxCountTermination();
 
-        WorkSchedule schedule = processor.newSchedule(checker);
-        schedule.subscribe();
+        Plan schedule = processor.newPlan(checker);
+        schedule.activate();
 
         //wait until finish
-        schedule.waitUntilFinish();
+        schedule.block();
 
         assertEquals(3, checker.count);
 

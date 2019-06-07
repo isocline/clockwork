@@ -13,7 +13,7 @@ public class CrontSchedule implements Work {
 
     public long execute(WorkEvent event) throws InterruptedException {
 
-        logger.debug("execute:" + count++);
+        logger.debug("activate:" + count++);
 
 
         if(count==2) return TERMINATE;
@@ -26,9 +26,9 @@ public class CrontSchedule implements Work {
 
 
         WorkProcessor.main()
-                .newSchedule(CrontSchedule.class)
+                .newPlan(CrontSchedule.class)
                 .scheduleDescriptor(new CronDescriptor("* * * * *"))
-                .subscribe();
+                .activate();
 
         WorkProcessor.main().shutdown(10*Clock.SECOND);
 
@@ -41,9 +41,9 @@ public class CrontSchedule implements Work {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-        WorkSchedule schedule = processor.newSchedule(new CronDescriptor("* * * * *"), CrontSchedule.class);
+        Plan schedule = processor.newPlan(new CronDescriptor("* * * * *"), CrontSchedule.class);
 
-        schedule.subscribe();
+        schedule.activate();
 
         processor.shutdown(Clock.MINUTE);
 

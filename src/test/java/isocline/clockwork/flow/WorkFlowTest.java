@@ -116,8 +116,8 @@ public class WorkFlowTest implements FlowableWork {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-        //processor.newSchedule(this).startDelayTime(1000).subscribe();
-        processor.newSchedule(this).subscribe();
+        //processor.newPlan(this).startDelayTime(1000).activate();
+        processor.newPlan(this).activate();
 
 
         processor.awaitShutdown();
@@ -130,14 +130,14 @@ public class WorkFlowTest implements FlowableWork {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-        processor.newSchedule(this).bindEvent("start").subscribe();
+        processor.newPlan(this).bindEvent("start").activate();
 
 
         WorkEventGenerator gen = new WorkEventGenerator();
         gen.setEventName("start");
         gen.setRepeatTime(Work.TERMINATE);
 
-        processor.newSchedule(gen).startDelayTime(1000).subscribe();
+        processor.newPlan(gen).startDelayTime(1000).activate();
 
         processor.awaitShutdown();
 

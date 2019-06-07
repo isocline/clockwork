@@ -29,12 +29,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
- * Base class for WorkSchedule management and thread management
+ * Base class for Plan management and thread management
  *
  * @author Richard D. Kim
  * @see isocline.clockwork.Work
  * @see isocline.clockwork.FlowableWork
- * @see isocline.clockwork.WorkSchedule
+ * @see Plan
  */
 public class WorkProcessor extends ThreadGroup {
 
@@ -54,7 +54,7 @@ public class WorkProcessor extends ThreadGroup {
 
     private AtomicInteger currentThreadWorkerCount = new AtomicInteger(0);
 
-    private BlockingQueue<WorkSchedule.ExecuteContext> workQueue;
+    private BlockingQueue<Plan.ExecuteContext> workQueue;
 
     private WorkChecker workChecker;
 
@@ -95,7 +95,7 @@ public class WorkProcessor extends ThreadGroup {
 
 
     /**
-     * Create a WorkProcessor object which provice services for WorkSchedule
+     * Create a WorkProcessor object which provice services for Plan
      *
      * @param name   ClockerWorker name
      * @param config configuration for WorkProcessor
@@ -111,7 +111,7 @@ public class WorkProcessor extends ThreadGroup {
             this.checkpointWorkQueueSize = 500;
         }
 
-        this.workQueue = new LinkedBlockingQueue<WorkSchedule.ExecuteContext>(this.configuration.getMaxWorkQueueSize());
+        this.workQueue = new LinkedBlockingQueue<Plan.ExecuteContext>(this.configuration.getMaxWorkQueueSize());
 
         init(true);
 
@@ -138,111 +138,111 @@ public class WorkProcessor extends ThreadGroup {
      *
      * @param work       an instance of Work
      * @param eventNames an event names
-     * @return an new instance of WorkSchedule
+     * @return an new instance of Plan
      */
-    public WorkSchedule newSchedule(Work work, String... eventNames) {
-        WorkSchedule workSchedule = new WorkSchedule(this, work);
-        workSchedule.setSleepMode();
-        workSchedule.bindEvent(eventNames);
+    public Plan newPlan(Work work, String... eventNames) {
+        Plan plan = new Plan(this, work);
+        plan.setSleepMode();
+        plan.bindEvent(eventNames);
 
-        workSchedule.subscribe();
 
-        return workSchedule;
+
+        return plan;
     }
 
 
-    public WorkSchedule reflow(AbstractFlowableWork workFlow) {
+    public Plan reflow(AbstractFlowableWork<?> workFlow) {
 
-        WorkSchedule workSchedule = new WorkSchedule(this, workFlow);
+        Plan plan = new Plan(this, workFlow);
 
 
-        return workSchedule;
+        return plan;
     }
 
-    public WorkSchedule execute(Work work) {
+    public Plan execute(Work work) {
         return execute(work, 0);
     }
 
-    public WorkSchedule execute(Work work, long startDelayTime) {
-        WorkSchedule workSchedule = new WorkSchedule(this, work);
+    public Plan execute(Work work, long startDelayTime) {
+        Plan plan = new Plan(this, work);
         if (startDelayTime > 0) {
-            workSchedule.startDelayTime(startDelayTime);
+            plan.startDelayTime(startDelayTime);
         }
 
-        workSchedule.subscribe();
+        plan.activate();
 
-        return workSchedule;
+        return plan;
     }
 
     /**
-     * Create a empty WorkSchedule instance
+     * Create a empty Plan instance
      *
-     * @return a new instance of WorkSchedule
+     * @return a new instance of Plan
      */
-    public WorkSchedule newSchedule() {
-        return new WorkSchedule(this, null);
+    public Plan newPlan() {
+        return new Plan(this, null);
     }
 
 
     /**
-     * Create a WorkSchedule instance.
+     * Create a Plan instance.
      *
      * @param work Work implement class object
-     * @return new instance of WorkSchedule
+     * @return new instance of Plan
      */
-    public WorkSchedule newSchedule(Work work) {
-        return newSchedule(null, work);
+    public Plan newPlan(Work work) {
+        return newPlan(null, work);
     }
 
 
-    public WorkSchedule newSchedule(ScheduleDescriptor config, Work work) {
-        WorkSchedule workSchedule = new WorkSchedule(this, work);
+    public Plan newPlan(ScheduleDescriptor config, Work work) {
+        Plan plan = new Plan(this, work);
         if (config != null) {
-            workSchedule.scheduleDescriptor(config);
+            plan.scheduleDescriptor(config);
         }
 
-        return workSchedule;
+        return plan;
     }
 
 
     /**
-     * Create a WorkSchedule instance by work class
+     * Create a Plan instance by work class
      *
      * @param workClass class of implement for Work
-     * @return new instance of WorkSchedule
+     * @return new instance of Plan
      * @throws InstantiationException InstantiationException
      * @throws IllegalAccessException IllegalAccessException
      */
-    public WorkSchedule newSchedule(Class workClass) throws InstantiationException, IllegalAccessException {
-        return newSchedule((Work) workClass.newInstance());
+    public Plan newPlan(Class workClass) throws InstantiationException, IllegalAccessException {
+        return newPlan((Work) workClass.newInstance());
     }
 
 
     /**
-     * Create a WorkSchedule instance by work class
+     * Create a Plan instance by work class
      *
      * @param descriptor an description for scheduling
      * @param workClass  class of implement for Work
-     * @return new instance of WorkSchedule
+     * @return new instance of Plan
      * @throws InstantiationException InstantiationException
      * @throws IllegalAccessException IllegalAccessException
      */
-    public WorkSchedule newSchedule(ScheduleDescriptor descriptor, Class workClass) throws InstantiationException, IllegalAccessException {
-        return newSchedule(descriptor, (Work) workClass.newInstance());
+    public Plan newPlan(ScheduleDescriptor descriptor, Class workClass) throws InstantiationException, IllegalAccessException {
+        return newPlan(descriptor, (Work) workClass.newInstance());
     }
 
 
     /**
-     * Create a WorkSchedule instance by work classname
+     * Create a Plan instance by work classname
      *
      * @param className classname of implement for Work
-     * @return new instance of WorkSchedule
+     * @return new instance of Plan
      * @throws ClassNotFoundException if the class cannot be located
      * @throws InstantiationException if this Class represents an abstract class, an interface, an array class, a primitive type, or void; or if the class has no nullary constructor; or if the instantiation fails for some other reason.
      * @throws IllegalAccessException if the class or its nullary constructor is not accessible.
      */
-    public WorkSchedule newSchedule(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        return new WorkSchedule(this, (Work) Class.forName(className).newInstance());
+    public Plan newPlan(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        return new Plan(this, (Work) Class.forName(className).newInstance());
     }
 
 
@@ -392,15 +392,15 @@ public class WorkProcessor extends ThreadGroup {
     }
 
 
-    boolean addWorkSchedule(WorkSchedule workSchedule) {
+    boolean addWorkSchedule(Plan plan) {
 
-        return addWorkSchedule(workSchedule, false);
+        return addWorkSchedule(plan, false);
     }
 
 
-    boolean addWorkSchedule(WorkSchedule workSchedule, boolean isUserEvent) {
+    boolean addWorkSchedule(Plan plan, boolean isUserEvent) {
 
-        boolean result = this.workQueue.offer(workSchedule.enterQueue(isUserEvent));
+        boolean result = this.workQueue.offer(plan.enterQueue(isUserEvent));
         //System.err.println("add >>> "+result);
         if (result) {
 
@@ -416,9 +416,9 @@ public class WorkProcessor extends ThreadGroup {
         return result;
     }
 
-    boolean addWorkSchedule(WorkSchedule workSchedule, WorkEvent workEvent) {
+    boolean addWorkSchedule(Plan plan, WorkEvent workEvent) {
 
-        boolean result = this.workQueue.offer(workSchedule.enterQueue(true, workEvent));
+        boolean result = this.workQueue.offer(plan.enterQueue(true, workEvent));
         if (result) {
 
             int sz = this.workQueue.size();
@@ -433,11 +433,11 @@ public class WorkProcessor extends ThreadGroup {
     }
 
 
-    boolean addWorkSchedule(WorkSchedule workSchedule, WorkEvent workEvent, long delayTime) {
+    boolean addWorkSchedule(Plan plan, WorkEvent workEvent, long delayTime) {
 
         workEvent.setFireTime(System.currentTimeMillis() + delayTime);
 
-        this.workChecker.addWorkStatusWrapper(workSchedule, workEvent);
+        this.workChecker.addWorkStatusWrapper(plan, workEvent);
 
         return true;
     }
@@ -530,28 +530,28 @@ public class WorkProcessor extends ThreadGroup {
         return workScheduleList;
     }
 
-    void bindEvent(WorkSchedule workSchedule, String eventName) {
+    void bindEvent(Plan plan, String eventName) {
 
 
         WorkScheduleList workScheduleMap = getWorkScheduleList(eventName, true);
 
-        workScheduleMap.add(workSchedule);
+        workScheduleMap.add(plan);
 
 
     }
 
 
-    void bindEvent(WorkSchedule workSchedule, String... eventNames) {
+    void bindEvent(Plan plan, String... eventNames) {
 
         for (String eventName : eventNames) {
-            bindEvent(workSchedule, eventName);
+            bindEvent(plan, eventName);
         }
 
 
     }
 
 
-    void unbindEvent(WorkSchedule workSchedule, String... eventNames) {
+    void unbindEvent(Plan plan, String... eventNames) {
 
         for (String eventName : eventNames) {
             WorkScheduleList workScheduleMap = getWorkScheduleList(eventName, false);
@@ -559,7 +559,7 @@ public class WorkProcessor extends ThreadGroup {
                 return;
             }
 
-            workScheduleMap.remove(workSchedule);
+            workScheduleMap.remove(plan);
         }
     }
 
@@ -583,8 +583,8 @@ public class WorkProcessor extends ThreadGroup {
         //if (workScheduleList != null)
         {
 
-            WorkSchedule[] array = workScheduleList.getWorkScheduleArray();
-            for (WorkSchedule schedule : array) {
+            Plan[] array = workScheduleList.getWorkScheduleArray();
+            for (Plan schedule : array) {
 
                 String newEventName = schedule.getDeliverableEventName(eventName);
 
@@ -616,28 +616,28 @@ public class WorkProcessor extends ThreadGroup {
 
     /****************************************
      *
-     * Sub class for WorkSchedule information
+     * Sub class for Plan information
      *
      ****************************************/
-    static final class WorkScheduleList extends HashSet<WorkSchedule> {
+    static final class WorkScheduleList extends HashSet<Plan> {
 
-        private WorkSchedule[] array = null;
+        private Plan[] array = null;
 
 
         private void setArray() {
-            array = this.toArray(new WorkSchedule[this.size()]);
+            array = this.toArray(new Plan[this.size()]);
         }
 
-        WorkSchedule[] getWorkScheduleArray() {
+        Plan[] getWorkScheduleArray() {
             return this.array;
         }
 
 
         @Override
-        public boolean add(WorkSchedule workSchedule) {
+        public boolean add(Plan plan) {
             boolean result;
             synchronized (this) {
-                result = super.add(workSchedule);
+                result = super.add(plan);
                 this.setArray();
             }
             return result;
@@ -716,7 +716,7 @@ public class WorkProcessor extends ThreadGroup {
         }
 
 
-        private boolean check(WorkSchedule schedule, long time) {
+        private boolean check(Plan schedule, long time) {
 
             if (!schedule.isSubscribed()) {
                 return false;
@@ -752,11 +752,11 @@ public class WorkProcessor extends ThreadGroup {
 
             while (isWorking()) {
 
-                WorkSchedule workSchedule = null;
+                Plan plan = null;
 
                 try {
 
-                    final WorkSchedule.ExecuteContext ctx = this.workProcessor.workQueue.poll(maxWaitTime,
+                    final Plan.ExecuteContext ctx = this.workProcessor.workQueue.poll(maxWaitTime,
                             TimeUnit.MILLISECONDS);
 
                     if (ctx == null) {
@@ -770,39 +770,42 @@ public class WorkProcessor extends ThreadGroup {
                         count++;
                     }
 
-                    workSchedule = ctx.getWorkSchedule();
-                    if (workSchedule == null) continue;
+                    plan = ctx.getPlan();
+                    if (plan == null) continue;
 
                     this.lastWorkTime = System.currentTimeMillis();
 
                     timeoutCount = 0;
                     stoplessCount++;
 
-                    Work workObject = workSchedule.getWorkObject();
+                    Work workObject = plan.getWorkObject();
 
 
-                    if (check(workSchedule, this.lastWorkTime)) {
+                    if (check(plan, this.lastWorkTime)) {
 
-                        long remainMilliTime = workSchedule.checkRemainMilliTime();
+                        long remainMilliTime = plan.checkRemainMilliTime();
 
                             /*
                             boolean chk1 = ctx.isExecuteImmediately();
-                            boolean chk2 = (remainMilliTime < workSchedule.getPreemptiveMilliTime());
+                            boolean chk2 = (remainMilliTime < plan.getPreemptiveMilliTime());
                             System.err.println(chk1 +" "+ chk2);
                             if (chk1 || chk2) {
                             */
-                        if (ctx.isExecuteImmediately() || remainMilliTime < workSchedule.getPreemptiveMilliTime()) {
+                        if (ctx.isExecuteImmediately() || remainMilliTime < plan.getPreemptiveMilliTime()) {
 
+                            WorkEvent workEvent = plan.getOriginWorkEvent(ctx.getWorkEvent());
+                            /*
                             WorkEvent workEvent = ctx.getWorkEvent();
                             if (workEvent == null) {
-                                workEvent = workSchedule.getDefaultEventInfo();
+                                workEvent = plan.getOriginWorkEvent();
 
                             } else {
-                                workEvent.setWorkSechedule(workSchedule);
+                                workEvent.setPlan(plan);
                             }
+                            */
 
 
-                            workSchedule.adjustWaiting();
+                            plan.adjustWaiting();
 
                             long delaytime = workObject.execute(workEvent);
 
@@ -819,7 +822,7 @@ public class WorkProcessor extends ThreadGroup {
 
                             if (delaytime == Work.WAIT) {
 
-                                long repeatInterval = workSchedule.getIntervalTime();
+                                long repeatInterval = plan.getIntervalTime();
 
                                 if (repeatInterval > 0) {
                                     delaytime = repeatInterval;
@@ -828,40 +831,40 @@ public class WorkProcessor extends ThreadGroup {
 
                             if (delaytime > 0) {
 
-                                workSchedule.adjustDelayTime(delaytime);
+                                plan.adjustDelayTime(delaytime);
 
                                 if (delaytime > this.workProcessor.configuration.getThresholdWaitTimeToReady()) {
                                     this.workProcessor.workChecker
-                                            .addWorkStatusWrapper(workSchedule);
+                                            .addWorkStatusWrapper(plan);
                                 } else {
-                                    this.workProcessor.addWorkSchedule(workSchedule);
+                                    this.workProcessor.addWorkSchedule(plan);
                                 }
 
                             } else if (delaytime == Work.WAIT) {
-                                workSchedule.adjustRepeatInterval(Work.WAIT);
+                                plan.adjustRepeatInterval(Work.WAIT);
                             } else {
-                                workSchedule.finish();
+                                plan.finish();
                             }
 
 
-                        } else if (!workSchedule.isUntilEndTime()) {
+                        } else if (!plan.isUntilEndTime()) {
                             timeoutCount++;
                             stoplessCount = 0;
 
                             if (remainMilliTime > this.workProcessor.configuration.getThresholdWaitTimeToReady()) {
                                 this.workProcessor.workChecker
-                                        .addWorkStatusWrapper(workSchedule);
+                                        .addWorkStatusWrapper(plan);
                             } else {
                                 this.workProcessor
-                                        .addWorkSchedule(workSchedule);
+                                        .addWorkSchedule(plan);
                             }
 
                         } else {
-                            workSchedule.finish();
+                            plan.finish();
                         }
 
                     } else {
-                        this.workProcessor.workQueue.put(workSchedule.enterQueue(false));
+                        this.workProcessor.workQueue.put(plan.enterQueue(false));
                     }
 
 
@@ -875,7 +878,7 @@ public class WorkProcessor extends ThreadGroup {
 
                 } catch (RuntimeException re) {
                     re.printStackTrace();
-                    workSchedule.finish();
+                    plan.finish();
                 } catch (InterruptedException ite) {
                     //ite.printStackTrace();
 
@@ -899,22 +902,22 @@ public class WorkProcessor extends ThreadGroup {
 
     private static class WorkScheduleWrapper {
 
-        private WorkSchedule workSchedule = null;
+        private Plan plan = null;
 
         private WorkEvent workEvent = null;
 
-        WorkScheduleWrapper(WorkSchedule workSchedule) {
-            this.workSchedule = workSchedule;
+        WorkScheduleWrapper(Plan plan) {
+            this.plan = plan;
         }
 
-        WorkScheduleWrapper(WorkSchedule workSchedule, WorkEvent workEvent) {
-            this(workSchedule);
+        WorkScheduleWrapper(Plan plan, WorkEvent workEvent) {
+            this(plan);
             this.workEvent = workEvent;
         }
 
 
-        WorkSchedule getWorkSchedule() {
-            return workSchedule;
+        Plan getPlan() {
+            return plan;
         }
 
         WorkEvent getWorkEvent() {
@@ -940,11 +943,11 @@ public class WorkProcessor extends ThreadGroup {
         }
 
 
-        void addWorkStatusWrapper(WorkSchedule sb) {
+        void addWorkStatusWrapper(Plan sb) {
             statusWrappers.add(new WorkScheduleWrapper(sb));
         }
 
-        void addWorkStatusWrapper(WorkSchedule sb, WorkEvent event) {
+        void addWorkStatusWrapper(Plan sb, WorkEvent event) {
             statusWrappers.add(new WorkScheduleWrapper(sb, event));
         }
 
@@ -959,7 +962,7 @@ public class WorkProcessor extends ThreadGroup {
 
 
                     if (workScheduleWrapper != null) {
-                        WorkSchedule workSchedule = workScheduleWrapper.getWorkSchedule();
+                        Plan plan = workScheduleWrapper.getPlan();
 
                         long nextExecuteTime = -1;
 
@@ -969,16 +972,16 @@ public class WorkProcessor extends ThreadGroup {
                         }
 
                         if (nextExecuteTime < 0) {
-                            nextExecuteTime = workSchedule.getNextExecuteTime();
+                            nextExecuteTime = plan.getNextExecuteTime();
                         }
 
                         long gap = (System.currentTimeMillis() + thresholdWaitTimeToReady) - nextExecuteTime;
                         if (gap >= 0) {
 
                             if (event != null) {
-                                workProcessor.addWorkSchedule(workSchedule, event);
+                                workProcessor.addWorkSchedule(plan, event);
                             } else {
-                                workProcessor.addWorkSchedule(workSchedule);
+                                workProcessor.addWorkSchedule(plan);
                             }
 
 

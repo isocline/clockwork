@@ -15,17 +15,13 @@
  */
 package isocline.clockwork.flow;
 
-import isocline.clockwork.WorkEvent;
 import isocline.clockwork.WorkFlow;
 import isocline.clockwork.WorkFlowPattern;
-import isocline.clockwork.flow.func.CheckFunction;
-import isocline.clockwork.flow.func.ReturnEventFunction;
-import isocline.clockwork.flow.func.WorkEventConsumer;
-import isocline.clockwork.flow.func.WorkFlowPatternFunction;
+import isocline.clockwork.flow.func.*;
 
 import java.util.function.Consumer;
 
-public class WorkFlowWrapper implements WorkFlow {
+public class WorkFlowWrapper<T> implements WorkFlow<T> {
 
     protected WorkFlowImpl workFlowInstance;
 
@@ -98,8 +94,8 @@ public class WorkFlowWrapper implements WorkFlow {
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 
-    @Override
-    public WorkFlow runAsync(Consumer<WorkEvent> execObject) {
+    //@Override
+    public WorkFlow runAsync(Consumer execObject) {
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 
@@ -115,17 +111,68 @@ public class WorkFlowWrapper implements WorkFlow {
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 
+    //@Override
+    public WorkFlow runAsync(Consumer execObject, int count) {
+        this.workFlowInstance.runAsync(execObject, count);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    //@Override
+    public WorkFlow runAsync(Consumer execObject, String eventName) {
+        this.workFlowInstance.runAsync(execObject, eventName);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
     @Override
-    public WorkFlow runAsync(Consumer<WorkEvent> execObject, int count) {
+    public WorkFlow runAsync(WorkEventConsumer execObject) {
+        this.workFlowInstance.runAsync(execObject);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
+    public WorkFlow runAsync(WorkEventConsumer execObject, String fireEventName) {
+        this.workFlowInstance.runAsync(execObject, fireEventName);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
+    public WorkFlow runAsync(WorkEventConsumer execObject, int count) {
         this.workFlowInstance.runAsync(execObject, count);
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 
     @Override
-    public WorkFlow runAsync(Consumer<WorkEvent> execObject, String eventName) {
-        this.workFlowInstance.runAsync(execObject, eventName);
+    public WorkFlow applyAsync(WorkEventFunction execObject) {
+        this.workFlowInstance.applyAsync(execObject);
         return new WorkFlowWrapper(this.workFlowInstance);
     }
+
+    @Override
+    public WorkFlow applyAsync(WorkEventFunction execObject, String fireEventName) {
+        this.workFlowInstance.applyAsync(execObject, fireEventName);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
+    public WorkFlow applyAsync(WorkEventFunction execObject, int count) {
+        this.workFlowInstance.applyAsync(execObject, count);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+
+
+    @Override
+    public WorkFlow mapAsync(WorkEventFunction... execObjects) {
+        this.workFlowInstance.mapAsync(execObjects);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+
+
+
+
+
+
 
     @Override
     public WorkFlow branch(ReturnEventFunction execObject) {
@@ -151,11 +198,6 @@ public class WorkFlowWrapper implements WorkFlow {
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 
-    @Override
-    public WorkFlow next(Consumer<?> execObject) {
-        this.workFlowInstance.next(execObject);
-        return new WorkFlowWrapper(this.workFlowInstance);
-    }
 
     @Override
     public WorkFlow next(Runnable execObject, String eventName) {
@@ -163,8 +205,18 @@ public class WorkFlowWrapper implements WorkFlow {
         return new WorkFlowWrapper(this.workFlowInstance);
     }
 
-    @Override
-    public WorkFlow next(Consumer<?> execObject, String eventName) {
+
+
+    //@Override
+    public WorkFlow next(Consumer<? super T> execObject) {
+        this.workFlowInstance.next(execObject);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+
+
+    // @Override
+    public WorkFlow next(Consumer<? super T> execObject, String eventName) {
         this.workFlowInstance.next(execObject, eventName);
         return new WorkFlowWrapper(this.workFlowInstance);
     }
@@ -181,6 +233,20 @@ public class WorkFlowWrapper implements WorkFlow {
         this.workFlowInstance.next(execObject, eventName);
         return new WorkFlowWrapper(this.workFlowInstance);
     }
+
+
+    @Override
+    public WorkFlow next(WorkEventFunction execObject) {
+        this.workFlowInstance.next(execObject);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
+    @Override
+    public WorkFlow next(WorkEventFunction execObject, String eventName) {
+        this.workFlowInstance.next(execObject, eventName);
+        return new WorkFlowWrapper(this.workFlowInstance);
+    }
+
 
 
     @Override

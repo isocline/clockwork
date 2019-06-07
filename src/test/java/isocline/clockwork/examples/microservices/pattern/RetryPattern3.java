@@ -23,7 +23,7 @@ public class RetryPattern3 {
         TestUtil.waiting(2000);
         logger.debug("Service1 - end");
 
-        e.root().setAttribute("result:service1", "A");
+        e.origin().setAttribute("result:service1", "A");
         throw new RuntimeException("zzzz");
     }
 
@@ -31,12 +31,12 @@ public class RetryPattern3 {
     public void finish(WorkEvent e) {
         logger.debug("finish start " + Thread.currentThread().getId());
 
-        logger.debug(e.root());
-        logger.debug(e.root().getAttribute("result:service1"));
+        logger.debug(e.origin());
+        logger.debug(e.origin().getAttribute("result:service1"));
 
-        String result = e.root().getAttribute("result:service1").toString()
-                + e.root().getAttribute("result:service2")
-                + e.root().getAttribute("result:service3");
+        String result = e.origin().getAttribute("result:service1").toString()
+                + e.origin().getAttribute("result:service2")
+                + e.origin().getAttribute("result:service3");
 
         assertEquals("ABC", result);
 

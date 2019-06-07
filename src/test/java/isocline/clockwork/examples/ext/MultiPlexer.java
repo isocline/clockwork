@@ -36,7 +36,7 @@ public class MultiPlexer implements Work {
 
         /*
         for(int i=0;i<10;i++) {
-            logger.info("execute(WorkEvent event) throws InterruptedException");
+            logger.info("activate(WorkEvent event) throws InterruptedException");
         }
         */
 
@@ -74,9 +74,9 @@ public class MultiPlexer implements Work {
 
 
         for(int i=0;i< 10;i++ ) {
-            WorkSchedule schedule = processor.newSchedule(new MultiPlexer("A",i)).startTime(startTime+i*10)
+            Plan schedule = processor.newPlan(new MultiPlexer("A",i)).startTime(startTime+i*10)
                     .setStrictMode();
-            schedule.subscribe();
+            schedule.activate();
         }
 
 
@@ -84,8 +84,8 @@ public class MultiPlexer implements Work {
         /*
 
         for(int i=0;i<10;i++ ) {
-            WorkSchedule schedule = worker.newSchedule(new MultiPlexer("B",i)).setStrictMode(true).setStartTime(startTime+i*100+50);
-            schedule.subscribe();
+            Plan schedule = worker.newPlan(new MultiPlexer("B",i)).setStrictMode(true).setStartTime(startTime+i*100+50);
+            schedule.activate();
         }
         */
 

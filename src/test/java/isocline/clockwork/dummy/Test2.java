@@ -33,7 +33,7 @@ public class Test2 {
 
         for(int i=0;i<30;i++) {
 
-            System.out.println(processor.getWorkQueueSize() +"  subscribe");
+            System.out.println(processor.getWorkQueueSize() +"  activate");
             System.out.println(processor.getManagedWorkCount() +"  chk");
 
             Thread.sleep(1000);
@@ -58,7 +58,7 @@ public class Test2 {
 
             count ++;
 
-            log(seq + "th job execute. count="+count);
+            log(seq + "th job activate. count="+count);
 
 
             if (count % 3 == 0) {

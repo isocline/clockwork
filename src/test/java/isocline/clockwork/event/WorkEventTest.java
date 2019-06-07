@@ -50,7 +50,7 @@ public class WorkEventTest {
 
 
         //event2.setAttribute("key1", "val2");
-        assertEquals("val1", event2.root().getAttribute("key1"));
+        assertEquals("val1", event2.origin().getAttribute("key1"));
 
     }
 }

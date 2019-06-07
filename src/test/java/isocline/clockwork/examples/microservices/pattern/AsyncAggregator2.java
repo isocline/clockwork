@@ -20,7 +20,7 @@ public class AsyncAggregator2 implements FlowableWork {
         TestUtil.waiting(2000);
         logger.debug("Service1 - end");
 
-        e.root().setAttribute("result:service1", "A");
+        e.origin().setAttribute("result:service1", "A");
     }
 
 
@@ -28,25 +28,25 @@ public class AsyncAggregator2 implements FlowableWork {
         logger.debug("Service2 - start "+Thread.currentThread().getId());
         TestUtil.waiting(3000);
         logger.debug("Service2 - end");
-        e.root().setAttribute("result:service2", "B");
+        e.origin().setAttribute("result:service2", "B");
     }
 
     public void callService3(WorkEvent e) {
         logger.debug("Service3 - start");
         TestUtil.waiting(1000);
         logger.debug("Service3 - end");
-        e.root().setAttribute("result:service3", "C");
+        e.origin().setAttribute("result:service3", "C");
     }
 
     public void finish(WorkEvent e) {
         logger.debug("finish start "+Thread.currentThread().getId());
 
-        logger.debug(e.root());
-        logger.debug(e.root().getAttribute("result:service1"));
+        logger.debug(e.origin());
+        logger.debug(e.origin().getAttribute("result:service1"));
 
-        String result = e.root().getAttribute("result:service1").toString()
-                + e.root().getAttribute("result:service2")
-                + e.root().getAttribute("result:service3");
+        String result = e.origin().getAttribute("result:service1").toString()
+                + e.origin().getAttribute("result:service2")
+                + e.origin().getAttribute("result:service3");
 
         assertEquals("ABC", result);
 

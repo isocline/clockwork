@@ -2,10 +2,6 @@ package isocline.clockwork.flow.func;
 
 import isocline.clockwork.WorkEvent;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 
 /**
  * Represents an operation that accepts a single input argument and returns no
@@ -19,14 +15,14 @@ import java.util.List;
  * @since 1.8
  */
 @FunctionalInterface
-public interface WorkEventConsumer {
+public interface WorkEventFunction {
 
     /**
      * Performs this operation on the given argument.
      *
      * @param e the input argument
      */
-    void accept(WorkEvent e) throws Throwable;
+    Object apply(WorkEvent e) throws Throwable;
 
 
 

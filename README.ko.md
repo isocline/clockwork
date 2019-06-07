@@ -115,7 +115,7 @@ public class PreciseRepeater implements Work {
 
     public long execute(WorkEvent event) throws InterruptedException {
 
-        logger.debug("execute:" + seq++);
+        logger.debug(activate + seq++);
 
         return 10; // 10 milli seconds
     }

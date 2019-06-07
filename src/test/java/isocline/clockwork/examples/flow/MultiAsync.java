@@ -43,9 +43,9 @@ public class MultiAsync implements FlowableWork {
 
     @Test
     public void test() throws InterruptedException {
-        WorkSchedule schedule = start();
+        Plan schedule = start();
 
-        schedule.waitUntilFinish();
+        schedule.block();
 
         WorkProcessorFactory.getProcessor().awaitShutdown();
 

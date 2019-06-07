@@ -80,7 +80,7 @@ public class ErrorWorkFlowTest implements FlowableWork {
     public void testStartByEvent() {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
-        processor.newSchedule(this).subscribe();
+        processor.newPlan(this).activate();
 
         processor.awaitShutdown();
 

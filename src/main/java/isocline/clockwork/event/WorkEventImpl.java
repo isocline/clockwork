@@ -15,12 +15,11 @@
  */
 package isocline.clockwork.event;
 
+import isocline.clockwork.Plan;
 import isocline.clockwork.WorkEvent;
-import isocline.clockwork.WorkSchedule;
 
-
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 
 /**
@@ -34,16 +33,20 @@ public class WorkEventImpl implements WorkEvent {
 
     private long fireTime = -1;
 
+    private int emitCount = 0;
+
+    private String fireEventName;
+
 
     private Map attributeMap = new Hashtable();
 
-    private WorkSchedule schedule;
+    private Plan schedule;
 
     private WorkEvent rootWorkEvent;
 
     private Throwable throwable;
 
-    private int count = 0;
+
 
 
 
@@ -74,11 +77,11 @@ public class WorkEventImpl implements WorkEvent {
 
     @Override
     public int count() {
-        return this.count;
+        return this.emitCount;
     }
 
-    public void setCount(int count) {
-        this.count = count;
+    public void setEmitCount(int emitCount) {
+        this.emitCount = emitCount;
     }
 
     public WorkEventImpl setEventName(String eventName) {
@@ -91,7 +94,7 @@ public class WorkEventImpl implements WorkEvent {
     }
 
 
-    public void setWorkSechedule(WorkSchedule sechedule) {
+    public void setPlan(Plan sechedule) {
         this.schedule = sechedule;
     }
 
@@ -99,7 +102,7 @@ public class WorkEventImpl implements WorkEvent {
     /**
      * @return
      */
-    public WorkSchedule getWorkSchedule() {
+    public Plan getPlan() {
 
         return this.schedule;
     }
@@ -192,7 +195,63 @@ public class WorkEventImpl implements WorkEvent {
     }
 
     @Override
-    public WorkEvent root() {
+    public WorkEvent origin() {
         return this.rootWorkEvent;
+    }
+
+    @Override
+    public String getFireEventName() {
+        if(this.fireEventName!=null) {
+            return this.fireEventName;
+        }
+        return eventName;
+    }
+
+    @Override
+    public void setFireEventName(String eventName) {
+        this.fireEventName = eventName;
+
+    }
+
+    @Override
+    public Stream getStream() {
+        WorkEvent event = this.origin();
+        if(event==null) {
+            event = this;
+        }
+
+        String resultKey = "result::" + event.hashCode();
+
+        List list = null;
+        synchronized (event) {
+            List newList = Collections.synchronizedList(new ArrayList<>());;
+            list = (List) event.getAttribute(resultKey);
+            if (list == null) {
+                list = newList;
+
+                event.setAttribute(resultKey, list);
+            }
+            else {
+                event.setAttribute(resultKey, newList);
+            }
+        }
+
+        Stream stream = list.stream();
+
+
+        return stream;
+    }
+
+    @Override
+    public Object getResult() {
+        WorkEvent event = this.origin();
+        if(event==null) {
+            event = this;
+        }
+
+        String resultKey = "result::" + event.hashCode()+"<Mono>";
+
+
+        return event.getAttribute(resultKey);
     }
 }

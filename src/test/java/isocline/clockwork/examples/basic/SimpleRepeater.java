@@ -13,8 +13,7 @@ public class SimpleRepeater implements Work {
 
     public long execute(WorkEvent event) throws InterruptedException {
 
-        logger.debug("execute:" + seq++);
-
+        logger.debug("activate:" + seq++);
 
 
         return WAIT;
@@ -25,16 +24,15 @@ public class SimpleRepeater implements Work {
     @Test
     public void case1() throws Exception {
 
-        WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
-
-        WorkSchedule schedule = processor.newSchedule(new SimpleRepeater())
+        Plan plan = WorkProcessor.main()
+                .newPlan(new SimpleRepeater())
                 .interval(1 * Clock.SECOND)
                 .finishTimeFromNow(5 * Clock.SECOND);
 
-        schedule.subscribe();
+        plan.activate().block();
 
-        processor.shutdown(TestConfiguration.TIMEOUT);
+        WorkProcessor.main().shutdown(TestConfiguration.TIMEOUT);
         //processor.awaitShutdown();
 
 
@@ -47,11 +45,10 @@ public class SimpleRepeater implements Work {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-
-        WorkSchedule schedule = processor.newSchedule(SimpleRepeater.class);
+        Plan schedule = processor.newPlan(SimpleRepeater.class);
 
         schedule.interval(1 * Clock.SECOND);
-        schedule.subscribe();
+        schedule.activate();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);
@@ -63,12 +60,11 @@ public class SimpleRepeater implements Work {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-
-        WorkSchedule schedule = processor.newSchedule(SimpleRepeater.class);
+        Plan schedule = processor.newPlan(SimpleRepeater.class);
 
         schedule.interval(1 * Clock.SECOND);
         schedule.setStrictMode();
-        schedule.subscribe();
+        schedule.activate();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);
@@ -80,12 +76,11 @@ public class SimpleRepeater implements Work {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-
-        WorkSchedule schedule = processor.newSchedule(SimpleRepeater.class);
+        Plan schedule = processor.newPlan(SimpleRepeater.class);
 
         schedule.interval(1 * Clock.SECOND);
-        schedule.startDelayTime(Clock.milliseconds(0,0,2));
-        schedule.subscribe();
+        schedule.startDelayTime(Clock.milliseconds(0, 0, 2));
+        schedule.activate();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);
@@ -98,12 +93,11 @@ public class SimpleRepeater implements Work {
         WorkProcessor processor = WorkProcessorFactory.getProcessor();
 
 
-
-        WorkSchedule schedule = processor.newSchedule(SimpleRepeater.class);
+        Plan schedule = processor.newPlan(SimpleRepeater.class);
 
         schedule.interval(1 * Clock.SECOND);
-        schedule.startTime(Clock.nextSecond()+Clock.SECOND*2);
-        schedule.subscribe();
+        schedule.startTime(Clock.nextSecond() + Clock.SECOND * 2);
+        schedule.activate();
 
 
         processor.shutdown(TestConfiguration.TIMEOUT);

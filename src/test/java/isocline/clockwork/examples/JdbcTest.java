@@ -8,9 +8,9 @@ public class JdbcTest {
 
         Class.forName("org.gjt.mm.mysql.Driver");
 
-        String connectionUrl = "jdbc:mysql://192.168.99.100:13306/dbridge?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=utf-8&amp;mysqlEncoding=utf8;user=root;password=root";
+        String connectionUrl = "jdbc:mysql://192.168.99.100:13306/dbridge?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=utf-8&amp;mysqlEncoding=utf8;user=origin;password=origin";
 
-        try (Connection con = DriverManager.getConnection(connectionUrl, "root", "root");
+        try (Connection con = DriverManager.getConnection(connectionUrl, "origin", "origin");
         ) {
 
             String SQL = "SELECT * FROM DBT_BO_MASTER";

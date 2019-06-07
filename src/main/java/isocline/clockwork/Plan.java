@@ -23,6 +23,7 @@ import isocline.clockwork.flow.WorkFlowFactory;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 
 /**
@@ -31,7 +32,7 @@ import java.util.UUID;
  *
  * @see isocline.clockwork.Work
  */
-public class WorkSchedule {
+public class Plan {
 
     private static final long UNDEFINED_INTERVAL = -1;
 
@@ -84,8 +85,9 @@ public class WorkSchedule {
 
     private Throwable error = null;
 
+    private Consumer consumer = null;
 
-    WorkSchedule(WorkProcessor workProcessor, Work work) {
+    Plan(WorkProcessor workProcessor, Work work) {
         this.workProcessor = workProcessor;
         this.work = work;
 
@@ -94,9 +96,9 @@ public class WorkSchedule {
 
 
     /**
-     * Returns a ID of WorkSchedule
+     * Returns a ID of Plan
      *
-     * @return a ID of WorkSchedule
+     * @return a ID of Plan
      */
     public String getId() {
         return this.workUUID;
@@ -238,7 +240,7 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule startTime(long nextExecuteTime) {
+    public Plan startTime(long nextExecuteTime) {
 
         this.isDefinedStartTime = true;
         return setStartTime(nextExecuteTime);
@@ -248,9 +250,9 @@ public class WorkSchedule {
      * Sets a start time for this schedule
      *
      * @param nextExecuteTime the number of milliseconds since January 1, 1970, 00:00:00 GMT for the date and time specified by the arguments.
-     * @return an instance of WorkSchedule
+     * @return an instance of Plan
      */
-    private WorkSchedule setStartTime(long nextExecuteTime) {
+    private Plan setStartTime(long nextExecuteTime) {
 
         if (waitingTime == 0) {
             waitingTime = 1;
@@ -261,7 +263,7 @@ public class WorkSchedule {
         return this;
     }
 
-    public WorkSchedule startDelayTime(long waitTime) {
+    public Plan startDelayTime(long waitTime) {
         checkLocking();
         this.waitingTime = waitTime;
 
@@ -272,9 +274,9 @@ public class WorkSchedule {
      * Adjust a delay time
      *
      * @param waitTime a milliseconds for timeout
-     * @return an instance of WorkSchedule
+     * @return an instance of Plan
      */
-    WorkSchedule adjustDelayTime(long waitTime) {
+    Plan adjustDelayTime(long waitTime) {
 
 
         this.waitingTime = waitTime;
@@ -349,9 +351,9 @@ public class WorkSchedule {
      * Sets an interval time
      *
      * @param intervalTime a milliseconds time for interval
-     * @return an instance of WorkSchedule
+     * @return an instance of Plan
      */
-    public WorkSchedule interval(long intervalTime) {
+    public Plan interval(long intervalTime) {
 
         checkLocking();
 
@@ -366,7 +368,7 @@ public class WorkSchedule {
      * @param intervalTime
      * @return
      */
-    WorkSchedule adjustRepeatInterval(long intervalTime) {
+    Plan adjustRepeatInterval(long intervalTime) {
 
 
         this.intervalTime = intervalTime;
@@ -380,10 +382,10 @@ public class WorkSchedule {
      * ISO 8601 Data elements and interchange formats (https://en.wikipedia.org/wiki/ISO_8601)
      *
      * @param isoDateTime this date-time as a String, such as 2019-06-16T10:15:30Z or 2019-06-16T10:15:30+01:00[Europe/Paris].
-     * @return an instance of WorkSchedule
+     * @return an instance of Plan
      * @throws java.text.ParseException if date time format is not valid.
      */
-    public WorkSchedule startTime(String isoDateTime) throws java.text.ParseException {
+    public Plan startTime(String isoDateTime) throws java.text.ParseException {
 
         this.isDefinedStartTime = true;
 
@@ -395,9 +397,9 @@ public class WorkSchedule {
      * Sets a start date time
      *
      * @param startDateTime Date of start
-     * @return an instance of WorkSchedule
+     * @return an instance of Plan
      */
-    public WorkSchedule startTime(Date startDateTime) {
+    public Plan startTime(Date startDateTime) {
 
         this.isDefinedStartTime = true;
 
@@ -410,10 +412,10 @@ public class WorkSchedule {
      * ISO 8601 Data elements and interchange formats (https://en.wikipedia.org/wiki/ISO_8601)
      *
      * @param isoDateTime this date-time as a String, such as 2019-06-16T10:15:30Z or 2019-06-16T10:15:30+01:00[Europe/Paris].
-     * @return an instance of WorkSchedule
+     * @return an instance of Plan
      * @throws java.text.ParseException if date time format is not valid.
      */
-    public WorkSchedule finishTime(String isoDateTime) throws java.text.ParseException {
+    public Plan finishTime(String isoDateTime) throws java.text.ParseException {
 
         return finishTime(Clock.toDate(isoDateTime));
     }
@@ -423,9 +425,9 @@ public class WorkSchedule {
      * Sets finish date time
      *
      * @param endDateTime Date of end
-     * @return an instance of WorkSchedule
+     * @return an instance of Plan
      */
-    public WorkSchedule finishTime(Date endDateTime) {
+    public Plan finishTime(Date endDateTime) {
 
         this.workEndTime = endDateTime.getTime();
         return this;
@@ -435,9 +437,9 @@ public class WorkSchedule {
      * Sets a finish time from now
      *
      * @param milliSeconds milliseconds
-     * @return an instance of WorkSchedule
+     * @return an instance of Plan
      */
-    public WorkSchedule finishTimeFromNow(long milliSeconds) {
+    public Plan finishTimeFromNow(long milliSeconds) {
         this.workEndTime = System.currentTimeMillis() + milliSeconds;
         return this;
     }
@@ -445,12 +447,12 @@ public class WorkSchedule {
 
     /**
      * @param className name of class
-     * @return an instance of WorkSchedule
+     * @return an instance of Plan
      * @throws ClassNotFoundException if the class cannot be located
      * @throws InstantiationException if this Class represents an abstract class, an interface, an array class, a primitive type, or void; or if the class has no nullary constructor; or if the instantiation fails for some other reason.
      * @throws IllegalAccessException if the class or its nullary constructor is not accessible.
      */
-    public WorkSchedule workSession(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    public Plan workSession(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         checkLocking();
         this.workSession = (WorkSession) Class.forName(className).newInstance();
         return this;
@@ -460,9 +462,9 @@ public class WorkSchedule {
      * Sets a {@link WorkSession}
      *
      * @param workSession an instance of WorkSession
-     * @return an instance of WorkSchedule
+     * @return an instance of Plan
      */
-    public WorkSchedule workSession(WorkSession workSession) {
+    public Plan workSession(WorkSession workSession) {
         checkLocking();
 
         this.workSession = workSession;
@@ -517,7 +519,7 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule bindEvent(String... eventNames) {
+    public Plan bindEvent(String... eventNames) {
         checkLocking();
 
         for (String eventName : eventNames) {
@@ -532,36 +534,36 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule setStrictMode() {
+    public Plan setStrictMode() {
         checkLocking();
         this.isStrictMode = true;
         return this;
     }
 
-    public WorkSchedule setBetweenStartTimeMode(boolean isBetweenStartTimeMode) {
+    public Plan setBetweenStartTimeMode(boolean isBetweenStartTimeMode) {
         checkLocking();
         this.isBetweenStartTimeMode = isBetweenStartTimeMode;
         return this;
     }
 
-    public WorkSchedule jitter(long jitter) {
+    public Plan jitter(long jitter) {
         checkLocking();
         this.jitter = jitter;
         return this;
     }
 
-    public WorkSchedule setSleepMode() {
+    public Plan setSleepMode() {
         checkLocking();
         this.startDelayTime(Work.WAIT);
         return this;
     }
 
 
-    public WorkSchedule run() {
-        WorkSchedule schedule = subscribe(false);
+    public Plan run() {
+        Plan schedule = activate();
 
         try {
-            schedule.waitUntilFinish();
+            schedule.block();
         }catch (InterruptedException ie) {
 
         }
@@ -576,24 +578,22 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule subscribe() {
-        return subscribe(false);
+
+    public Plan activate() {
+        return activate(null);
     }
 
 
     /**
-     * Actives a {@link WorkSchedule}
-     * @param checkActivated  Check whether it is activated
-     * @return an instance of WorkSchedule
+     * Actives a {@link Plan}
+     * @param consumer  Consumer
+     * @return an instance of Plan
      */
-    public WorkSchedule subscribe(boolean checkActivated) {
+    public Plan activate(Consumer consumer) {
         if (isActivated) {
-            if (checkActivated) {
-                throw new RuntimeException("Already subscribe!");
-            } else {
-                return this;
-            }
+                throw new RuntimeException("Already activate!");
         }
+        this.consumer = consumer;
         this.isActivated = true;
 
 
@@ -603,11 +603,15 @@ public class WorkSchedule {
 
                 FlowableWork fw = (FlowableWork) this.work;
 
-                WorkFlow wf = this.workFlow.next(fw::initialize);
+                WorkFlow wf = this.workFlow
+                        .next(fw::initialize);
+
+
 
                 fw.defineWorkFlow(wf);
 
                 if (!wf.isSetFinish()) {
+                    wf.fireEvent(WorkFlow.FINISH,0);
                     wf.wait(WorkFlow.FINISH).finish();
                 }
             }
@@ -639,7 +643,7 @@ public class WorkSchedule {
         return this;
     }
 
-    public WorkSchedule scheduleDescriptor(ScheduleDescriptor descriptor) {
+    public Plan scheduleDescriptor(ScheduleDescriptor descriptor) {
         descriptor.build(this);
         return this;
     }
@@ -647,7 +651,7 @@ public class WorkSchedule {
     /**
      * check activated
      *
-     * @return True if WorkSchedule is activated
+     * @return True if Plan is activated
      */
     public boolean isSubscribed() {
         return isActivated;
@@ -663,17 +667,22 @@ public class WorkSchedule {
             this.isActivated = false;
             this.workProcessor.managedWorkCount.decrementAndGet();
         }
+        if(this.consumer!=null) {
+            WorkEvent originEvent = this.getOriginWorkEvent();
+            Object result = WorkHelper.Get(originEvent);
+            consumer.accept(result);
+        }
         notifyAll();
     }
 
 
-    synchronized public void waitUntilFinish(long timeout) throws InterruptedException {
+    synchronized public void block(long timeout) throws InterruptedException {
         wait(timeout);
     }
 
 
 
-    synchronized public void waitUntilFinish() throws InterruptedException{
+    synchronized public void block() throws InterruptedException{
         wait();
     }
 
@@ -682,7 +691,7 @@ public class WorkSchedule {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        WorkSchedule schedule = (WorkSchedule) o;
+        Plan schedule = (Plan) o;
 
         return workUUID.equals(schedule.workUUID);
     }
@@ -698,7 +707,7 @@ public class WorkSchedule {
     }
 
 
-    public WorkSchedule executeEventChecker(ExecuteEventChecker checker) {
+    public Plan executeEventChecker(ExecuteEventChecker checker) {
         this.executeEventChecker = checker;
         return this;
     }
@@ -723,16 +732,32 @@ public class WorkSchedule {
 ///////////////////////////////////////////////////////////////////
 
 
-    private WorkEvent defaultEvent = null;
+    private WorkEvent originEvent = null;
 
-    WorkEvent getDefaultEventInfo() {
-        if (defaultEvent == null) {
-            defaultEvent = WorkEventFactory.create();
-            defaultEvent.setWorkSechedule(this);
+    WorkEvent getOriginWorkEvent() {
+        return this.originEvent;
+    }
 
+    WorkEvent getOriginWorkEvent(WorkEvent inputWorkEvent) {
+
+        WorkEvent event = null;
+
+        if(inputWorkEvent==null) {
+            if(originEvent==null) {
+                originEvent = WorkEventFactory.create();
+                originEvent.setPlan(this);
+            }
+            event = originEvent;
+        }else {
+            if(originEvent==null) {
+                originEvent = inputWorkEvent;
+            }
+            event = inputWorkEvent;
+            event.setPlan(this);
         }
 
-        return defaultEvent;
+        return event;
+
 
     }
 
@@ -797,23 +822,23 @@ public class WorkSchedule {
     static class ExecuteContext {
 
 
-        private WorkSchedule workSchedule;
+        private Plan plan;
 
         private boolean isUserEvent = false;
 
         private WorkEvent workEvent;
 
 
-        ExecuteContext(WorkSchedule workSchedule, boolean isUserEvent, WorkEvent event) {
+        ExecuteContext(Plan plan, boolean isUserEvent, WorkEvent event) {
 
-            this.workSchedule = workSchedule;
+            this.plan = plan;
             this.isUserEvent = isUserEvent;
 
             this.workEvent = event;
 
             /*
             if(event!=null) {
-                event.setWorkSechedule(workSchedule);
+                event.setPlan(plan);
 
             }
             */
@@ -830,11 +855,11 @@ public class WorkSchedule {
             return false;
         }
 
-        WorkSchedule getWorkSchedule() {
+        Plan getPlan() {
 
-            //if (this.contextId == this.workSchedule.contextCheckId)
+            //if (this.contextId == this.plan.contextCheckId)
             {
-                return workSchedule;
+                return plan;
             }
 
             //return null;

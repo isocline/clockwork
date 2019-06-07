@@ -8,9 +8,9 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 
-public class WorkScheduleTest {
+public class PlanTest {
 
-    private static Logger logger = Logger.getLogger(WorkScheduleTest.class.getName());
+    private static Logger logger = Logger.getLogger(PlanTest.class.getName());
 
     private int seq;
 
@@ -33,12 +33,12 @@ public class WorkScheduleTest {
     public void executeOneTime() throws Exception {
 
 
-        processor.newSchedule((WorkEvent event) -> {
+        processor.newPlan((WorkEvent event) -> {
             seq++;
             logger.debug("exec " + seq);
 
             return Work.TERMINATE;
-        }).subscribe();
+        }).activate();
 
         Thread.sleep(100);
 
@@ -51,12 +51,12 @@ public class WorkScheduleTest {
     public void executeSleep() throws Exception {
 
 
-        processor.newSchedule((WorkEvent event) -> {
+        processor.newPlan((WorkEvent event) -> {
             seq++;
             logger.debug("exec " + seq);
 
             return Work.WAIT;
-        }).subscribe();
+        }).activate();
 
         Thread.sleep(100);
 
@@ -68,7 +68,7 @@ public class WorkScheduleTest {
     public void executeLoop() throws Exception {
 
 
-        processor.newSchedule((WorkEvent event) -> {
+        processor.newPlan((WorkEvent event) -> {
             seq++;
             logger.debug("exec " + seq);
 
@@ -77,7 +77,7 @@ public class WorkScheduleTest {
             }
 
             return Work.LOOP;
-        }).subscribe();
+        }).activate();
 
 
         Thread.sleep(100);

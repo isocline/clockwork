@@ -22,7 +22,7 @@ import java.util.Date;
  * Utility Class with time setting related functions
  *
  * @author Richard Dean Kim
- * @see WorkSchedule
+ * @see Plan
  */
 public class Clock {
 

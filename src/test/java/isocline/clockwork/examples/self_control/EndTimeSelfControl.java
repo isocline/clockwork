@@ -17,10 +17,10 @@ public class EndTimeSelfControl implements Work {
 
         count++;
 
-        logger.debug("execute:" + count);
+        logger.debug("activate:" + count);
 
         if(count ==1) {
-            event.getWorkSchedule().finishTimeFromNow(Clock.SECOND*2);
+            event.getPlan().finishTimeFromNow(Clock.SECOND*2);
         }
 
         return Clock.SECOND/2;
@@ -35,10 +35,10 @@ public class EndTimeSelfControl implements Work {
 
         EndTimeSelfControl checker = new EndTimeSelfControl();
 
-        WorkSchedule schedule = processor.newSchedule(checker);
-        schedule.subscribe();
+        Plan schedule = processor.newPlan(checker);
+        schedule.activate();
 
-        schedule.waitUntilFinish();
+        schedule.block();
 
         assertEquals(4, checker.count);
 

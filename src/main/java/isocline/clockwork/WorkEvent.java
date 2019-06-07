@@ -15,6 +15,8 @@
  */
 package isocline.clockwork;
 
+import java.util.stream.Stream;
+
 /**
  *
  *  A interface that represents the event to be delivered when the work object is executed.
@@ -39,19 +41,19 @@ public interface WorkEvent {
 
     /**
      *
-     * Set the WorkSchedule object.
+     * Set the Plan object.
      *
-     * @param sechedule instance of WorkSchedule
+     * @param plan instance of Plan
      */
-    void setWorkSechedule(WorkSchedule sechedule);
+    void setPlan(Plan plan);
 
 
     /**
-     * Returns the WorkSchedule object.
+     * Returns the Plan object.
      *
-     * @return instance of WorkSchedule
+     * @return instance of Plan
      */
-    WorkSchedule getWorkSchedule();
+    Plan getPlan();
 
 
     /**
@@ -103,9 +105,9 @@ public interface WorkEvent {
     /**
      * Returns the earliest event among the events associated with the current event.
      *
-     * @return first root of WorkEvent
+     * @return first origin of WorkEvent
      */
-    WorkEvent root();
+    WorkEvent origin();
 
 
     /**
@@ -139,6 +141,19 @@ public interface WorkEvent {
      * @return time the milliseconds since January 1, 1970, 00:00:00 GMT.
      */
     long getFireTime();
+
+
+    String getFireEventName();
+
+
+    void setFireEventName(String eventName);
+
+
+
+    Stream getStream();
+
+    Object getResult();
+
 
 
 }

@@ -23,8 +23,8 @@ package isocline.clockwork;
  * @see Work
  */
 @FunctionalInterface
-public interface AbstractFlowableWork extends FlowableWork {
+public interface AbstractFlowableWork<T> extends FlowableWork<T> {
 
 
-    void defineWorkFlow(WorkFlow flow);
+    void defineWorkFlow(WorkFlow<T> flow);
 }

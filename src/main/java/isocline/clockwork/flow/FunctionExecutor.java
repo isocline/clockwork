@@ -16,10 +16,12 @@
 package isocline.clockwork.flow;
 
 import isocline.clockwork.WorkEvent;
+import isocline.clockwork.WorkHelper;
 import isocline.clockwork.event.WorkEventImpl;
 import isocline.clockwork.flow.func.CheckFunction;
 import isocline.clockwork.flow.func.ReturnEventFunction;
 import isocline.clockwork.flow.func.WorkEventConsumer;
+import isocline.clockwork.flow.func.WorkEventFunction;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -57,7 +59,12 @@ public class FunctionExecutor {
 
     private Function function = null;
 
+
+
     private WorkEventConsumer workEventConsumer = null;
+
+    private WorkEventFunction workEventFunction = null;
+
 
     private CheckFunction checkFunction = null;
 
@@ -89,6 +96,8 @@ public class FunctionExecutor {
                 this.checkFunction = (CheckFunction) obj;
             }else if (obj instanceof ReturnEventFunction) {
                 this.returnEventFunction = (ReturnEventFunction) obj;
+            } else if(obj instanceof WorkEventFunction) {
+                this.workEventFunction = (WorkEventFunction) obj;
             }
             else {
                 throw new IllegalArgumentException("Not Support type");
@@ -160,7 +169,7 @@ public class FunctionExecutor {
         }
 
         WorkEventImpl e = (WorkEventImpl)event;
-        e.setCount(callCount);
+        e.setEmitCount(callCount);
 
         if (runnable != null) {
             runnable.run();
@@ -168,7 +177,7 @@ public class FunctionExecutor {
 
         else if (consumer != null) {
 
-            WorkEventImpl rootEvent = (WorkEventImpl) event.root();
+            WorkEventImpl rootEvent = (WorkEventImpl) event.origin();
 
 
 
@@ -178,6 +187,12 @@ public class FunctionExecutor {
         else if (workEventConsumer !=null) {
             workEventConsumer.accept(event);
         }
+
+        else if (workEventFunction !=null) {
+            Object result = workEventFunction.apply(event);
+            WorkHelper.Return(event, result);
+        }
+
 
         else if (checkFunction != null) {
             boolean runNext = checkFunction.check(event);

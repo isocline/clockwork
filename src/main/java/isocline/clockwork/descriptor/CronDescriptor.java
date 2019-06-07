@@ -18,7 +18,7 @@ package isocline.clockwork.descriptor;
 import isocline.clockwork.Clock;
 import isocline.clockwork.ExecuteEventChecker;
 import isocline.clockwork.ScheduleDescriptor;
-import isocline.clockwork.WorkSchedule;
+import isocline.clockwork.Plan;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -52,15 +52,15 @@ public class CronDescriptor implements ScheduleDescriptor {
 
 
     @Override
-    public void build(WorkSchedule workSchedule) {
+    public void build(Plan plan) {
 
         long t1 = Clock.nextMinutes();
 
         //System.err.println("--- "+Clock.toDateFormat(t1));
 
-        workSchedule.startTime(t1);
-        workSchedule.interval(Clock.MINUTE);
-        workSchedule.executeEventChecker(this.checker);
+        plan.startTime(t1);
+        plan.interval(Clock.MINUTE);
+        plan.executeEventChecker(this.checker);
 
 
     }

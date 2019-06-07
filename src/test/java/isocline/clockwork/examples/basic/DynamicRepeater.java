@@ -16,7 +16,7 @@ public class DynamicRepeater implements Work {
 
         long nexttime = 500 + (long) (Math.random()*1000);
 
-        logger.debug("execute:" + (seq++) + " nexttime:"+nexttime );
+        logger.debug("activate:" + (seq++) + " nexttime:"+nexttime );
 
 
         return nexttime;
@@ -31,9 +31,9 @@ public class DynamicRepeater implements Work {
 
 
 
-        WorkSchedule schedule = processor.newSchedule(new DynamicRepeater());
+        Plan schedule = processor.newPlan(new DynamicRepeater());
 
-        schedule.subscribe();
+        schedule.activate();
 
         processor.shutdown(TestConfiguration.TIMEOUT);
 
